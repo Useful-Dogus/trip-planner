@@ -13,9 +13,9 @@
 | 레포          | GitHub (프라이빗)                 |
 | 프론트/백엔드 | Next.js (App Router + API Routes) |
 | 스타일        | Tailwind CSS                      |
-| DB            | Supabase                          |
+| 데이터        | JSON 파일 (레포에 포함)           |
 | 지도          | Leaflet.js + OpenStreetMap        |
-| 배포          | Vercel                            |
+| 실행          | 로컬 서버 + ngrok                 |
 | 인증          | ID/PW + JWT                       |
 
 ## 구조
