@@ -30,4 +30,8 @@ TypeScript + Node.js 18+: Follow standard conventions
 - 001-trip-planner-mvp: Added TypeScript + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS, react-leaflet + Leaflet.js, jose (JWT)
 
 <!-- MANUAL ADDITIONS START -->
+## Attribution Policy
+
+- 커밋 메시지에 `Co-Authored-By: Claude` 등 AI 관련 문구를 추가하지 말 것
+- PR 본문에 `🤖 Generated with Claude Code` 등 AI 관련 문구를 추가하지 말 것
 <!-- MANUAL ADDITIONS END -->
