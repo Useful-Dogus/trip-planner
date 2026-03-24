@@ -1,8 +1,10 @@
 # trip-planner Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-23
+Auto-generated from all feature plans. Last updated: 2026-03-24
 
 ## Active Technologies
+- TypeScript + Node.js 18+ + Next.js 14 (App Router), jose (JWT) (002-login-redirect)
+- N/A (쿠키 기반 인증 토큰) (002-login-redirect)
 
 - TypeScript + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS, react-leaflet + Leaflet.js, jose (JWT) (001-trip-planner-mvp)
 
@@ -26,6 +28,7 @@ npm run dev    # 로컬 개발 서버 (http://localhost:3000)
 TypeScript + Node.js 18+: Follow standard conventions
 
 ## Recent Changes
+- 002-login-redirect: Added TypeScript + Node.js 18+ + Next.js 14 (App Router), jose (JWT)
 
 - 001-trip-planner-mvp: Added TypeScript + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS, react-leaflet + Leaflet.js, jose (JWT)
 
