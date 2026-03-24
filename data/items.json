@@ -1,0 +1,251 @@
+{
+  "items": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "name": "JFK 공항 도착",
+      "category": "교통",
+      "status": "확정",
+      "priority": "반드시",
+      "address": "John F. Kennedy International Airport, Queens, NY 11430",
+      "lat": 40.641766,
+      "lng": -73.780968,
+      "links": [
+        { "label": "공항 공식 사이트", "url": "https://www.jfkairport.com" }
+      ],
+      "memo": "터미널 4 도착. 픽업 차량 예약 필요.",
+      "date": "2025-06-01",
+      "time_start": "14:00",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "name": "더 플라자 호텔",
+      "category": "숙소",
+      "status": "확정",
+      "priority": "반드시",
+      "address": "768 5th Ave, New York, NY 10019",
+      "lat": 40.764741,
+      "lng": -73.974741,
+      "links": [
+        { "label": "호텔 공식 사이트", "url": "https://www.theplazany.com" }
+      ],
+      "budget": 450,
+      "memo": "체크인 15:00 이후. 조식 포함.",
+      "date": "2025-06-01",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440003",
+      "name": "타임스퀘어",
+      "category": "관광",
+      "status": "확정",
+      "priority": "들를만해",
+      "address": "Times Square, Manhattan, NY 10036",
+      "lat": 40.758896,
+      "lng": -73.985130,
+      "links": [],
+      "memo": "저녁 산책으로. 네온사인 야경.",
+      "date": "2025-06-01",
+      "time_start": "20:00",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440004",
+      "name": "엠파이어 스테이트 빌딩",
+      "category": "관광",
+      "status": "확정",
+      "priority": "반드시",
+      "address": "20 W 34th St, New York, NY 10001",
+      "lat": 40.748817,
+      "lng": -73.985428,
+      "links": [
+        { "label": "공식 사이트", "url": "https://www.esbnyc.com" },
+        { "label": "티켓 예약", "url": "https://www.esbnyc.com/buy-tickets" }
+      ],
+      "budget": 44,
+      "memo": "저녁 노을 시간대 추천. 사전 예약 필수. 102층 전망대 고려.",
+      "date": "2025-06-02",
+      "time_start": "18:00",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440005",
+      "name": "Peter Luger Steak House",
+      "category": "식당",
+      "status": "확정",
+      "priority": "반드시",
+      "address": "178 Broadway, Brooklyn, NY 11211",
+      "lat": 40.709799,
+      "lng": -73.962099,
+      "links": [
+        { "label": "공식 사이트", "url": "https://peterluger.com" }
+      ],
+      "budget": 120,
+      "memo": "현금만 가능. 예약 필수 (몇 달 전에). 포터하우스 추천.",
+      "date": "2025-06-02",
+      "time_start": "19:30",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440006",
+      "name": "센트럴파크 아침 산책",
+      "category": "관광",
+      "status": "확정",
+      "priority": "들를만해",
+      "address": "Central Park, New York, NY 10024",
+      "lat": 40.767778,
+      "lng": -73.971861,
+      "links": [],
+      "memo": "Sheep Meadow, Bethesda Fountain 코스 추천.",
+      "date": "2025-06-03",
+      "time_start": "09:00",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440007",
+      "name": "Grand Central Terminal",
+      "category": "기타",
+      "status": "확정",
+      "priority": "시간 남으면",
+      "address": "89 E 42nd St, New York, NY 10017",
+      "lat": 40.752726,
+      "lng": -73.977229,
+      "links": [
+        { "label": "공식 사이트", "url": "https://www.grandcentralterminal.com" }
+      ],
+      "memo": "건축물 구경. 지하 식품 시장도 좋음.",
+      "date": "2025-06-03",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440008",
+      "name": "Metropolitan Museum of Art",
+      "category": "관광",
+      "status": "대기중",
+      "priority": "반드시",
+      "address": "1000 5th Ave, New York, NY 10028",
+      "lat": 40.779434,
+      "lng": -73.963244,
+      "links": [
+        { "label": "공식 사이트", "url": "https://www.metmuseum.org" }
+      ],
+      "budget": 30,
+      "memo": "최소 3-4시간 필요. 이집트 전시관 필수.",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440009",
+      "name": "Katz's Delicatessen",
+      "category": "식당",
+      "status": "검토중",
+      "priority": "들를만해",
+      "address": "205 E Houston St, New York, NY 10002",
+      "lat": 40.722199,
+      "lng": -73.987418,
+      "links": [
+        { "label": "공식 사이트", "url": "https://katzsdelicatessen.com" }
+      ],
+      "budget": 25,
+      "memo": "유명한 파스트라미 샌드위치. 영화 해리가 샐리를 만났을 때 촬영지.",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440010",
+      "name": "MoMA (뉴욕 현대미술관)",
+      "category": "관광",
+      "status": "검토중",
+      "priority": "들를만해",
+      "address": "11 W 53rd St, New York, NY 10019",
+      "lat": 40.761447,
+      "lng": -73.977556,
+      "links": [
+        { "label": "공식 사이트", "url": "https://www.moma.org" }
+      ],
+      "budget": 25,
+      "memo": "금요일 저녁 무료 입장(17:30-21:00).",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440011",
+      "name": "Brooklyn Bridge 걷기",
+      "category": "관광",
+      "status": "대기중",
+      "priority": "반드시",
+      "address": "Brooklyn Bridge, New York, NY 10038",
+      "lat": 40.706086,
+      "lng": -73.996864,
+      "links": [],
+      "memo": "맨해튼 → 브루클린 방향 추천. 1.1km, 30분 소요.",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440012",
+      "name": "High Line",
+      "category": "관광",
+      "status": "검토중",
+      "priority": "시간 남으면",
+      "address": "High Line, New York, NY 10011",
+      "lat": 40.748425,
+      "lng": -74.004761,
+      "links": [
+        { "label": "공식 사이트", "url": "https://www.thehighline.org" }
+      ],
+      "memo": "폐철로를 공원으로 만든 곳. 1.6km 산책로.",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440013",
+      "name": "Bloomingdale's",
+      "category": "쇼핑",
+      "status": "보류",
+      "priority": "들를만해",
+      "address": "1000 3rd Ave, New York, NY 10022",
+      "lat": 40.762547,
+      "lng": -73.967432,
+      "links": [
+        { "label": "공식 사이트", "url": "https://www.bloomingdales.com" }
+      ],
+      "memo": "면세 쇼핑 가능. 여권 지참 필요.",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440014",
+      "name": "One World Observatory",
+      "category": "관광",
+      "status": "검토중",
+      "priority": "시간 남으면",
+      "links": [],
+      "budget": 46,
+      "memo": "100층 전망대. 엠파이어 스테이트와 비교해서 결정.",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440015",
+      "name": "The Vessel (Hudson Yards)",
+      "category": "관광",
+      "status": "탈락",
+      "priority": "시간 남으면",
+      "address": "20 Hudson Yards, New York, NY 10001",
+      "lat": 40.754163,
+      "lng": -74.002160,
+      "links": [],
+      "memo": "예약 및 유료화됨. 다른 곳 우선.",
+      "created_at": "2025-03-23T00:00:00.000Z",
+      "updated_at": "2025-03-23T00:00:00.000Z"
+    }
+  ]
+}
