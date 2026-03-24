@@ -21,6 +21,7 @@ export interface TripItem {
   memo?:       string;
   date?:       string;
   time_start?: string;
+  time_end?:   string;
   created_at:  string;
   updated_at:  string;
 }
