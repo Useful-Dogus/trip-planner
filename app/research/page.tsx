@@ -37,27 +37,33 @@ export default function ResearchPage() {
 
   return (
     <div className="md:pl-44">
-      <div className="max-w-2xl mx-auto px-4 pt-4 pb-24 md:pb-6">
-        {/* Header */}
+      {/* Header: 항상 제한된 너비 */}
+      <div className="max-w-2xl mx-auto px-4 pt-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-gray-900">리서치</h1>
           <TabSwitcher tab={tab} onChange={setTab} />
         </div>
+      </div>
 
-        {loading ? (
+      {/* 콘텐츠: 목록은 제한 너비, 지도는 전체 너비 */}
+      {loading ? (
+        <div className="max-w-2xl mx-auto px-4">
           <p className="text-center text-gray-400 py-16 text-sm">불러오는 중...</p>
-        ) : tab === 'list' ? (
+        </div>
+      ) : tab === 'list' ? (
+        <div className="max-w-2xl mx-auto px-4 pb-24 md:pb-6">
           <ItemList
             items={items}
             selectedItemId={selectedItemId}
             onSelectItem={id => setSelectedItemId(prev => (prev === id ? null : id))}
           />
-        ) : (
-          <div className="h-[calc(100vh-130px)] -mx-4">
-            <ResearchMap items={items} />
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="h-[calc(100vh-72px)]">
+          <ResearchMap items={items} />
+        </div>
+      )}
+
       <Navigation />
 
       <ItemPanel
