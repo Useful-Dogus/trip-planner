@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { TripItem, Category, Status, Priority, Link as TripLink } from '@/types'
 
@@ -62,6 +62,15 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [geocoding, setGeocoding] = useState(false)
+
+  const memoRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    const el = memoRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [form.memo])
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -345,10 +354,11 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
       <section className="space-y-3">
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">메모</h2>
         <textarea
+          ref={memoRef}
           value={form.memo}
           onChange={e => setField('memo', e.target.value)}
-          className={`${inputClass} resize-none`}
-          rows={3}
+          className={`${inputClass} resize-none overflow-hidden`}
+          rows={5}
           placeholder="자유롭게 메모..."
         />
       </section>
