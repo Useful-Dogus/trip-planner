@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import type { TripItem, Category, Status, Priority } from '@/types'
 import ItemCard from './ItemCard'
 
@@ -42,7 +42,13 @@ function Chip({ label, active, onClick }: { label: string; active: boolean; onCl
   )
 }
 
-export default function ItemList({ items }: { items: TripItem[] }) {
+interface ItemListProps {
+  items: TripItem[]
+  selectedItemId: string | null
+  onSelectItem: (id: string) => void
+}
+
+export default function ItemList({ items, selectedItemId, onSelectItem }: ItemListProps) {
   const [selCats, setSelCats] = useState<Category[]>([])
   const [selStatuses, setSelStatuses] = useState<Status[]>([])
   const [selPriorities, setSelPriorities] = useState<Priority[]>([])
@@ -50,6 +56,9 @@ export default function ItemList({ items }: { items: TripItem[] }) {
   const [query, setQuery] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('name')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
+
+  const onSelectItemRef = useRef(onSelectItem)
+  useEffect(() => { onSelectItemRef.current = onSelectItem })
 
   const eliminatedCount = useMemo(() => items.filter(i => i.status === '탈락').length, [items])
 
@@ -95,6 +104,13 @@ export default function ItemList({ items }: { items: TripItem[] }) {
 
     return result
   }, [items, selCats, selStatuses, selPriorities, showEliminated, query, sortKey, sortDir])
+
+  // 필터 변경으로 선택된 항목이 결과에서 사라지면 패널 닫기
+  useEffect(() => {
+    if (selectedItemId && !filtered.some(i => i.id === selectedItemId)) {
+      onSelectItemRef.current(selectedItemId) // 토글: 같은 id를 다시 보내면 ResearchPage에서 null로 처리
+    }
+  }, [filtered, selectedItemId])
 
   const SORT_OPTIONS: { key: SortKey; label: string }[] = [
     { key: 'name', label: '이름' },
@@ -181,7 +197,12 @@ export default function ItemList({ items }: { items: TripItem[] }) {
 
       <div className="space-y-2">
         {filtered.map(item => (
-          <ItemCard key={item.id} item={item} />
+          <ItemCard
+            key={item.id}
+            item={item}
+            onSelect={onSelectItem}
+            isActive={item.id === selectedItemId}
+          />
         ))}
         {filtered.length === 0 && (
           <p className="text-center text-gray-400 py-12 text-sm">항목이 없습니다.</p>
