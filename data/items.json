@@ -368,31 +368,31 @@
     },
     {
       "id": "a1b2c3d4-0024-4000-8000-100000000024",
-      "name": "Circle Line Cruises - Downtown (Pier 16)",
+      "name": "Circle Line Cruises",
       "category": "관광",
       "status": "검토중",
       "priority": "들를만해",
-      "address": "Pier 16, South Street Seaport, New York, NY 10038",
-      "lat": 40.706111,
-      "lng": -74.003611,
       "links": [],
       "memo": "맨해튼 다운타운 출발 사이트시잉 크루즈. 자유의 여신상·뉴욕 스카이라인 감상.",
       "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
-    },
-    {
-      "id": "a1b2c3d4-0025-4000-8000-100000000025",
-      "name": "Circle Line Cruises - Midtown (Pier 83)",
-      "category": "관광",
-      "status": "검토중",
-      "priority": "들를만해",
-      "address": "Pier 83, W 42nd St, New York, NY 10036",
-      "lat": 40.763611,
-      "lng": -74.001389,
-      "links": [],
-      "memo": "미드타운 출발 사이트시잉 크루즈. 허드슨강에서 맨해튼 전경 감상.",
-      "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
+      "updated_at": "2026-03-24T00:00:00.000Z",
+      "is_franchise": true,
+      "branches": [
+        {
+          "id": "a1b2c3d4-0024-4000-8000-100000000024",
+          "name": "Downtown (Pier 16)",
+          "address": "Pier 16, South Street Seaport, New York, NY 10038",
+          "lat": 40.706111,
+          "lng": -74.003611
+        },
+        {
+          "id": "a1b2c3d4-0025-4000-8000-100000000025",
+          "name": "Midtown (Pier 83)",
+          "address": "Pier 83, W 42nd St, New York, NY 10036",
+          "lat": 40.763611,
+          "lng": -74.001389
+        }
+      ]
     },
     {
       "id": "a1b2c3d4-0026-4000-8000-100000000026",
@@ -410,59 +410,59 @@
     },
     {
       "id": "a1b2c3d4-0027-4000-8000-100000000027",
-      "name": "Nathan's Famous - Coney Island",
+      "name": "Nathan's Famous",
       "category": "식당",
       "status": "검토중",
       "priority": "들를만해",
-      "address": "1310 Surf Ave, Brooklyn, NY 11224",
-      "lat": 40.574722,
-      "lng": -73.981667,
       "links": [],
       "memo": "코니아일랜드 본점. 뉴욕 핫도그의 원조. 1916년 창업.",
       "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
-    },
-    {
-      "id": "a1b2c3d4-0028-4000-8000-100000000028",
-      "name": "Nathan's Famous - Times Square",
-      "category": "식당",
-      "status": "검토중",
-      "priority": "시간 남으면",
-      "address": "1500 Broadway, New York, NY 10036",
-      "lat": 40.758333,
-      "lng": -73.986111,
-      "links": [],
-      "memo": "네이선스 페이머스 타임스퀘어 지점.",
-      "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
+      "updated_at": "2026-03-24T00:00:00.000Z",
+      "is_franchise": true,
+      "branches": [
+        {
+          "id": "a1b2c3d4-0027-4000-8000-100000000027",
+          "name": "Coney Island",
+          "address": "1310 Surf Ave, Brooklyn, NY 11224",
+          "lat": 40.574722,
+          "lng": -73.981667
+        },
+        {
+          "id": "a1b2c3d4-0028-4000-8000-100000000028",
+          "name": "Times Square",
+          "address": "1500 Broadway, New York, NY 10036",
+          "lat": 40.758333,
+          "lng": -73.986111
+        }
+      ]
     },
     {
       "id": "a1b2c3d4-0029-4000-8000-100000000029",
-      "name": "Jing Fong - Elizabeth St",
+      "name": "Jing Fong",
       "category": "식당",
       "status": "검토중",
       "priority": "들를만해",
-      "address": "20 Elizabeth St, New York, NY 10013",
-      "lat": 40.714722,
-      "lng": -73.997222,
       "links": [],
       "memo": "차이나타운 대표 딤섬 레스토랑. 주말 브런치 혼잡.",
       "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
-    },
-    {
-      "id": "a1b2c3d4-0030-4000-8000-100000000030",
-      "name": "Jing Fong - Midtown",
-      "category": "식당",
-      "status": "검토중",
-      "priority": "시간 남으면",
-      "address": "Midtown, New York, NY",
-      "lat": 40.754722,
-      "lng": -73.984722,
-      "links": [],
-      "memo": "징 퐁 미드타운 지점. 딤섬 레스토랑.",
-      "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
+      "updated_at": "2026-03-24T00:00:00.000Z",
+      "is_franchise": true,
+      "branches": [
+        {
+          "id": "a1b2c3d4-0029-4000-8000-100000000029",
+          "name": "Elizabeth St",
+          "address": "20 Elizabeth St, New York, NY 10013",
+          "lat": 40.714722,
+          "lng": -73.997222
+        },
+        {
+          "id": "a1b2c3d4-0030-4000-8000-100000000030",
+          "name": "Midtown",
+          "address": "Midtown, New York, NY",
+          "lat": 40.754722,
+          "lng": -73.984722
+        }
+      ]
     },
     {
       "id": "a1b2c3d4-0031-4000-8000-100000000031",
@@ -564,31 +564,31 @@
     },
     {
       "id": "a1b2c3d4-0038-4000-8000-100000000038",
-      "name": "Panda Express - Midtown",
+      "name": "Panda Express",
       "category": "식당",
       "status": "검토중",
       "priority": "시간 남으면",
-      "address": "Midtown Manhattan, New York, NY",
-      "lat": 40.754722,
-      "lng": -73.984722,
       "links": [],
       "memo": "미국 중식 패스트푸드 체인. 뉴욕 미드타운 지점.",
       "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
-    },
-    {
-      "id": "a1b2c3d4-0039-4000-8000-100000000039",
-      "name": "Panda Express - Times Square",
-      "category": "식당",
-      "status": "검토중",
-      "priority": "시간 남으면",
-      "address": "Times Square, New York, NY",
-      "lat": 40.758896,
-      "lng": -73.98513,
-      "links": [],
-      "memo": "미국 중식 패스트푸드 체인. 타임스퀘어 지점.",
-      "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
+      "updated_at": "2026-03-24T00:00:00.000Z",
+      "is_franchise": true,
+      "branches": [
+        {
+          "id": "a1b2c3d4-0038-4000-8000-100000000038",
+          "name": "Midtown",
+          "address": "Midtown Manhattan, New York, NY",
+          "lat": 40.754722,
+          "lng": -73.984722
+        },
+        {
+          "id": "a1b2c3d4-0039-4000-8000-100000000039",
+          "name": "Times Square",
+          "address": "Times Square, New York, NY",
+          "lat": 40.758896,
+          "lng": -73.98513
+        }
+      ]
     },
     {
       "id": "a1b2c3d4-0040-4000-8000-100000000040",
@@ -662,31 +662,31 @@
     },
     {
       "id": "a1b2c3d4-0045-4000-8000-100000000045",
-      "name": "P.J. Clarke's - Lincoln Square",
+      "name": "P.J. Clarke's",
       "category": "식당",
       "status": "검토중",
       "priority": "시간 남으면",
-      "address": "44 W 63rd St, New York, NY 10023",
-      "lat": 40.772778,
-      "lng": -73.983333,
       "links": [],
       "memo": "뉴욕 클래식 아이리시 바 & 버거. 링컨 스퀘어 지점.",
       "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
-    },
-    {
-      "id": "a1b2c3d4-0046-4000-8000-100000000046",
-      "name": "P.J. Clarke's - Third Avenue",
-      "category": "식당",
-      "status": "검토중",
-      "priority": "시간 남으면",
-      "address": "915 3rd Ave, New York, NY 10022",
-      "lat": 40.758611,
-      "lng": -73.969444,
-      "links": [],
-      "memo": "뉴욕 클래식 아이리시 바 & 버거. 3번가 지점.",
-      "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
+      "updated_at": "2026-03-24T00:00:00.000Z",
+      "is_franchise": true,
+      "branches": [
+        {
+          "id": "a1b2c3d4-0045-4000-8000-100000000045",
+          "name": "Lincoln Square",
+          "address": "44 W 63rd St, New York, NY 10023",
+          "lat": 40.772778,
+          "lng": -73.983333
+        },
+        {
+          "id": "a1b2c3d4-0046-4000-8000-100000000046",
+          "name": "Third Avenue",
+          "address": "915 3rd Ave, New York, NY 10022",
+          "lat": 40.758611,
+          "lng": -73.969444
+        }
+      ]
     },
     {
       "id": "a1b2c3d4-0047-4000-8000-100000000047",
@@ -760,31 +760,31 @@
     },
     {
       "id": "a1b2c3d4-0052-4000-8000-100000000052",
-      "name": "매그놀리아 베이커리 - Bleecker St",
+      "name": "매그놀리아 베이커리",
       "category": "카페",
       "status": "검토중",
       "priority": "들를만해",
-      "address": "401 Bleecker St, New York, NY 10014",
-      "lat": 40.733333,
-      "lng": -74.004167,
       "links": [],
       "memo": "뉴욕 빈티지 베이커리. 바나나 푸딩·컵케이크 명소. 섹스앤더시티 배경.",
       "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
-    },
-    {
-      "id": "a1b2c3d4-0053-4000-8000-100000000053",
-      "name": "매그놀리아 베이커리 - Rockefeller Center",
-      "category": "카페",
-      "status": "검토중",
-      "priority": "시간 남으면",
-      "address": "1240 Avenue of the Americas, New York, NY 10020",
-      "lat": 40.759722,
-      "lng": -73.980278,
-      "links": [],
-      "memo": "매그놀리아 베이커리 록펠러 센터 지점.",
-      "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
+      "updated_at": "2026-03-24T00:00:00.000Z",
+      "is_franchise": true,
+      "branches": [
+        {
+          "id": "a1b2c3d4-0052-4000-8000-100000000052",
+          "name": "Bleecker St",
+          "address": "401 Bleecker St, New York, NY 10014",
+          "lat": 40.733333,
+          "lng": -74.004167
+        },
+        {
+          "id": "a1b2c3d4-0053-4000-8000-100000000053",
+          "name": "Rockefeller Center",
+          "address": "1240 Avenue of the Americas, New York, NY 10020",
+          "lat": 40.759722,
+          "lng": -73.980278
+        }
+      ]
     },
     {
       "id": "a1b2c3d4-0054-4000-8000-100000000054",
@@ -844,45 +844,38 @@
     },
     {
       "id": "a1b2c3d4-0058-4000-8000-100000000058",
-      "name": "Trader Joe's - Upper West Side",
+      "name": "Trader Joe's",
       "category": "쇼핑",
       "status": "검토중",
       "priority": "시간 남으면",
-      "address": "2073 Broadway, New York, NY 10023",
-      "lat": 40.783611,
-      "lng": -73.981389,
       "links": [],
       "memo": "미국 인기 식료품 마트. 어퍼 웨스트 사이드 지점.",
       "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
-    },
-    {
-      "id": "a1b2c3d4-0059-4000-8000-100000000059",
-      "name": "Trader Joe's - Union Square",
-      "category": "쇼핑",
-      "status": "검토중",
-      "priority": "시간 남으면",
-      "address": "142 E 14th St, New York, NY 10003",
-      "lat": 40.734167,
-      "lng": -73.989444,
-      "links": [],
-      "memo": "미국 인기 식료품 마트. 유니언 스퀘어 지점.",
-      "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
-    },
-    {
-      "id": "a1b2c3d4-0060-4000-8000-100000000060",
-      "name": "Trader Joe's - Chelsea",
-      "category": "쇼핑",
-      "status": "검토중",
-      "priority": "시간 남으면",
-      "address": "675 6th Ave, New York, NY 10010",
-      "lat": 40.743611,
-      "lng": -73.994722,
-      "links": [],
-      "memo": "미국 인기 식료품 마트. 첼시 지점.",
-      "created_at": "2026-03-24T00:00:00.000Z",
-      "updated_at": "2026-03-24T00:00:00.000Z"
+      "updated_at": "2026-03-24T00:00:00.000Z",
+      "is_franchise": true,
+      "branches": [
+        {
+          "id": "a1b2c3d4-0058-4000-8000-100000000058",
+          "name": "Upper West Side",
+          "address": "2073 Broadway, New York, NY 10023",
+          "lat": 40.783611,
+          "lng": -73.981389
+        },
+        {
+          "id": "a1b2c3d4-0059-4000-8000-100000000059",
+          "name": "Union Square",
+          "address": "142 E 14th St, New York, NY 10003",
+          "lat": 40.734167,
+          "lng": -73.989444
+        },
+        {
+          "id": "a1b2c3d4-0060-4000-8000-100000000060",
+          "name": "Chelsea",
+          "address": "675 6th Ave, New York, NY 10010",
+          "lat": 40.743611,
+          "lng": -73.994722
+        }
+      ]
     },
     {
       "id": "a1b2c3d4-0061-4000-8000-100000000061",

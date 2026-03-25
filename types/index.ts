@@ -7,21 +7,31 @@ export interface Link {
   url:   string;
 }
 
+export interface Branch {
+  id:       string;
+  name:     string;
+  address?: string;
+  lat?:     number;
+  lng?:     number;
+}
+
 export interface TripItem {
-  id:          string;
-  name:        string;
-  category:    Category;
-  status:      Status;
-  priority?:   Priority;
-  address?:    string;
-  lat?:        number;
-  lng?:        number;
-  links:       Link[];
-  budget?:     number;
-  memo?:       string;
-  date?:       string;
-  time_start?: string;
-  time_end?:   string;
-  created_at:  string;
-  updated_at:  string;
+  id:           string;
+  name:         string;
+  category:     Category;
+  status:       Status;
+  priority?:    Priority;
+  address?:     string;
+  lat?:         number;
+  lng?:         number;
+  links:        Link[];
+  budget?:      number;
+  memo?:        string;
+  date?:        string;
+  time_start?:  string;
+  time_end?:    string;
+  is_franchise?: boolean;
+  branches?:    Branch[];
+  created_at:   string;
+  updated_at:   string;
 }
