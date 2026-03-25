@@ -102,7 +102,7 @@ export default function Navigation() {
       <aside className="hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:h-full md:w-44 bg-white border-r border-gray-100 p-4 z-50">
         <div className="mb-6 px-3">
           <p className="text-sm font-bold text-gray-900">NYC Trip</p>
-          <p className="text-xs text-gray-400 mt-0.5">2025년 6월</p>
+          <p className="text-xs text-gray-400 mt-0.5">2026년 7월</p>
         </div>
         <div className="flex-1 space-y-0.5">
           {navItems.map(({ href, label, icon }) => (

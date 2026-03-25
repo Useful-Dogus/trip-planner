@@ -49,7 +49,7 @@ export default function LoginForm() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">NYC Trip Planner</h1>
-          <p className="text-sm text-gray-400 mt-1">2025년 6월 뉴욕 여행</p>
+          <p className="text-sm text-gray-400 mt-1">2026년 7월 뉴욕 여행</p>
         </div>
 
         <form
