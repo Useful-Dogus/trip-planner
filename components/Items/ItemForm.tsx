@@ -141,7 +141,11 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     })
 
     if (res.ok) {
-      router.push('/research')
+      if (mode === 'edit' && itemId) {
+        router.push(`/items/${itemId}`)
+      } else {
+        router.push('/research')
+      }
       router.refresh()
     } else {
       const data = await res.json()
