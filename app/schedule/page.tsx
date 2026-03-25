@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import Navigation from '@/components/Layout/Navigation'
 import ItemCard from '@/components/Items/ItemCard'
+import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
 import type { TripItem } from '@/types'
 
 const ScheduleMap = dynamic(() => import('@/components/Map/ScheduleMap'), { ssr: false })
@@ -66,8 +67,10 @@ export default function SchedulePage() {
 
       {/* 콘텐츠: 목록은 제한 너비, 지도는 전체 너비 */}
       {loading ? (
-        <div className="max-w-2xl mx-auto px-4">
-          <p className="text-center text-gray-400 py-16 text-sm">불러오는 중...</p>
+        <div className="max-w-2xl mx-auto px-4 space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <ItemCardSkeleton key={i} />
+          ))}
         </div>
       ) : tab === 'list' ? (
         <div className="max-w-2xl mx-auto px-4 pb-24 md:pb-6">
