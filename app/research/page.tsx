@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Navigation from '@/components/Layout/Navigation'
 import ItemList from '@/components/Items/ItemList'
-import ItemPanel from '@/components/Panel/ItemPanel'
 import type { TripItem } from '@/types'
 
 const ResearchMap = dynamic(() => import('@/components/Map/ResearchMap'), { ssr: false })
+const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
 export default function ResearchPage() {
   const [items, setItems] = useState<TripItem[]>([])

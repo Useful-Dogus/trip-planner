@@ -50,9 +50,9 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
 
   return (
     <>
-      {/* 백드롭 */}
+      {/* 백드롭: z-[55]로 네비게이션(z-50) 위에 씌움 */}
       <div
-        className={`fixed inset-0 bg-black/20 z-40 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/30 z-[55] transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
@@ -65,16 +65,11 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
         aria-label="항목 상세 패널"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className={`
-          fixed z-50 bg-white shadow-2xl transition-transform duration-300 ease-in-out
-          flex flex-col
-          bottom-0 left-0 right-0 rounded-t-2xl max-h-[88vh]
-          md:bottom-auto md:right-0 md:top-0 md:left-auto md:w-[440px] md:h-full md:rounded-none md:rounded-l-2xl
-          ${isOpen
-            ? 'translate-y-0 md:translate-y-0 md:translate-x-0'
-            : 'translate-y-full md:translate-y-0 md:translate-x-full'
-          }
-        `}
+        className={`fixed z-[60] bg-white shadow-2xl transition-transform duration-300 ease-in-out flex flex-col bottom-0 left-0 right-0 rounded-t-2xl h-[80vh] md:h-screen md:bottom-auto md:right-0 md:top-0 md:left-auto md:w-[440px] md:rounded-none md:rounded-l-2xl ${
+          isOpen
+            ? 'translate-y-0 md:translate-x-0'
+            : 'translate-y-full md:translate-x-full'
+        }`}
       >
         {/* 헤더 */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
