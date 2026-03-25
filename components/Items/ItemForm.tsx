@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { TripItem, Category, Status, Priority, Link as TripLink } from '@/types'
 
-const CATEGORIES: Category[] = ['교통', '숙소', '식당', '관광', '쇼핑', '기타']
+const CATEGORIES: Category[] = ['교통', '숙소', '식당', '카페', '관광', '공연', '스포츠', '쇼핑', '기타']
 
 const STATUS_OPTIONS: { value: Status; label: string }[] = [
   { value: '검토중', label: '검토중 — 아직 결정 안 됨' },

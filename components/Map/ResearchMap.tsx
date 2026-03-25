@@ -10,7 +10,10 @@ const categoryColors: Record<Category, string> = {
   교통: '#94A3B8',
   숙소: '#7DD3FC',
   식당: '#FB923C',
+  카페: '#FDBA74',
   관광: '#6EE7B7',
+  공연: '#F9A8D4',
+  스포츠: '#86EFAC',
   쇼핑: '#C4B5FD',
   기타: '#FCD34D',
 }
