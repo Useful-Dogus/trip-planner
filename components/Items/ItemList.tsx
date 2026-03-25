@@ -39,9 +39,13 @@ export default function ItemList({ items }: { items: TripItem[] }) {
   const [selCats, setSelCats] = useState<Category[]>([])
   const [selStatuses, setSelStatuses] = useState<Status[]>([])
   const [selPriorities, setSelPriorities] = useState<Priority[]>([])
+  const [showEliminated, setShowEliminated] = useState(false)
+
+  const eliminatedCount = useMemo(() => items.filter(i => i.status === '탈락').length, [items])
 
   const filtered = useMemo(() => {
     return items.filter(item => {
+      if (!showEliminated && item.status === '탈락') return false
       if (selCats.length && !selCats.includes(item.category)) return false
       if (selStatuses.length && !selStatuses.includes(item.status)) return false
       if (selPriorities.length) {
@@ -49,7 +53,7 @@ export default function ItemList({ items }: { items: TripItem[] }) {
       }
       return true
     })
-  }, [items, selCats, selStatuses, selPriorities])
+  }, [items, selCats, selStatuses, selPriorities, showEliminated])
 
   return (
     <div className="space-y-4">
@@ -87,7 +91,17 @@ export default function ItemList({ items }: { items: TripItem[] }) {
         </div>
       </div>
 
-      <p className="text-xs text-gray-400">{filtered.length}개 항목</p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-gray-400">{filtered.length}개 항목</p>
+        {eliminatedCount > 0 && (
+          <button
+            onClick={() => setShowEliminated(v => !v)}
+            className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 transition-colors"
+          >
+            {showEliminated ? `탈락 항목 숨기기` : `탈락 항목 보기 (${eliminatedCount})`}
+          </button>
+        )}
+      </div>
 
       <div className="space-y-2">
         {filtered.map(item => (
