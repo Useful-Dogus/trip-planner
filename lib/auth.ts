@@ -1,9 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose'
 
 function getSecret() {
-  return new TextEncoder().encode(
-    process.env.JWT_SECRET || 'dev-secret-change-me-in-production'
-  )
+  return new TextEncoder().encode(process.env.JWT_SECRET || 'dev-secret-change-me-in-production')
 }
 
 export async function createToken(payload: Record<string, unknown>): Promise<string> {

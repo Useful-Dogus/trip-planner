@@ -4,7 +4,17 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { TripItem, Category, Status, Priority, Link as TripLink } from '@/types'
 
-const CATEGORIES: Category[] = ['교통', '숙소', '식당', '카페', '관광', '공연', '스포츠', '쇼핑', '기타']
+const CATEGORIES: Category[] = [
+  '교통',
+  '숙소',
+  '식당',
+  '카페',
+  '관광',
+  '공연',
+  '스포츠',
+  '쇼핑',
+  '기타',
+]
 
 const STATUS_OPTIONS: { value: Status; label: string }[] = [
   { value: '검토중', label: '검토중 — 아직 결정 안 됨' },
@@ -107,7 +117,10 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   }
 
   function removeLink(i: number) {
-    setField('links', form.links.filter((_, idx) => idx !== i))
+    setField(
+      'links',
+      form.links.filter((_, idx) => idx !== i)
+    )
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -176,9 +189,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     <form onSubmit={handleSubmit} className="space-y-8 pb-28 md:pb-8">
       {/* 기본 정보 */}
       <section className="space-y-4">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-          기본 정보
-        </h2>
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">기본 정보</h2>
 
         <div>
           <label className={labelClass}>이름 *</label>
@@ -286,9 +297,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
             className={inputClass}
             placeholder="주소 입력 후 포커스를 벗어나면 좌표 자동 입력"
           />
-          {geocoding && (
-            <p className="text-xs text-gray-400 mt-1">좌표 검색 중...</p>
-          )}
+          {geocoding && <p className="text-xs text-gray-400 mt-1">좌표 검색 중...</p>}
           {!geocoding && geocodeError && (
             <p className="text-xs text-amber-500 mt-1">{geocodeError}</p>
           )}
