@@ -8,6 +8,11 @@ const CATEGORIES: Category[] = ['교통', '숙소', '식당', '관광', '쇼핑'
 const STATUSES: Status[] = ['검토중', '보류', '대기중', '확정', '탈락']
 const PRIORITIES: Priority[] = ['반드시', '들를만해', '시간 남으면']
 
+type SortKey = 'name' | 'date' | 'budget' | 'priority'
+type SortDir = 'asc' | 'desc'
+
+const PRIORITY_ORDER: Record<string, number> = { '반드시': 0, '들를만해': 1, '시간 남으면': 2 }
+
 function toggle<T>(arr: T[], val: T): T[] {
   return arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
 }
@@ -40,23 +45,73 @@ export default function ItemList({ items }: { items: TripItem[] }) {
   const [selStatuses, setSelStatuses] = useState<Status[]>([])
   const [selPriorities, setSelPriorities] = useState<Priority[]>([])
   const [showEliminated, setShowEliminated] = useState(false)
+  const [query, setQuery] = useState('')
+  const [sortKey, setSortKey] = useState<SortKey>('name')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
 
   const eliminatedCount = useMemo(() => items.filter(i => i.status === '탈락').length, [items])
 
+  function handleSortChange(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+
   const filtered = useMemo(() => {
-    return items.filter(item => {
+    const q = query.trim().toLowerCase()
+    const result = items.filter(item => {
       if (!showEliminated && item.status === '탈락') return false
       if (selCats.length && !selCats.includes(item.category)) return false
       if (selStatuses.length && !selStatuses.includes(item.status)) return false
       if (selPriorities.length) {
         if (!item.priority || !selPriorities.includes(item.priority)) return false
       }
+      if (q && !item.name.toLowerCase().includes(q)) return false
       return true
     })
-  }, [items, selCats, selStatuses, selPriorities, showEliminated])
+
+    result.sort((a, b) => {
+      let cmp = 0
+      if (sortKey === 'name') {
+        cmp = a.name.localeCompare(b.name, 'ko')
+      } else if (sortKey === 'date') {
+        const da = a.date ?? ''
+        const db = b.date ?? ''
+        cmp = da < db ? -1 : da > db ? 1 : 0
+      } else if (sortKey === 'budget') {
+        cmp = (a.budget ?? 0) - (b.budget ?? 0)
+      } else if (sortKey === 'priority') {
+        const pa = a.priority ? PRIORITY_ORDER[a.priority] : 99
+        const pb = b.priority ? PRIORITY_ORDER[b.priority] : 99
+        cmp = pa - pb
+      }
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+
+    return result
+  }, [items, selCats, selStatuses, selPriorities, showEliminated, query, sortKey, sortDir])
+
+  const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+    { key: 'name', label: '이름' },
+    { key: 'date', label: '날짜' },
+    { key: 'budget', label: '예산' },
+    { key: 'priority', label: '우선순위' },
+  ]
 
   return (
     <div className="space-y-4">
+      {/* 검색 */}
+      <input
+        type="text"
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        placeholder="이름으로 검색..."
+        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
+      />
+
       {/* Filters */}
       <div className="space-y-2">
         <div className="flex flex-wrap gap-1.5">
@@ -89,6 +144,27 @@ export default function ItemList({ items }: { items: TripItem[] }) {
             />
           ))}
         </div>
+      </div>
+
+      {/* 정렬 */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="text-xs text-gray-400">정렬:</span>
+        {SORT_OPTIONS.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => handleSortChange(key)}
+            className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+              sortKey === key
+                ? 'bg-gray-900 text-white border-gray-900'
+                : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+            }`}
+          >
+            {label}
+            {sortKey === key && (
+              <span className="ml-0.5">{sortDir === 'asc' ? '↑' : '↓'}</span>
+            )}
+          </button>
+        ))}
       </div>
 
       <div className="flex items-center justify-between">
