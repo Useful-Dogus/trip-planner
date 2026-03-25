@@ -85,6 +85,8 @@ function LinkButton({ links }: { links: TripItem['links'] }) {
 }
 
 export default function ItemCard({ item }: { item: TripItem }) {
+  const [branchesOpen, setBranchesOpen] = useState(false)
+
   return (
     <Link href={`/items/${item.id}`}>
       <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:border-gray-200 hover:shadow-sm transition-all cursor-pointer">
@@ -95,7 +97,14 @@ export default function ItemCard({ item }: { item: TripItem }) {
               style={{ backgroundColor: categoryColors[item.category] ?? '#D1D5DB' }}
             />
             <div className="min-w-0">
-              <span className="font-semibold text-gray-900 truncate text-sm block">{item.name}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-gray-900 truncate text-sm">{item.name}</span>
+                {item.is_franchise && item.branches && item.branches.length > 0 && (
+                  <span className="flex-shrink-0 text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                    {item.branches.length}곳
+                  </span>
+                )}
+              </div>
               {item.address && (
                 <span className="text-xs text-gray-400 truncate block">{item.address}</span>
               )}
@@ -105,6 +114,22 @@ export default function ItemCard({ item }: { item: TripItem }) {
             <StatusBadge status={item.status} />
             {item.priority && <PriorityBadge priority={item.priority} />}
             <LinkButton links={item.links} />
+            {item.is_franchise && item.branches && item.branches.length > 0 && (
+              <button
+                onClick={e => { e.preventDefault(); setBranchesOpen(v => !v) }}
+                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                title="지점 목록"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`w-4 h-4 transition-transform ${branchesOpen ? 'rotate-180' : ''}`}
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
 
@@ -122,6 +147,24 @@ export default function ItemCard({ item }: { item: TripItem }) {
             {item.budget !== undefined && (
               <span className="font-medium text-gray-500">${item.budget.toLocaleString()}</span>
             )}
+          </div>
+        )}
+
+        {branchesOpen && item.branches && item.branches.length > 0 && (
+          <div className="mt-3 pl-[22px] space-y-1.5 border-t border-gray-100 pt-3">
+            {item.branches.map(branch => (
+              <div key={branch.id} className="flex items-start gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-gray-300 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <span className="text-xs font-medium text-gray-700">{branch.name}</span>
+                  {branch.address && (
+                    <p className="text-xs text-gray-400">{branch.address}</p>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
