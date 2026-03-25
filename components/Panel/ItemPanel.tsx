@@ -54,9 +54,9 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
 
   return (
     <>
-      {/* 백드롭: z-[55]로 네비게이션(z-50) 위에 씌움 */}
+      {/* 백드롭: Leaflet 최대 z-index(700)보다 높게 설정해 지도 위에 표시 */}
       <div
-        className={`fixed inset-0 bg-black/30 z-[55] transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/30 z-[1000] transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
@@ -69,7 +69,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
         aria-label="항목 상세 패널"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className={`fixed z-[60] bg-white shadow-2xl transition-transform duration-300 ease-in-out flex flex-col bottom-0 left-0 right-0 rounded-t-2xl h-[80vh] md:h-screen md:bottom-auto md:right-0 md:top-0 md:left-auto md:w-[520px] md:rounded-none md:rounded-l-2xl ${
+        className={`fixed z-[1010] bg-white shadow-2xl transition-transform duration-300 ease-in-out flex flex-col bottom-0 left-0 right-0 rounded-t-2xl h-[80vh] md:h-screen md:bottom-auto md:right-0 md:top-0 md:left-auto md:w-[520px] md:rounded-none md:rounded-l-2xl ${
           isOpen
             ? 'translate-y-0 md:translate-y-0 md:translate-x-0'
             : 'translate-y-full md:translate-y-0 md:translate-x-full'
