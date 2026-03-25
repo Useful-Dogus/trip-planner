@@ -7,11 +7,13 @@ import ItemList from '@/components/Items/ItemList'
 import type { TripItem } from '@/types'
 
 const ResearchMap = dynamic(() => import('@/components/Map/ResearchMap'), { ssr: false })
+const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
 export default function ResearchPage() {
   const [items, setItems] = useState<TripItem[]>([])
   const [tab, setTab] = useState<'list' | 'map'>('list')
   const [loading, setLoading] = useState(true)
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/items')
@@ -21,6 +23,17 @@ export default function ResearchPage() {
         setLoading(false)
       })
   }, [])
+
+  const selectedItem = items.find(i => i.id === selectedItemId) ?? null
+
+  function handleSave(updated: TripItem) {
+    setItems(prev => prev.map(i => (i.id === updated.id ? updated : i)))
+  }
+
+  function handleDelete(id: string) {
+    setItems(prev => prev.filter(i => i.id !== id))
+    setSelectedItemId(null)
+  }
 
   return (
     <div className="md:pl-44">
@@ -34,7 +47,11 @@ export default function ResearchPage() {
         {loading ? (
           <p className="text-center text-gray-400 py-16 text-sm">불러오는 중...</p>
         ) : tab === 'list' ? (
-          <ItemList items={items} />
+          <ItemList
+            items={items}
+            selectedItemId={selectedItemId}
+            onSelectItem={id => setSelectedItemId(prev => (prev === id ? null : id))}
+          />
         ) : (
           <div className="h-[calc(100vh-130px)] -mx-4">
             <ResearchMap items={items} />
@@ -42,6 +59,14 @@ export default function ResearchPage() {
         )}
       </div>
       <Navigation />
+
+      <ItemPanel
+        item={selectedItem}
+        isOpen={selectedItemId !== null}
+        onClose={() => setSelectedItemId(null)}
+        onSave={handleSave}
+        onDelete={handleDelete}
+      />
     </div>
   )
 }
