@@ -67,10 +67,13 @@ export default function SchedulePage() {
         ) : tab === 'list' ? (
           <div className="space-y-6">
             {confirmedItems.length === 0 ? (
-              <div className="text-center text-gray-400 py-16">
-                <p className="text-sm">확정 일정이 없습니다.</p>
-                <p className="text-xs mt-1">
-                  항목 상태를 &quot;확정&quot;으로 변경하고 날짜를 입력하세요.
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="text-4xl mb-3">🗓️</div>
+                <p className="text-sm font-medium text-gray-700 mb-1">확정된 일정이 없어요</p>
+                <p className="text-xs text-gray-400">
+                  항목 상태를 &quot;확정&quot;으로 변경하고 날짜를 입력하면
+                  <br />
+                  여기에 일정이 표시됩니다
                 </p>
               </div>
             ) : (
