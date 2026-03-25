@@ -2,11 +2,11 @@
 
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
-import type { TripItem, Category } from '@/types'
+import type { TripItem } from '@/types'
 import StatusBadge from '@/components/UI/StatusBadge'
 import PriorityBadge from '@/components/UI/PriorityBadge'
 
-const categoryColors: Record<Category, string> = {
+const categoryColors: Record<string, string> = {
   교통: '#94A3B8',
   숙소: '#7DD3FC',
   식당: '#FB923C',

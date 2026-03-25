@@ -2,11 +2,11 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import type { TripItem, Category } from '@/types'
+import type { TripItem } from '@/types'
 import StatusBadge from '@/components/UI/StatusBadge'
 import PriorityBadge from '@/components/UI/PriorityBadge'
 
-const categoryColors: Record<Category, string> = {
+const categoryColors: Record<string, string> = {
   교통: '#94A3B8',
   숙소: '#7DD3FC',
   식당: '#FB923C',
@@ -43,7 +43,7 @@ function LinkButton({ links }: { links: TripItem['links'] }) {
         className="flex-shrink-0 p-1 text-gray-400 hover:text-blue-500 transition-colors"
         title={links[0].label || '링크 열기'}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
           <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
           <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
         </svg>
@@ -58,14 +58,14 @@ function LinkButton({ links }: { links: TripItem['links'] }) {
         className="p-1 text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-0.5"
         title="링크 목록"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
           <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
           <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
         </svg>
         <span className="text-xs">{links.length}</span>
       </button>
       {open && (
-        <div className="absolute right-0 top-7 z-10 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-36">
+        <div className="absolute right-0 top-7 z-10 bg-white border border-gray-200 rounded-xl shadow-lg py-1 min-w-36">
           {links.map((link, i) => (
             <a
               key={i}
@@ -87,14 +87,19 @@ function LinkButton({ links }: { links: TripItem['links'] }) {
 export default function ItemCard({ item }: { item: TripItem }) {
   return (
     <Link href={`/items/${item.id}`}>
-      <div className="bg-white rounded-xl border border-gray-200 p-4 hover:border-gray-300 transition-colors cursor-pointer">
+      <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:border-gray-200 hover:shadow-sm transition-all cursor-pointer">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
             <span
-              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-              style={{ backgroundColor: categoryColors[item.category] }}
+              className="w-3 h-3 rounded-full flex-shrink-0 ring-2 ring-white shadow-sm"
+              style={{ backgroundColor: categoryColors[item.category] ?? '#D1D5DB' }}
             />
-            <span className="font-medium text-gray-900 truncate text-sm">{item.name}</span>
+            <div className="min-w-0">
+              <span className="font-semibold text-gray-900 truncate text-sm block">{item.name}</span>
+              {item.address && (
+                <span className="text-xs text-gray-400 truncate block">{item.address}</span>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
             <StatusBadge status={item.status} />
@@ -104,10 +109,19 @@ export default function ItemCard({ item }: { item: TripItem }) {
         </div>
 
         {(item.date || item.time_start || item.budget !== undefined) && (
-          <div className="mt-2 flex items-center gap-2 text-xs text-gray-400 pl-[18px]">
-            {item.date && <span>{item.date}</span>}
+          <div className="mt-2.5 flex items-center gap-2 text-xs text-gray-400 pl-[22px]">
+            {item.date && (
+              <span className="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                </svg>
+                {item.date}
+              </span>
+            )}
             {item.time_start && <span>{item.time_start}</span>}
-            {item.budget !== undefined && <span>${item.budget}</span>}
+            {item.budget !== undefined && (
+              <span className="font-medium text-gray-500">${item.budget.toLocaleString()}</span>
+            )}
           </div>
         )}
       </div>
