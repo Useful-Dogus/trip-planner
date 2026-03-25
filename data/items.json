@@ -47,7 +47,7 @@
     {
       "id": "a1b2c3d4-0001-4000-8000-100000000001",
       "name": "Marquis Theatre",
-      "category": "관광",
+      "category": "공연",
       "status": "검토중",
       "priority": "들를만해",
       "address": "1535 Broadway, New York, NY 10036",
@@ -61,7 +61,7 @@
     {
       "id": "a1b2c3d4-0002-4000-8000-100000000002",
       "name": "마제스틱 극장 (Majestic Theatre)",
-      "category": "관광",
+      "category": "공연",
       "status": "검토중",
       "priority": "들를만해",
       "address": "245 W 44th St, New York, NY 10036",
@@ -75,7 +75,7 @@
     {
       "id": "a1b2c3d4-0003-4000-8000-100000000003",
       "name": "Broadway Theatre",
-      "category": "관광",
+      "category": "공연",
       "status": "검토중",
       "priority": "들를만해",
       "address": "1681 Broadway, New York, NY 10019",
@@ -89,7 +89,7 @@
     {
       "id": "a1b2c3d4-0004-4000-8000-100000000004",
       "name": "Chicago The Musical (CIBC Theatre)",
-      "category": "관광",
+      "category": "공연",
       "status": "검토중",
       "priority": "들를만해",
       "address": "18 W 45th St, New York, NY 10036",
@@ -103,7 +103,7 @@
     {
       "id": "a1b2c3d4-0005-4000-8000-100000000005",
       "name": "Gershwin Theatre",
-      "category": "관광",
+      "category": "공연",
       "status": "검토중",
       "priority": "들를만해",
       "address": "222 W 51st St, New York, NY 10019",
@@ -117,7 +117,7 @@
     {
       "id": "a1b2c3d4-0006-4000-8000-100000000006",
       "name": "Aladdin the Musical (New Amsterdam Theatre)",
-      "category": "관광",
+      "category": "공연",
       "status": "검토중",
       "priority": "들를만해",
       "address": "214 W 42nd St, New York, NY 10036",
@@ -131,7 +131,7 @@
     {
       "id": "a1b2c3d4-0007-4000-8000-100000000007",
       "name": "더 라이온 킹 (Minskoff Theatre)",
-      "category": "관광",
+      "category": "공연",
       "status": "검토중",
       "priority": "반드시",
       "address": "200 W 45th St, New York, NY 10036",
@@ -257,7 +257,7 @@
     {
       "id": "a1b2c3d4-0016-4000-8000-100000000016",
       "name": "양키 스타디움",
-      "category": "관광",
+      "category": "스포츠",
       "status": "검토중",
       "priority": "시간 남으면",
       "address": "1 E 161st St, Bronx, NY 10451",
@@ -285,7 +285,7 @@
     {
       "id": "a1b2c3d4-0018-4000-8000-100000000018",
       "name": "메츠 플라자 (Citi Field)",
-      "category": "관광",
+      "category": "스포츠",
       "status": "검토중",
       "priority": "시간 남으면",
       "address": "41 Seaver Way, Flushing, NY 11368",
@@ -341,7 +341,7 @@
     {
       "id": "a1b2c3d4-0022-4000-8000-100000000022",
       "name": "질레트 스타디움",
-      "category": "관광",
+      "category": "스포츠",
       "status": "검토중",
       "priority": "시간 남으면",
       "address": "1 Patriot Place, Foxborough, MA 02035",

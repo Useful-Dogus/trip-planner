@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readItems, writeItems } from '@/lib/data'
 import type { Category, Status, Priority } from '@/types'
 
-const CATEGORIES: Category[] = ['교통', '숙소', '식당', '관광', '쇼핑', '기타']
+const CATEGORIES: Category[] = ['교통', '숙소', '식당', '카페', '관광', '공연', '스포츠', '쇼핑', '기타']
 const STATUSES: Status[] = ['검토중', '보류', '대기중', '확정', '탈락']
 const PRIORITIES: Priority[] = ['반드시', '들를만해', '시간 남으면']
 
