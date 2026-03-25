@@ -62,6 +62,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [geocoding, setGeocoding] = useState(false)
+  const [geocodeError, setGeocodeError] = useState('')
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -70,15 +71,18 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   async function handleAddressBlur() {
     if (!form.address.trim()) return
     setGeocoding(true)
+    setGeocodeError('')
     try {
       const res = await fetch(`/api/geocode?q=${encodeURIComponent(form.address)}`)
       const data = await res.json()
       if (data.lat !== null && data.lng !== null) {
         setField('lat', data.lat.toString())
         setField('lng', data.lng.toString())
+      } else {
+        setGeocodeError('주소를 찾을 수 없습니다. 좌표 없이 저장됩니다.')
       }
     } catch {
-      // 지오코딩 실패는 무시
+      setGeocodeError('좌표 검색에 실패했습니다. 좌표 없이 저장됩니다.')
     } finally {
       setGeocoding(false)
     }
@@ -271,6 +275,9 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
           />
           {geocoding && (
             <p className="text-xs text-gray-400 mt-1">좌표 검색 중...</p>
+          )}
+          {!geocoding && geocodeError && (
+            <p className="text-xs text-amber-500 mt-1">{geocodeError}</p>
           )}
         </div>
 
