@@ -1,8 +1,10 @@
 # trip-planner Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-23
+Auto-generated from all feature plans. Last updated: 2026-03-25
 
 ## Active Technologies
+- TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS 3.x, React 18 (003-panel-editing-ux)
+- 기존 파일 기반 (`data/items.json`) - 변경 없음 (003-panel-editing-ux)
 
 - TypeScript + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS, react-leaflet + Leaflet.js, jose (JWT) (001-trip-planner-mvp)
 
@@ -26,6 +28,7 @@ npm run dev    # 로컬 개발 서버 (http://localhost:3000)
 TypeScript + Node.js 18+: Follow standard conventions
 
 ## Recent Changes
+- 003-panel-editing-ux: Added TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS 3.x, React 18
 
 - 001-trip-planner-mvp: Added TypeScript + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS, react-leaflet + Leaflet.js, jose (JWT)
 
