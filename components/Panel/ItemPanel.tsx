@@ -23,14 +23,18 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
     setMode('view')
   }, [item?.id])
 
-  // ESC 키로 닫기
+  // ESC 키 닫기 + 배경 스크롤 잠금
   useEffect(() => {
     if (!isOpen) return
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
   }, [isOpen, onClose])
 
   // 스와이프 다운으로 닫기 (모바일)
@@ -65,10 +69,10 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
         aria-label="항목 상세 패널"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className={`fixed z-[60] bg-white shadow-2xl transition-transform duration-300 ease-in-out flex flex-col bottom-0 left-0 right-0 rounded-t-2xl h-[80vh] md:h-screen md:bottom-auto md:right-0 md:top-0 md:left-auto md:w-[440px] md:rounded-none md:rounded-l-2xl ${
+        className={`fixed z-[60] bg-white shadow-2xl transition-transform duration-300 ease-in-out flex flex-col bottom-0 left-0 right-0 rounded-t-2xl h-[80vh] md:h-screen md:bottom-auto md:right-0 md:top-0 md:left-auto md:w-[520px] md:rounded-none md:rounded-l-2xl ${
           isOpen
-            ? 'translate-y-0 md:translate-x-0'
-            : 'translate-y-full md:translate-x-full'
+            ? 'translate-y-0 md:translate-y-0 md:translate-x-0'
+            : 'translate-y-full md:translate-y-0 md:translate-x-full'
         }`}
       >
         {/* 헤더 */}
