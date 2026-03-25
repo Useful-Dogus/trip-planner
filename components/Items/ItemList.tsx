@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import type { TripItem, Category, Status, Priority } from '@/types'
 import ItemCard from './ItemCard'
 
@@ -61,6 +62,23 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
   useEffect(() => { onSelectItemRef.current = onSelectItem })
 
   const eliminatedCount = useMemo(() => items.filter(i => i.status === '탈락').length, [items])
+
+  function clearFilters() {
+    setSelCats([])
+    setSelStatuses([])
+    setSelPriorities([])
+    setShowEliminated(false)
+    setQuery('')
+  }
+
+  const hasActiveFilter = useMemo(
+    () =>
+      selCats.length > 0 ||
+      selStatuses.length > 0 ||
+      selPriorities.length > 0 ||
+      query.trim().length > 0,
+    [selCats, selStatuses, selPriorities, query]
+  )
 
   function handleSortChange(key: SortKey) {
     if (sortKey === key) {
@@ -204,8 +222,33 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
             isActive={item.id === selectedItemId}
           />
         ))}
-        {filtered.length === 0 && (
-          <p className="text-center text-gray-400 py-12 text-sm">항목이 없습니다.</p>
+        {filtered.length === 0 && items.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="text-4xl mb-3">📍</div>
+            <p className="text-sm font-medium text-gray-700 mb-1">아직 항목이 없어요</p>
+            <p className="text-xs text-gray-400 mb-4">가고 싶은 장소를 추가해보세요</p>
+            <Link
+              href="/items/new"
+              className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              첫 항목 추가하기
+            </Link>
+          </div>
+        )}
+        {filtered.length === 0 && items.length > 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="text-4xl mb-3">🔍</div>
+            <p className="text-sm font-medium text-gray-700 mb-1">검색 결과가 없어요</p>
+            <p className="text-xs text-gray-400 mb-4">필터 조건을 바꿔보세요</p>
+            {hasActiveFilter && (
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                필터 초기화
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>
