@@ -29,9 +29,7 @@ function createNumberIcon(num: number) {
 
 export default function ScheduleMap({ items }: { items: TripItem[] }) {
   const confirmedDates = useMemo(() => {
-    const dates = items
-      .filter(i => i.status === '확정' && i.date)
-      .map(i => i.date!)
+    const dates = items.filter(i => i.status === '확정' && i.date).map(i => i.date!)
     return Array.from(new Set(dates)).sort()
   }, [items])
 
@@ -92,19 +90,13 @@ export default function ScheduleMap({ items }: { items: TripItem[] }) {
         />
 
         {dayItems.map((item, idx) => (
-          <Marker
-            key={item.id}
-            position={[item.lat!, item.lng!]}
-            icon={createNumberIcon(idx + 1)}
-          >
+          <Marker key={item.id} position={[item.lat!, item.lng!]} icon={createNumberIcon(idx + 1)}>
             <Popup>
               <div className="space-y-1 min-w-[140px]">
                 <p className="font-semibold text-gray-900 text-sm">
                   {idx + 1}. {item.name}
                 </p>
-                {item.time_start && (
-                  <p className="text-xs text-gray-500">{item.time_start}</p>
-                )}
+                {item.time_start && <p className="text-xs text-gray-500">{item.time_start}</p>}
                 {item.budget !== undefined && (
                   <p className="text-xs text-gray-500">${item.budget}</p>
                 )}

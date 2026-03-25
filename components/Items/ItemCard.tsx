@@ -43,7 +43,12 @@ function LinkButton({ links }: { links: TripItem['links'] }) {
         className="flex-shrink-0 p-1 text-gray-400 hover:text-blue-500 transition-colors"
         title={links[0].label || '링크 열기'}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-3.5 h-3.5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
           <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
           <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
         </svg>
@@ -54,11 +59,20 @@ function LinkButton({ links }: { links: TripItem['links'] }) {
   return (
     <div ref={ref} className="relative flex-shrink-0">
       <button
-        onClick={e => { e.preventDefault(); e.stopPropagation(); setOpen(v => !v) }}
+        onClick={e => {
+          e.preventDefault()
+          e.stopPropagation()
+          setOpen(v => !v)
+        }}
         className="p-1 text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-0.5"
         title="링크 목록"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-3.5 h-3.5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
           <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
           <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
         </svg>
@@ -72,7 +86,10 @@ function LinkButton({ links }: { links: TripItem['links'] }) {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={e => { e.stopPropagation(); setOpen(false) }}
+              onClick={e => {
+                e.stopPropagation()
+                setOpen(false)
+              }}
               className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 truncate max-w-48"
             >
               {link.label || link.url}
@@ -116,7 +133,10 @@ export default function ItemCard({ item }: { item: TripItem }) {
             <LinkButton links={item.links} />
             {item.is_franchise && item.branches && item.branches.length > 0 && (
               <button
-                onClick={e => { e.preventDefault(); setBranchesOpen(v => !v) }}
+                onClick={e => {
+                  e.preventDefault()
+                  setBranchesOpen(v => !v)
+                }}
                 className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                 title="지점 목록"
               >
@@ -126,7 +146,11 @@ export default function ItemCard({ item }: { item: TripItem }) {
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </button>
             )}
@@ -137,8 +161,17 @@ export default function ItemCard({ item }: { item: TripItem }) {
           <div className="mt-2.5 flex items-center gap-2 text-xs text-gray-400 pl-[22px]">
             {item.date && (
               <span className="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-3 h-3"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 {item.date}
               </span>
@@ -154,14 +187,21 @@ export default function ItemCard({ item }: { item: TripItem }) {
           <div className="mt-3 pl-[22px] space-y-1.5 border-t border-gray-100 pt-3">
             {item.branches.map(branch => (
               <div key={branch.id} className="flex items-start gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-gray-300 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-3.5 h-3.5 text-gray-300 flex-shrink-0 mt-0.5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <div>
                   <span className="text-xs font-medium text-gray-700">{branch.name}</span>
-                  {branch.address && (
-                    <p className="text-xs text-gray-400">{branch.address}</p>
-                  )}
+                  {branch.address && <p className="text-xs text-gray-400">{branch.address}</p>}
                 </div>
               </div>
             ))}

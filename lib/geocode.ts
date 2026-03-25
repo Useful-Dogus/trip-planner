@@ -1,6 +1,4 @@
-export async function geocodeAddress(
-  q: string
-): Promise<{ lat: number; lng: number } | null> {
+export async function geocodeAddress(q: string): Promise<{ lat: number; lng: number } | null> {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`
 
   const res = await fetch(url, {
