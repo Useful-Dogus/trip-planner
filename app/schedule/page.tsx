@@ -22,9 +22,11 @@ export default function SchedulePage() {
       })
   }, [])
 
+  const confirmedItems = useMemo(() => items.filter(item => item.status === '확정'), [items])
+
   const scheduleItems = useMemo(() => {
-    return items
-      .filter(item => item.status === '확정' && item.date)
+    return confirmedItems
+      .filter(item => item.date)
       .sort((a, b) => {
         if (a.date! < b.date!) return -1
         if (a.date! > b.date!) return 1
@@ -33,7 +35,9 @@ export default function SchedulePage() {
         if (!b.time_start) return -1
         return a.time_start.localeCompare(b.time_start)
       })
-  }, [items])
+  }, [confirmedItems])
+
+  const undatedItems = useMemo(() => confirmedItems.filter(item => !item.date), [confirmedItems])
 
   const grouped = useMemo(() => {
     const groups: Record<string, TripItem[]> = {}
@@ -44,6 +48,11 @@ export default function SchedulePage() {
     }
     return groups
   }, [scheduleItems])
+
+  const totalBudget = useMemo(
+    () => confirmedItems.reduce((sum, item) => sum + (item.budget ?? 0), 0),
+    [confirmedItems]
+  )
 
   return (
     <div className="md:pl-44">
@@ -57,24 +66,64 @@ export default function SchedulePage() {
           <p className="text-center text-gray-400 py-16 text-sm">불러오는 중...</p>
         ) : tab === 'list' ? (
           <div className="space-y-6">
-            {Object.keys(grouped).length === 0 ? (
+            {confirmedItems.length === 0 ? (
               <div className="text-center text-gray-400 py-16">
                 <p className="text-sm">확정 일정이 없습니다.</p>
                 <p className="text-xs mt-1">항목 상태를 &quot;확정&quot;으로 변경하고 날짜를 입력하세요.</p>
               </div>
             ) : (
-              Object.entries(grouped).map(([date, dateItems]) => (
-                <div key={date}>
-                  <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                    {date}
-                  </h2>
-                  <div className="space-y-2">
-                    {dateItems.map(item => (
-                      <ItemCard key={item.id} item={item} />
-                    ))}
+              <>
+                {/* 예산 합계 */}
+                {totalBudget > 0 && (
+                  <div className="flex items-center justify-between px-1 py-2 border-b border-gray-100">
+                    <span className="text-xs text-gray-400">확정 항목 예산 합계</span>
+                    <span className="text-sm font-semibold text-gray-900">${totalBudget.toLocaleString()}</span>
                   </div>
-                </div>
-              ))
+                )}
+
+                {/* 날짜별 일정 */}
+                {Object.entries(grouped).map(([date, dateItems]) => {
+                  const dayBudget = dateItems.reduce((sum, item) => sum + (item.budget ?? 0), 0)
+                  return (
+                    <div key={date}>
+                      <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                          {date}
+                        </h2>
+                        {dayBudget > 0 && (
+                          <span className="text-xs text-gray-400">${dayBudget.toLocaleString()}</span>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        {dateItems.map(item => (
+                          <ItemCard key={item.id} item={item} />
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+
+                {/* 날짜 미정 섹션 */}
+                {undatedItems.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        미정
+                      </h2>
+                      {undatedItems.reduce((sum, i) => sum + (i.budget ?? 0), 0) > 0 && (
+                        <span className="text-xs text-gray-400">
+                          ${undatedItems.reduce((sum, i) => sum + (i.budget ?? 0), 0).toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      {undatedItems.map(item => (
+                        <ItemCard key={item.id} item={item} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         ) : (
