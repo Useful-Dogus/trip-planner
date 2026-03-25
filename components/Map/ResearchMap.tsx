@@ -1,10 +1,8 @@
 'use client'
 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
-import StatusBadge from '@/components/UI/StatusBadge'
-import PriorityBadge from '@/components/UI/PriorityBadge'
 
 const categoryColors: Record<string, string> = {
   교통: '#94A3B8',
@@ -33,7 +31,12 @@ function createDotIcon(color: string) {
   })
 }
 
-export default function ResearchMap({ items }: { items: TripItem[] }) {
+interface ResearchMapProps {
+  items: TripItem[]
+  onSelectItem?: (id: string) => void
+}
+
+export default function ResearchMap({ items, onSelectItem }: ResearchMapProps) {
   const mapItems = items.filter(
     item => item.status !== '탈락' && item.lat !== undefined && item.lng !== undefined
   )
@@ -54,17 +57,17 @@ export default function ResearchMap({ items }: { items: TripItem[] }) {
           key={item.id}
           position={[item.lat!, item.lng!]}
           icon={createDotIcon(categoryColors[item.category])}
+          eventHandlers={
+            onSelectItem
+              ? {
+                  click: () => onSelectItem(item.id),
+                }
+              : undefined
+          }
         >
-          <Popup>
-            <div className="space-y-1 min-w-[140px]">
-              <p className="font-semibold text-gray-900 text-sm">{item.name}</p>
-              <p className="text-xs text-gray-500">{item.category}</p>
-              <div className="flex gap-1 flex-wrap pt-0.5">
-                <StatusBadge status={item.status} />
-                {item.priority && <PriorityBadge priority={item.priority} />}
-              </div>
-            </div>
-          </Popup>
+          <Tooltip direction="top" offset={[0, -12]} opacity={0.9}>
+            <span className="text-xs font-medium">{item.name}</span>
+          </Tooltip>
         </Marker>
       ))}
     </MapContainer>
