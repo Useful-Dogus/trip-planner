@@ -88,7 +88,7 @@ export default function ItemCard({ item }: { item: TripItem }) {
   const [branchesOpen, setBranchesOpen] = useState(false)
 
   return (
-    <Link href={`/items/${item.id}`}>
+    <Link href={`/items/${item.id}`} className="block">
       <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:border-gray-200 hover:shadow-sm transition-all cursor-pointer">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">

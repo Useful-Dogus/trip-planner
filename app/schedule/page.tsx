@@ -1,58 +1,58 @@
-'use client'
+'use client';
 
-import { useEffect, useState, useMemo } from 'react'
-import dynamic from 'next/dynamic'
-import Navigation from '@/components/Layout/Navigation'
-import ItemCard from '@/components/Items/ItemCard'
-import type { TripItem } from '@/types'
+import { useEffect, useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
+import Navigation from '@/components/Layout/Navigation';
+import ItemCard from '@/components/Items/ItemCard';
+import type { TripItem } from '@/types';
 
-const ScheduleMap = dynamic(() => import('@/components/Map/ScheduleMap'), { ssr: false })
+const ScheduleMap = dynamic(() => import('@/components/Map/ScheduleMap'), { ssr: false });
 
 export default function SchedulePage() {
-  const [items, setItems] = useState<TripItem[]>([])
-  const [tab, setTab] = useState<'list' | 'map'>('list')
-  const [loading, setLoading] = useState(true)
+  const [items, setItems] = useState<TripItem[]>([]);
+  const [tab, setTab] = useState<'list' | 'map'>('list');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/items')
-      .then(r => r.json())
-      .then(data => {
-        setItems(data.items ?? [])
-        setLoading(false)
-      })
-  }, [])
+      .then((r) => r.json())
+      .then((data) => {
+        setItems(data.items ?? []);
+        setLoading(false);
+      });
+  }, []);
 
-  const confirmedItems = useMemo(() => items.filter(item => item.status === '확정'), [items])
+  const confirmedItems = useMemo(() => items.filter((item) => item.status === '확정'), [items]);
 
   const scheduleItems = useMemo(() => {
     return confirmedItems
-      .filter(item => item.date)
+      .filter((item) => item.date)
       .sort((a, b) => {
-        if (a.date! < b.date!) return -1
-        if (a.date! > b.date!) return 1
-        if (!a.time_start && !b.time_start) return 0
-        if (!a.time_start) return 1
-        if (!b.time_start) return -1
-        return a.time_start.localeCompare(b.time_start)
-      })
-  }, [confirmedItems])
+        if (a.date! < b.date!) return -1;
+        if (a.date! > b.date!) return 1;
+        if (!a.time_start && !b.time_start) return 0;
+        if (!a.time_start) return 1;
+        if (!b.time_start) return -1;
+        return a.time_start.localeCompare(b.time_start);
+      });
+  }, [confirmedItems]);
 
-  const undatedItems = useMemo(() => confirmedItems.filter(item => !item.date), [confirmedItems])
+  const undatedItems = useMemo(() => confirmedItems.filter((item) => !item.date), [confirmedItems]);
 
   const grouped = useMemo(() => {
-    const groups: Record<string, TripItem[]> = {}
+    const groups: Record<string, TripItem[]> = {};
     for (const item of scheduleItems) {
-      const date = item.date!
-      if (!groups[date]) groups[date] = []
-      groups[date].push(item)
+      const date = item.date!;
+      if (!groups[date]) groups[date] = [];
+      groups[date].push(item);
     }
-    return groups
-  }, [scheduleItems])
+    return groups;
+  }, [scheduleItems]);
 
   const totalBudget = useMemo(
     () => confirmedItems.reduce((sum, item) => sum + (item.budget ?? 0), 0),
-    [confirmedItems]
-  )
+    [confirmedItems],
+  );
 
   return (
     <div className="md:pl-44">
@@ -83,41 +83,35 @@ export default function SchedulePage() {
 
                 {/* 날짜별 일정 */}
                 {Object.entries(grouped).map(([date, dateItems]) => {
-                  const dayBudget = dateItems.reduce((sum, item) => sum + (item.budget ?? 0), 0)
+                  const dayBudget = dateItems.reduce((sum, item) => sum + (item.budget ?? 0), 0);
                   return (
                     <div key={date}>
                       <div className="flex items-center justify-between mb-2">
-                        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                          {date}
-                        </h2>
-                        {dayBudget > 0 && (
-                          <span className="text-xs text-gray-400">${dayBudget.toLocaleString()}</span>
-                        )}
+                        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{date}</h2>
+                        {dayBudget > 0 && <span className="text-xs text-gray-400">${dayBudget.toLocaleString()}</span>}
                       </div>
                       <div className="space-y-2">
-                        {dateItems.map(item => (
+                        {dateItems.map((item) => (
                           <ItemCard key={item.id} item={item} />
                         ))}
                       </div>
                     </div>
-                  )
+                  );
                 })}
 
                 {/* 날짜 미정 섹션 */}
                 {undatedItems.length > 0 && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                        미정
-                      </h2>
+                      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">미정</h2>
                       {undatedItems.reduce((sum, i) => sum + (i.budget ?? 0), 0) > 0 && (
                         <span className="text-xs text-gray-400">
                           ${undatedItems.reduce((sum, i) => sum + (i.budget ?? 0), 0).toLocaleString()}
                         </span>
                       )}
                     </div>
-                    <div className="space-y-2">
-                      {undatedItems.map(item => (
+                    <div className="space-y-3">
+                      {undatedItems.map((item) => (
                         <ItemCard key={item.id} item={item} />
                       ))}
                     </div>
@@ -134,19 +128,13 @@ export default function SchedulePage() {
       </div>
       <Navigation />
     </div>
-  )
+  );
 }
 
-function TabSwitcher({
-  tab,
-  onChange,
-}: {
-  tab: 'list' | 'map'
-  onChange: (t: 'list' | 'map') => void
-}) {
+function TabSwitcher({ tab, onChange }: { tab: 'list' | 'map'; onChange: (t: 'list' | 'map') => void }) {
   return (
     <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-      {(['list', 'map'] as const).map(t => (
+      {(['list', 'map'] as const).map((t) => (
         <button
           key={t}
           onClick={() => onChange(t)}
@@ -158,5 +146,5 @@ function TabSwitcher({
         </button>
       ))}
     </div>
-  )
+  );
 }
