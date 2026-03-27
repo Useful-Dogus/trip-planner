@@ -5,6 +5,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-27
 ## Active Technologies
 - TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), React 18, Tailwind CSS 3.x (004-mobile-panel-ux)
 - N/A (UI 전용 변경) (004-mobile-panel-ux)
+- TypeScript 5.x + Node.js 18+ + Next.js 14.2.0 (App Router), React 18.3.1, Tailwind CSS 3.x, SWR (신규 추가) (005-data-caching-fast-ux)
+- Supabase (서버), localStorage (클라이언트 캐시) (005-data-caching-fast-ux)
 
 - TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS 3.x, React 18 (003-panel-editing-ux)
 - Supabase (데이터 저장소, 파일 기반에서 마이그레이션 완료)
@@ -31,11 +33,11 @@ npm run dev # 로컬 개발 서버 (http://localhost:3000)
 TypeScript + Node.js 18+: Follow standard conventions
 
 ## Recent Changes
+- 005-data-caching-fast-ux: Added TypeScript 5.x + Node.js 18+ + Next.js 14.2.0 (App Router), React 18.3.1, Tailwind CSS 3.x, SWR (신규 추가)
 - 004-mobile-panel-ux: Added TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), React 18, Tailwind CSS 3.x
 
 - 003-panel-editing-ux: Added TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS 3.x, React 18
 
-- 001-trip-planner-mvp: Added TypeScript + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS, react-leaflet + Leaflet.js, jose (JWT)
 
 <!-- MANUAL ADDITIONS START -->
 

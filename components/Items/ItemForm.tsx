@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { TripItem, Category, Status, Priority, Link as TripLink } from '@/types'
+import { useItems } from '@/lib/hooks/useItems'
 
 const CATEGORIES: Category[] = [
   '교통',
@@ -53,6 +54,7 @@ interface ItemFormProps {
 
 export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   const router = useRouter()
+  const { createItem, updateItem, deleteItem } = useItems()
 
   const [form, setForm] = useState<FormData>({
     name: initialData?.name ?? '',
@@ -144,25 +146,16 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     if (form.date.trim()) body.date = form.date.trim()
     if (form.time_start.trim()) body.time_start = form.time_start.trim()
 
-    const url = mode === 'create' ? '/api/items' : `/api/items/${itemId}`
-    const method = mode === 'create' ? 'POST' : 'PUT'
-
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-
-    if (res.ok) {
-      if (mode === 'edit' && itemId) {
-        router.push(`/items/${itemId}`)
-      } else {
+    try {
+      if (mode === 'create') {
+        await createItem(body as Omit<TripItem, 'id' | 'created_at' | 'updated_at'>)
         router.push('/research')
+      } else if (itemId) {
+        await updateItem(itemId, body as Partial<TripItem>)
+        router.push(`/items/${itemId}`)
       }
-      router.refresh()
-    } else {
-      const data = await res.json()
-      setError(data.error || '저장에 실패했습니다.')
+    } catch {
+      setError('저장에 실패했습니다.')
       setLoading(false)
     }
   }
@@ -170,14 +163,9 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   async function handleDelete() {
     if (!confirm('이 항목을 삭제하시겠습니까?')) return
     setLoading(true)
-
-    const res = await fetch(`/api/items/${itemId}`, { method: 'DELETE' })
-    if (res.ok) {
+    if (itemId) {
+      await deleteItem(itemId)
       router.push('/research')
-      router.refresh()
-    } else {
-      setError('삭제에 실패했습니다.')
-      setLoading(false)
     }
   }
 

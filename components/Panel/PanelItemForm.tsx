@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import type { TripItem, Category, Status, Priority, Link as TripLink } from '@/types'
+import { useItems } from '@/lib/hooks/useItems'
 
 const CATEGORIES: Category[] = [
   '교통',
@@ -46,12 +47,14 @@ interface FormData {
 
 export interface PanelItemFormProps {
   item: TripItem
-  onSave: (updated: TripItem) => void
+  onSave: () => void
   onCancel: () => void
   onDirtyChange: (dirty: boolean) => void
 }
 
 export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }: PanelItemFormProps) {
+  const { updateItem } = useItems()
+
   const [form, setForm] = useState<FormData>({
     name: item.name,
     category: item.category,
@@ -67,8 +70,6 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     links: item.links ?? [],
   })
 
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
   const [geocoding, setGeocoding] = useState(false)
   const [geocodeError, setGeocodeError] = useState('')
 
@@ -143,39 +144,25 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
-    setError('')
 
-    const body: Record<string, unknown> = {
+    const changes: Record<string, unknown> = {
       name: form.name,
       category: form.category,
       status: form.status,
       links: form.links.filter(l => l.url.trim()),
     }
 
-    if (form.priority) body.priority = form.priority
-    if (form.address.trim()) body.address = form.address.trim()
-    if (form.lat.trim()) body.lat = parseFloat(form.lat)
-    if (form.lng.trim()) body.lng = parseFloat(form.lng)
-    if (form.budget.trim()) body.budget = parseInt(form.budget)
-    if (form.memo.trim()) body.memo = form.memo.trim()
-    if (form.date.trim()) body.date = form.date.trim()
-    if (form.time_start.trim()) body.time_start = form.time_start.trim()
+    if (form.priority) changes.priority = form.priority
+    if (form.address.trim()) changes.address = form.address.trim()
+    if (form.lat.trim()) changes.lat = parseFloat(form.lat)
+    if (form.lng.trim()) changes.lng = parseFloat(form.lng)
+    if (form.budget.trim()) changes.budget = parseInt(form.budget)
+    if (form.memo.trim()) changes.memo = form.memo.trim()
+    if (form.date.trim()) changes.date = form.date.trim()
+    if (form.time_start.trim()) changes.time_start = form.time_start.trim()
 
-    const res = await fetch(`/api/items/${item.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-
-    if (res.ok) {
-      const data = await res.json()
-      onSave(data.item)
-    } else {
-      const data = await res.json()
-      setError(data.error || '저장에 실패했습니다.')
-      setLoading(false)
-    }
+    await updateItem(item.id, changes as Partial<TripItem>)
+    onSave()
   }
 
   const inputClass =
@@ -386,22 +373,19 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
 
       {/* 고정 하단 버튼 영역 */}
       <div className="flex-shrink-0 px-5 py-3 border-t border-gray-100">
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
         <div className="flex gap-3">
           <button
             type="button"
             onClick={onCancel}
-            disabled={loading}
-            className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors"
           >
             취소
           </button>
           <button
             type="submit"
-            disabled={loading}
-            className="flex-1 bg-gray-900 text-white rounded-lg px-4 py-2.5 text-sm font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors"
+            className="flex-1 bg-gray-900 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors"
           >
-            {loading ? '저장 중...' : '저장'}
+            저장
           </button>
         </div>
       </div>

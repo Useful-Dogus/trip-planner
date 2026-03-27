@@ -1,40 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import Navigation from '@/components/Layout/Navigation'
 import ItemList from '@/components/Items/ItemList'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
-import type { TripItem } from '@/types'
+import { useItems } from '@/lib/hooks/useItems'
 
 const ResearchMap = dynamic(() => import('@/components/Map/ResearchMap'), { ssr: false })
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
 export default function ResearchPage() {
-  const [items, setItems] = useState<TripItem[]>([])
+  const { items, isLoading } = useItems()
   const [tab, setTab] = useState<'list' | 'map'>('list')
-  const [loading, setLoading] = useState(true)
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetch('/api/items')
-      .then(r => r.json())
-      .then(data => {
-        setItems(data.items ?? [])
-        setLoading(false)
-      })
-  }, [])
-
   const selectedItem = items.find(i => i.id === selectedItemId) ?? null
-
-  function handleSave(updated: TripItem) {
-    setItems(prev => prev.map(i => (i.id === updated.id ? updated : i)))
-  }
-
-  function handleDelete(id: string) {
-    setItems(prev => prev.filter(i => i.id !== id))
-    setSelectedItemId(null)
-  }
 
   return (
     <div className="md:pl-44">
@@ -47,7 +28,7 @@ export default function ResearchPage() {
       </div>
 
       {/* 콘텐츠: 목록은 제한 너비, 지도는 전체 너비 */}
-      {loading ? (
+      {isLoading ? (
         <div className="max-w-2xl mx-auto px-4 space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
             <ItemCardSkeleton key={i} />
@@ -76,8 +57,8 @@ export default function ResearchPage() {
         item={selectedItem}
         isOpen={selectedItemId !== null}
         onClose={() => setSelectedItemId(null)}
-        onSave={handleSave}
-        onDelete={handleDelete}
+        onSave={() => {}}
+        onDelete={() => setSelectedItemId(null)}
       />
     </div>
   )

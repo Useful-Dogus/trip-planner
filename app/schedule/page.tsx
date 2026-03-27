@@ -1,27 +1,18 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import Navigation from '@/components/Layout/Navigation'
 import ItemCard from '@/components/Items/ItemCard'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
+import { useItems } from '@/lib/hooks/useItems'
 import type { TripItem } from '@/types'
 
 const ScheduleMap = dynamic(() => import('@/components/Map/ScheduleMap'), { ssr: false })
 
 export default function SchedulePage() {
-  const [items, setItems] = useState<TripItem[]>([])
+  const { items, isLoading } = useItems()
   const [tab, setTab] = useState<'list' | 'map'>('list')
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch('/api/items')
-      .then(r => r.json())
-      .then(data => {
-        setItems(data.items ?? [])
-        setLoading(false)
-      })
-  }, [])
 
   const confirmedItems = useMemo(() => items.filter(item => item.status === '확정'), [items])
 
@@ -66,7 +57,7 @@ export default function SchedulePage() {
       </div>
 
       {/* 콘텐츠: 목록은 제한 너비, 지도는 전체 너비 */}
-      {loading ? (
+      {isLoading ? (
         <div className="max-w-2xl mx-auto px-4 space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <ItemCardSkeleton key={i} />
