@@ -48,10 +48,10 @@ export interface PanelItemFormProps {
   item: TripItem
   onSave: (updated: TripItem) => void
   onCancel: () => void
-  onDelete: (id: string) => void
+  onDirtyChange: (dirty: boolean) => void
 }
 
-export default function PanelItemForm({ item, onSave, onCancel, onDelete }: PanelItemFormProps) {
+export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }: PanelItemFormProps) {
   const [form, setForm] = useState<FormData>({
     name: item.name,
     category: item.category,
@@ -74,12 +74,32 @@ export default function PanelItemForm({ item, onSave, onCancel, onDelete }: Pane
 
   const memoRef = useRef<HTMLTextAreaElement>(null)
 
+  // 메모 높이 자동 조절
   useEffect(() => {
     const el = memoRef.current
     if (!el) return
     el.style.height = 'auto'
     el.style.height = `${el.scrollHeight}px`
   }, [form.memo])
+
+  // dirty 상태 계산 — 링크는 URL 비어있는 항목 제외 후 비교
+  useEffect(() => {
+    const cleanLinks = form.links.filter(l => l.url.trim())
+    const dirty =
+      form.name !== item.name ||
+      form.category !== item.category ||
+      form.status !== item.status ||
+      form.priority !== (item.priority ?? '') ||
+      form.address !== (item.address ?? '') ||
+      form.lat !== (item.lat?.toString() ?? '') ||
+      form.lng !== (item.lng?.toString() ?? '') ||
+      form.budget !== (item.budget?.toString() ?? '') ||
+      form.memo !== (item.memo ?? '') ||
+      form.date !== (item.date ?? '') ||
+      form.time_start !== (item.time_start ?? '') ||
+      JSON.stringify(cleanLinks) !== JSON.stringify(item.links ?? [])
+    onDirtyChange(dirty)
+  }, [form, item, onDirtyChange])
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -158,248 +178,232 @@ export default function PanelItemForm({ item, onSave, onCancel, onDelete }: Pane
     }
   }
 
-  async function handleDelete() {
-    if (!confirm('이 항목을 삭제하시겠습니까?')) return
-    setLoading(true)
-
-    const res = await fetch(`/api/items/${item.id}`, { method: 'DELETE' })
-    if (res.ok) {
-      onDelete(item.id)
-    } else {
-      setError('삭제에 실패했습니다.')
-      setLoading(false)
-    }
-  }
-
   const inputClass =
     'w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white'
   const labelClass = 'block text-sm font-medium text-gray-700 mb-1'
 
   return (
-    <form onSubmit={handleSubmit} className="px-5 py-4 space-y-6 pb-8">
-      {/* 기본 정보 */}
-      <section className="space-y-4">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">기본 정보</h3>
+    <form onSubmit={handleSubmit} className="flex flex-col h-full">
+      {/* 스크롤 가능한 폼 필드 영역 */}
+      <div className="flex-1 overflow-y-auto min-h-0 px-5 py-4 space-y-6">
+        {/* 기본 정보 */}
+        <section className="space-y-4">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">기본 정보</h3>
 
-        <div>
-          <label className={labelClass}>이름 *</label>
-          <input
-            type="text"
-            value={form.name}
-            onChange={e => setField('name', e.target.value)}
-            className={inputClass}
-            placeholder="장소 또는 활동 이름"
-            required
-          />
-        </div>
-
-        <div>
-          <label className={labelClass}>카테고리 *</label>
-          <select
-            value={form.category}
-            onChange={e => setField('category', e.target.value as Category)}
-            className={inputClass}
-          >
-            {CATEGORIES.map(c => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className={labelClass}>상태 *</label>
-          <select
-            value={form.status}
-            onChange={e => setField('status', e.target.value as Status)}
-            className={inputClass}
-          >
-            {STATUS_OPTIONS.map(o => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className={labelClass}>우선순위</label>
-          <select
-            value={form.priority}
-            onChange={e => setField('priority', e.target.value as Priority | '')}
-            className={inputClass}
-          >
-            <option value="">없음</option>
-            {PRIORITY_OPTIONS.map(o => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={labelClass}>날짜</label>
+            <label className={labelClass}>이름 *</label>
             <input
-              type="date"
-              value={form.date}
-              onChange={e => setField('date', e.target.value)}
+              type="text"
+              value={form.name}
+              onChange={e => setField('name', e.target.value)}
               className={inputClass}
+              placeholder="장소 또는 활동 이름"
+              required
+              autoFocus
             />
           </div>
+
           <div>
-            <label className={labelClass}>시작 시간</label>
-            <input
-              type="time"
-              value={form.time_start}
-              onChange={e => setField('time_start', e.target.value)}
+            <label className={labelClass}>카테고리 *</label>
+            <select
+              value={form.category}
+              onChange={e => setField('category', e.target.value as Category)}
               className={inputClass}
-            />
+            >
+              {CATEGORIES.map(c => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
 
-        <div>
-          <label className={labelClass}>예산 (USD)</label>
-          <input
-            type="number"
-            min="0"
-            value={form.budget}
-            onChange={e => setField('budget', e.target.value)}
-            className={inputClass}
-            placeholder="예: 50"
-          />
-        </div>
-      </section>
-
-      {/* 위치 */}
-      <section className="space-y-4">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">위치</h3>
-
-        <div>
-          <label className={labelClass}>주소</label>
-          <input
-            type="text"
-            value={form.address}
-            onChange={e => setField('address', e.target.value)}
-            onBlur={handleAddressBlur}
-            className={inputClass}
-            placeholder="주소 입력 후 포커스를 벗어나면 좌표 자동 입력"
-          />
-          {geocoding && <p className="text-xs text-gray-400 mt-1">좌표 검색 중...</p>}
-          {!geocoding && geocodeError && (
-            <p className="text-xs text-amber-500 mt-1">{geocodeError}</p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={labelClass}>위도 (lat)</label>
-            <input
-              type="number"
-              step="any"
-              value={form.lat}
-              onChange={e => setField('lat', e.target.value)}
+            <label className={labelClass}>상태 *</label>
+            <select
+              value={form.status}
+              onChange={e => setField('status', e.target.value as Status)}
               className={inputClass}
-              placeholder="40.748817"
-            />
+            >
+              {STATUS_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </div>
+
           <div>
-            <label className={labelClass}>경도 (lng)</label>
-            <input
-              type="number"
-              step="any"
-              value={form.lng}
-              onChange={e => setField('lng', e.target.value)}
+            <label className={labelClass}>우선순위</label>
+            <select
+              value={form.priority}
+              onChange={e => setField('priority', e.target.value as Priority | '')}
               className={inputClass}
-              placeholder="-73.985428"
-            />
+            >
+              <option value="">없음</option>
+              {PRIORITY_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
-      </section>
 
-      {/* 링크 */}
-      <section className="space-y-3">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">링크</h3>
-
-        {form.links.map((link, i) => (
-          <div key={i} className="flex gap-2 items-start">
-            <div className="flex-1 grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>날짜</label>
               <input
-                type="text"
-                value={link.label}
-                onChange={e => updateLink(i, 'label', e.target.value)}
+                type="date"
+                value={form.date}
+                onChange={e => setField('date', e.target.value)}
                 className={inputClass}
-                placeholder="이름 (예: 공식 사이트)"
-              />
-              <input
-                type="url"
-                value={link.url}
-                onChange={e => updateLink(i, 'url', e.target.value)}
-                className={inputClass}
-                placeholder="https://..."
               />
             </div>
-            <button
-              type="button"
-              onClick={() => removeLink(i)}
-              className="mt-1.5 text-gray-300 hover:text-red-400 text-xl leading-none transition-colors"
-            >
-              ×
-            </button>
+            <div>
+              <label className={labelClass}>시작 시간</label>
+              <input
+                type="time"
+                value={form.time_start}
+                onChange={e => setField('time_start', e.target.value)}
+                className={inputClass}
+              />
+            </div>
           </div>
-        ))}
 
-        <button
-          type="button"
-          onClick={addLink}
-          className="w-full text-sm text-gray-400 hover:text-gray-600 border border-dashed border-gray-300 rounded-lg px-4 py-2 transition-colors"
-        >
-          + 링크 추가
-        </button>
-      </section>
+          <div>
+            <label className={labelClass}>예산 (USD)</label>
+            <input
+              type="number"
+              min="0"
+              value={form.budget}
+              onChange={e => setField('budget', e.target.value)}
+              className={inputClass}
+              placeholder="예: 50"
+            />
+          </div>
+        </section>
 
-      {/* 메모 */}
-      <section className="space-y-3">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">메모</h3>
-        <textarea
-          ref={memoRef}
-          value={form.memo}
-          onChange={e => setField('memo', e.target.value)}
-          className={`${inputClass} resize-none overflow-hidden`}
-          rows={4}
-          placeholder="자유롭게 메모..."
-        />
-      </section>
+        {/* 위치 */}
+        <section className="space-y-4">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">위치</h3>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+          <div>
+            <label className={labelClass}>주소</label>
+            <input
+              type="text"
+              value={form.address}
+              onChange={e => setField('address', e.target.value)}
+              onBlur={handleAddressBlur}
+              className={inputClass}
+              placeholder="주소 입력 후 포커스를 벗어나면 좌표 자동 입력"
+            />
+            {geocoding && <p className="text-xs text-gray-400 mt-1">좌표 검색 중...</p>}
+            {!geocoding && geocodeError && (
+              <p className="text-xs text-amber-500 mt-1">{geocodeError}</p>
+            )}
+          </div>
 
-      {/* 액션 버튼 */}
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={loading}
-          className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-        >
-          취소
-        </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex-1 bg-gray-900 text-white rounded-lg px-4 py-2.5 text-sm font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors"
-        >
-          {loading ? '저장 중...' : '저장'}
-        </button>
-        <button
-          type="button"
-          onClick={handleDelete}
-          disabled={loading}
-          className="px-4 py-2.5 rounded-lg text-sm font-medium text-red-500 border border-red-200 hover:bg-red-50 disabled:opacity-50 transition-colors"
-        >
-          삭제
-        </button>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>위도 (lat)</label>
+              <input
+                type="number"
+                step="any"
+                value={form.lat}
+                onChange={e => setField('lat', e.target.value)}
+                className={inputClass}
+                placeholder="40.748817"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>경도 (lng)</label>
+              <input
+                type="number"
+                step="any"
+                value={form.lng}
+                onChange={e => setField('lng', e.target.value)}
+                className={inputClass}
+                placeholder="-73.985428"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* 링크 — 모바일 1단, 데스크탑 2단 */}
+        <section className="space-y-3">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">링크</h3>
+
+          {form.links.map((link, i) => (
+            <div key={i} className="flex gap-2 items-start">
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  value={link.label}
+                  onChange={e => updateLink(i, 'label', e.target.value)}
+                  className={inputClass}
+                  placeholder="이름 (예: 공식 사이트)"
+                />
+                <input
+                  type="url"
+                  value={link.url}
+                  onChange={e => updateLink(i, 'url', e.target.value)}
+                  className={inputClass}
+                  placeholder="https://..."
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => removeLink(i)}
+                className="mt-1.5 text-gray-300 hover:text-red-400 text-xl leading-none transition-colors"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={addLink}
+            className="w-full text-sm text-gray-400 hover:text-gray-600 border border-dashed border-gray-300 rounded-lg px-4 py-2 transition-colors"
+          >
+            + 링크 추가
+          </button>
+        </section>
+
+        {/* 메모 */}
+        <section className="space-y-3">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">메모</h3>
+          <textarea
+            ref={memoRef}
+            value={form.memo}
+            onChange={e => setField('memo', e.target.value)}
+            className={`${inputClass} resize-none overflow-hidden`}
+            rows={4}
+            placeholder="자유롭게 메모..."
+          />
+        </section>
+      </div>
+
+      {/* 고정 하단 버튼 영역 */}
+      <div className="flex-shrink-0 px-5 py-3 border-t border-gray-100">
+        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={loading}
+            className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+          >
+            취소
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-gray-900 text-white rounded-lg px-4 py-2.5 text-sm font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors"
+          >
+            {loading ? '저장 중...' : '저장'}
+          </button>
+        </div>
       </div>
     </form>
   )

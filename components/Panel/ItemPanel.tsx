@@ -16,18 +16,40 @@ export interface ItemPanelProps {
 
 export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: ItemPanelProps) {
   const [mode, setMode] = useState<'view' | 'edit'>('view')
+  const [isDirty, setIsDirty] = useState(false)
+  const [confirmingClose, setConfirmingClose] = useState(false)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
   const panelRef = useRef<HTMLDivElement>(null)
 
   // 항목이 바뀌면 항상 읽기 모드로 리셋
   useEffect(() => {
     setMode('view')
+    setIsDirty(false)
+    setConfirmingClose(false)
   }, [item?.id])
+
+  // 패널이 닫히면 상태 초기화
+  useEffect(() => {
+    if (!isOpen) {
+      setMode('view')
+      setIsDirty(false)
+      setConfirmingClose(false)
+    }
+  }, [isOpen])
 
   // ESC 키 닫기 + 배경 스크롤 잠금
   useEffect(() => {
     if (!isOpen) return
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') {
+        if (confirmingClose) {
+          setConfirmingClose(false)
+        } else if (mode === 'edit' && isDirty) {
+          setConfirmingClose(true)
+        } else {
+          onClose()
+        }
+      }
     }
     document.addEventListener('keydown', handleKeyDown)
     document.body.style.overflow = 'hidden'
@@ -35,22 +57,75 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = ''
     }
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, mode, isDirty, confirmingClose])
 
-  // 스와이프 다운으로 닫기 (모바일)
+  // Visual Viewport API — 가상 키보드 높이 감지 (iOS Safari 대응)
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv || !isOpen) return
+    const handler = () => {
+      const height = window.innerHeight - vv.height - vv.offsetTop
+      setKeyboardHeight(Math.max(0, height))
+    }
+    vv.addEventListener('resize', handler)
+    vv.addEventListener('scroll', handler)
+    handler()
+    return () => {
+      vv.removeEventListener('resize', handler)
+      vv.removeEventListener('scroll', handler)
+      setKeyboardHeight(0)
+    }
+  }, [isOpen])
+
+  // 스와이프 다운으로 닫기 (모바일, 편집 모드 제외)
   const touchStartY = useRef<number>(0)
   function handleTouchStart(e: React.TouchEvent) {
     touchStartY.current = e.touches[0].clientY
   }
   function handleTouchEnd(e: React.TouchEvent) {
+    if (mode === 'edit') return
     const delta = e.changedTouches[0].clientY - touchStartY.current
     if (delta > 50) onClose()
+  }
+
+  // 닫기 시도 — dirty 상태 확인 후 확인 UI 표시 또는 즉시 닫기
+  function tryClose() {
+    if (mode === 'edit' && isDirty) {
+      setConfirmingClose(true)
+    } else {
+      onClose()
+    }
+  }
+
+  // 변경사항 폐기 후 닫기
+  function handleDiscardAndClose() {
+    setConfirmingClose(false)
+    onClose()
+  }
+
+  // 삭제 처리 (PanelItemForm에서 이전)
+  async function handleDelete(id: string) {
+    if (!confirm('이 항목을 삭제하시겠습니까?')) return
+    const res = await fetch(`/api/items/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      onDelete(id)
+      onClose()
+    }
   }
 
   // 패널이 닫혀도 마지막 item은 캐싱 (애니메이션 중 콘텐츠 유지)
   const cachedItem = useRef<TripItem | null>(null)
   if (item) cachedItem.current = item
   const displayItem = item ?? cachedItem.current
+
+  // 가상 키보드 대응 패널 스타일 (keyboardHeight > 0일 때만 적용)
+  const panelStyle: React.CSSProperties =
+    keyboardHeight > 0
+      ? {
+          bottom: `${keyboardHeight}px`,
+          maxHeight: `${window.innerHeight - keyboardHeight}px`,
+        }
+      : {}
 
   return (
     <>
@@ -59,7 +134,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
         className={`fixed inset-0 bg-black/30 z-[1000] transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
-        onClick={onClose}
+        onClick={confirmingClose ? () => setConfirmingClose(false) : tryClose}
         aria-hidden="true"
       />
 
@@ -69,6 +144,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
         aria-label="항목 상세 패널"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        style={panelStyle}
         className={`fixed z-[1010] bg-white shadow-2xl transition-transform duration-300 ease-in-out flex flex-col bottom-0 left-0 right-0 rounded-t-2xl h-[80vh] md:h-screen md:bottom-auto md:right-0 md:top-0 md:left-auto md:w-[520px] md:rounded-none md:rounded-l-2xl ${
           isOpen
             ? 'translate-y-0 md:translate-y-0 md:translate-x-0'
@@ -92,8 +168,17 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
                 편집
               </button>
             )}
+            {mode === 'edit' && displayItem && (
+              <button
+                onClick={() => handleDelete(displayItem.id)}
+                aria-label="항목 삭제"
+                className="px-3 py-1.5 text-xs font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+              >
+                삭제
+              </button>
+            )}
             <button
-              onClick={onClose}
+              onClick={tryClose}
               aria-label="패널 닫기"
               className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
             >
@@ -105,7 +190,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
         </div>
 
         {/* 콘텐츠 */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {displayItem && mode === 'view' && <ItemDetailView item={displayItem} />}
           {displayItem && mode === 'edit' && (
             <PanelItemForm
@@ -115,13 +200,33 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
                 setMode('view')
               }}
               onCancel={() => setMode('view')}
-              onDelete={id => {
-                onDelete(id)
-                onClose()
-              }}
+              onDirtyChange={setIsDirty}
             />
           )}
         </div>
+
+        {/* 인라인 닫기 확인 UI — confirmingClose 시 하단 오버레이 */}
+        {confirmingClose && (
+          <div className="absolute bottom-0 left-0 right-0 bg-white border-t-2 border-amber-100 px-5 pt-4 pb-6 z-10">
+            <p className="text-sm font-medium text-gray-800 mb-3">
+              변경사항이 있습니다. 저장하지 않고 나가시겠습니까?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleDiscardAndClose}
+                className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 transition-colors"
+              >
+                나가기
+              </button>
+              <button
+                onClick={() => setConfirmingClose(false)}
+                className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                계속 편집
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   )
@@ -129,7 +234,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
 
 function ItemDetailView({ item }: { item: TripItem }) {
   return (
-    <div className="px-5 py-4 space-y-5 pb-8">
+    <div className="px-5 py-4 space-y-5 pb-8 overflow-y-auto">
       {/* 이름 + 배지 */}
       <div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">{item.name}</h2>

@@ -1,8 +1,10 @@
 # trip-planner Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-25
+Auto-generated from all feature plans. Last updated: 2026-03-27
 
 ## Active Technologies
+- TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), React 18, Tailwind CSS 3.x (004-mobile-panel-ux)
+- N/A (UI 전용 변경) (004-mobile-panel-ux)
 
 - TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS 3.x, React 18 (003-panel-editing-ux)
 - Supabase (데이터 저장소, 파일 기반에서 마이그레이션 완료)
@@ -29,6 +31,7 @@ npm run dev # 로컬 개발 서버 (http://localhost:3000)
 TypeScript + Node.js 18+: Follow standard conventions
 
 ## Recent Changes
+- 004-mobile-panel-ux: Added TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), React 18, Tailwind CSS 3.x
 
 - 003-panel-editing-ux: Added TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS 3.x, React 18
 
