@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import type { TripItem } from '@/types'
-import StatusBadge from '@/components/UI/StatusBadge'
 import PriorityBadge from '@/components/UI/PriorityBadge'
+import StatusDropdown from '@/components/Items/StatusDropdown'
 
 const categoryColors: Record<string, string> = {
   교통: '#94A3B8',
@@ -139,7 +139,7 @@ export default function ItemCard({ item, onSelect, isActive = false }: ItemCardP
           </div>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
-          <StatusBadge status={item.status} />
+          <StatusDropdown item={item} />
           {item.priority && <PriorityBadge priority={item.priority} />}
           <LinkButton links={item.links} />
           {item.is_franchise && item.branches && item.branches.length > 0 && (

@@ -5,16 +5,18 @@ import type { TripItem } from '@/types'
 import StatusBadge from '@/components/UI/StatusBadge'
 import PriorityBadge from '@/components/UI/PriorityBadge'
 import PanelItemForm from './PanelItemForm'
+import { useItems } from '@/lib/hooks/useItems'
 
 export interface ItemPanelProps {
   item: TripItem | null
   isOpen: boolean
   onClose: () => void
-  onSave: (updated: TripItem) => void
+  onSave: () => void
   onDelete: (id: string) => void
 }
 
 export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: ItemPanelProps) {
+  const { deleteItem } = useItems()
   const [mode, setMode] = useState<'view' | 'edit'>('view')
   const [isDirty, setIsDirty] = useState(false)
   const [confirmingClose, setConfirmingClose] = useState(false)
@@ -103,14 +105,12 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
     onClose()
   }
 
-  // 삭제 처리 (PanelItemForm에서 이전)
+  // 삭제 처리
   async function handleDelete(id: string) {
     if (!confirm('이 항목을 삭제하시겠습니까?')) return
-    const res = await fetch(`/api/items/${id}`, { method: 'DELETE' })
-    if (res.ok) {
-      onDelete(id)
-      onClose()
-    }
+    await deleteItem(id)
+    onDelete(id)
+    onClose()
   }
 
   // 패널이 닫혀도 마지막 item은 캐싱 (애니메이션 중 콘텐츠 유지)
@@ -195,8 +195,8 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
           {displayItem && mode === 'edit' && (
             <PanelItemForm
               item={displayItem}
-              onSave={updated => {
-                onSave(updated)
+              onSave={() => {
+                onSave()
                 setMode('view')
               }}
               onCancel={() => setMode('view')}
