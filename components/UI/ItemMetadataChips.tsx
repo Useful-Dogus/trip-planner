@@ -5,8 +5,7 @@ import {
   PLACEHOLDER_LABELS,
   PLACEHOLDER_TONE,
 } from '@/lib/itemOptions'
-import StatusBadge from '@/components/UI/StatusBadge'
-import PriorityBadge from '@/components/UI/PriorityBadge'
+import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 import ReservationStatusBadge from '@/components/UI/ReservationStatusBadge'
 
 function PlaceholderChip({ label }: { label: string }) {
@@ -40,9 +39,11 @@ export default function ItemMetadataChips({
       node: <CategoryChip category={item.category} />,
     },
     {
-      key: 'status',
-      label: ITEM_FIELD_LABELS.status,
-      node: item.status ? <StatusBadge status={item.status} /> : <PlaceholderChip label={PLACEHOLDER_LABELS.status} />,
+      key: 'trip_priority',
+      label: ITEM_FIELD_LABELS.trip_priority,
+      node: item.trip_priority
+        ? <TripPriorityBadge tripPriority={item.trip_priority} />
+        : <PlaceholderChip label={PLACEHOLDER_LABELS.trip_priority} />,
     },
     {
       key: 'reservation_status',
@@ -52,11 +53,6 @@ export default function ItemMetadataChips({
       ) : (
         <PlaceholderChip label={PLACEHOLDER_LABELS.reservation_status} />
       ),
-    },
-    {
-      key: 'priority',
-      label: ITEM_FIELD_LABELS.priority,
-      node: item.priority ? <PriorityBadge priority={item.priority} /> : <PlaceholderChip label={PLACEHOLDER_LABELS.priority} />,
     },
   ]
 

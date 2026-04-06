@@ -22,9 +22,8 @@ function placeToItem(
     category:
       (categoryOverride as TripItem['category']) ??
       mapGoogleCategory(place.googleCategory),
-    status: '검토',
+    trip_priority: '검토 필요',
     reservation_status: '확인 필요',
-    priority: undefined,
     address: place.address ?? undefined,
     lat: place.lat ?? undefined,
     lng: place.lng ?? undefined,
@@ -68,7 +67,7 @@ export async function POST(request: Request) {
         id: item.id,
         name: item.name,
         category: item.category,
-        status: item.status,
+        status: item.trip_priority,
         reservation_status: item.reservation_status,
         priority: null,
         address: item.address ?? null,

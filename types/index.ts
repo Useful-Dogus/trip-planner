@@ -10,9 +10,8 @@ export type Category =
   | '액티비티'
   | '휴양'
   | '기타'
-export type Status = '아이디어' | '검토' | '확정' | '제외'
+export type TripPriority = '검토 필요' | '시간 되면' | '가고 싶음' | '확정' | '제외'
 export type ReservationStatus = '확인 필요' | '불필요' | '필요(미예약)' | '예약완료'
-export type Priority = '반드시' | '들를만해' | '시간 남으면'
 
 export interface Link {
   label: string
@@ -31,9 +30,8 @@ export interface TripItem {
   id: string
   name: string
   category: Category
-  status: Status
+  trip_priority: TripPriority
   reservation_status?: ReservationStatus | null
-  priority?: Priority
   address?: string
   lat?: number
   lng?: number

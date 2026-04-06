@@ -2,18 +2,17 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import type { Category, Priority, ReservationStatus, Status, TripItem } from '@/types'
+import type { Category, ReservationStatus, TripItem, TripPriority } from '@/types'
 import ItemCard from './ItemCard'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
-  PRIORITY_META,
-  PRIORITY_OPTIONS,
+  TRIP_PRIORITY_META,
+  TRIP_PRIORITY_OPTIONS,
   RESERVATION_STATUS_OPTIONS,
-  STATUS_OPTIONS,
 } from '@/lib/itemOptions'
 
-type SortKey = 'name' | 'date' | 'budget' | 'priority'
+type SortKey = 'name' | 'date' | 'budget' | 'trip_priority'
 type SortDir = 'asc' | 'desc'
 
 function toggle<T>(arr: T[], val: T): T[] {
@@ -41,9 +40,8 @@ interface ItemListProps {
 
 export default function ItemList({ items, selectedItemId, onSelectItem }: ItemListProps) {
   const [selCats, setSelCats] = useState<Category[]>([])
-  const [selStatuses, setSelStatuses] = useState<Status[]>([])
+  const [selTripPriorities, setSelTripPriorities] = useState<TripPriority[]>([])
   const [selReservationStatuses, setSelReservationStatuses] = useState<ReservationStatus[]>([])
-  const [selPriorities, setSelPriorities] = useState<Priority[]>([])
   const [showExcluded, setShowExcluded] = useState(false)
   const [query, setQuery] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('name')
@@ -54,13 +52,12 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
     onSelectItemRef.current = onSelectItem
   })
 
-  const excludedCount = useMemo(() => items.filter(i => i.status === '제외').length, [items])
+  const excludedCount = useMemo(() => items.filter(i => i.trip_priority === '제외').length, [items])
 
   function clearFilters() {
     setSelCats([])
-    setSelStatuses([])
+    setSelTripPriorities([])
     setSelReservationStatuses([])
-    setSelPriorities([])
     setShowExcluded(false)
     setQuery('')
   }
@@ -68,11 +65,10 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
   const hasActiveFilter = useMemo(
     () =>
       selCats.length > 0 ||
-      selStatuses.length > 0 ||
+      selTripPriorities.length > 0 ||
       selReservationStatuses.length > 0 ||
-      selPriorities.length > 0 ||
       query.trim().length > 0,
-    [selCats, selStatuses, selReservationStatuses, selPriorities, query]
+    [selCats, selTripPriorities, selReservationStatuses, query]
   )
 
   function handleSortChange(key: SortKey) {
@@ -87,14 +83,11 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     const result = items.filter(item => {
-      if (!showExcluded && item.status === '제외') return false
+      if (!showExcluded && item.trip_priority === '제외') return false
       if (selCats.length && !selCats.includes(item.category)) return false
-      if (selStatuses.length && !selStatuses.includes(item.status)) return false
+      if (selTripPriorities.length && !selTripPriorities.includes(item.trip_priority)) return false
       if (selReservationStatuses.length) {
         if (!item.reservation_status || !selReservationStatuses.includes(item.reservation_status)) return false
-      }
-      if (selPriorities.length) {
-        if (!item.priority || !selPriorities.includes(item.priority)) return false
       }
       if (q && !item.name.toLowerCase().includes(q)) return false
       return true
@@ -110,16 +103,16 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
         cmp = da < db ? -1 : da > db ? 1 : 0
       } else if (sortKey === 'budget') {
         cmp = (a.budget ?? 0) - (b.budget ?? 0)
-      } else if (sortKey === 'priority') {
-        const pa = a.priority ? PRIORITY_META[a.priority].order : 99
-        const pb = b.priority ? PRIORITY_META[b.priority].order : 99
+      } else if (sortKey === 'trip_priority') {
+        const pa = TRIP_PRIORITY_META[a.trip_priority].order
+        const pb = TRIP_PRIORITY_META[b.trip_priority].order
         cmp = pa - pb
       }
       return sortDir === 'asc' ? cmp : -cmp
     })
 
     return result
-  }, [items, query, selCats, selPriorities, selReservationStatuses, selStatuses, showExcluded, sortDir, sortKey])
+  }, [items, query, selCats, selTripPriorities, selReservationStatuses, showExcluded, sortDir, sortKey])
 
   useEffect(() => {
     if (selectedItemId && !filtered.some(i => i.id === selectedItemId)) {
@@ -131,7 +124,7 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
     { key: 'name', label: '이름' },
     { key: 'date', label: '날짜' },
     { key: 'budget', label: '예산' },
-    { key: 'priority', label: '우선순위' },
+    { key: 'trip_priority', label: '이번 여행에서' },
   ]
 
   return (
@@ -149,9 +142,11 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
         <div className="flex flex-wrap gap-1.5">
           {CATEGORY_OPTIONS.map(c => <Chip key={c} label={c} active={selCats.includes(c)} onClick={() => setSelCats(toggle(selCats, c))} />)}
         </div>
-        <p className="text-xs font-medium text-gray-400">{ITEM_FIELD_LABELS.status}</p>
+        <p className="text-xs font-medium text-gray-400">{ITEM_FIELD_LABELS.trip_priority}</p>
         <div className="flex flex-wrap gap-1.5">
-          {STATUS_OPTIONS.map(s => <Chip key={s} label={s} active={selStatuses.includes(s)} onClick={() => setSelStatuses(toggle(selStatuses, s))} />)}
+          {TRIP_PRIORITY_OPTIONS.map(p => (
+            <Chip key={p} label={p} active={selTripPriorities.includes(p)} onClick={() => setSelTripPriorities(toggle(selTripPriorities, p))} />
+          ))}
         </div>
         <p className="text-xs font-medium text-gray-400">{ITEM_FIELD_LABELS.reservation_status}</p>
         <div className="flex flex-wrap gap-1.5">
@@ -163,10 +158,6 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
               onClick={() => setSelReservationStatuses(toggle(selReservationStatuses, status))}
             />
           ))}
-        </div>
-        <p className="text-xs font-medium text-gray-400">{ITEM_FIELD_LABELS.priority}</p>
-        <div className="flex flex-wrap gap-1.5">
-          {PRIORITY_OPTIONS.map(p => <Chip key={p} label={p} active={selPriorities.includes(p)} onClick={() => setSelPriorities(toggle(selPriorities, p))} />)}
         </div>
       </div>
 

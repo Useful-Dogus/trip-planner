@@ -1,9 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import type { TripItem } from '@/types'
 import {
-  normalizePriority,
+  normalizeTripPriority,
   normalizeReservationStatus,
-  normalizeStatus,
   normalizeTripItem,
   normalizeCategory,
 } from '@/lib/itemOptions'
@@ -57,14 +56,16 @@ export async function writeItems(items: TripItem[]): Promise<void> {
 }
 
 // DB row → TripItem
+// DB의 status 컬럼에 trip_priority 값이 저장된다.
+// DB의 priority 컬럼은 deprecated (null로 유지).
+// 구 status/priority 값이 있는 경우 normalizeTripPriority가 마이그레이션 처리.
 function rowToItem(row: Record<string, unknown>): TripItem {
   return {
     id: row.id as string,
     name: row.name as string,
     category: normalizeCategory(row.category),
-    status: normalizeStatus(row.status),
+    trip_priority: normalizeTripPriority(row.status, row.priority),
     reservation_status: normalizeReservationStatus(row.reservation_status) ?? null,
-    priority: normalizePriority(row.priority),
     address: (row.address as string) ?? undefined,
     lat: (row.lat as number) ?? undefined,
     lng: (row.lng as number) ?? undefined,
@@ -84,20 +85,22 @@ function rowToItem(row: Record<string, unknown>): TripItem {
 }
 
 function validateItem(item: TripItem): void {
-  if (!item.id || !item.name || !item.category || !item.status) {
+  if (!item.id || !item.name || !item.category || !item.trip_priority) {
     throw new Error(`Invalid item: ${JSON.stringify(item)}`)
   }
 }
 
 // TripItem → DB row
+// trip_priority는 DB의 status 컬럼에 저장한다.
+// priority 컬럼은 null로 저장 (deprecated).
 function itemToRow(item: TripItem): Record<string, unknown> {
   return {
     id: item.id,
     name: item.name,
     category: item.category,
-    status: item.status,
+    status: item.trip_priority,
     reservation_status: item.reservation_status ?? null,
-    priority: item.priority ?? null,
+    priority: null,
     address: item.address ?? null,
     lat: item.lat ?? null,
     lng: item.lng ?? null,

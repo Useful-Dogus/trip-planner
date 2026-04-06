@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readItems, writeItems } from '@/lib/data'
 import { v4 as uuidv4 } from 'uuid'
-import type { TripItem, Category, Status, Priority, Link, ReservationStatus } from '@/types'
+import type { TripItem, Category, TripPriority, Link, ReservationStatus } from '@/types'
 import {
   CATEGORY_OPTIONS,
-  PRIORITY_OPTIONS,
   RESERVATION_STATUS_OPTIONS,
-  STATUS_OPTIONS,
+  TRIP_PRIORITY_OPTIONS,
   TRIP_DATE_MAX,
   TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
@@ -18,8 +17,8 @@ function validateItem(body: Record<string, unknown>): string | null {
   if (!CATEGORY_OPTIONS.includes(body.category as Category)) {
     return '유효하지 않은 category입니다.'
   }
-  if (!STATUS_OPTIONS.includes(body.status as Status)) {
-    return '유효하지 않은 status입니다.'
+  if (!TRIP_PRIORITY_OPTIONS.includes(body.trip_priority as TripPriority)) {
+    return '유효하지 않은 trip_priority입니다.'
   }
   if (
     body.reservation_status !== undefined &&
@@ -27,13 +26,6 @@ function validateItem(body: Record<string, unknown>): string | null {
     !RESERVATION_STATUS_OPTIONS.includes(body.reservation_status as ReservationStatus)
   ) {
     return '유효하지 않은 reservation_status입니다.'
-  }
-  if (
-    body.priority !== undefined &&
-    body.priority !== null &&
-    !PRIORITY_OPTIONS.includes(body.priority as Priority)
-  ) {
-    return '유효하지 않은 priority입니다.'
   }
   if (body.budget !== undefined && (typeof body.budget !== 'number' || body.budget < 0)) {
     return 'budget은 0 이상의 숫자여야 합니다.'
@@ -112,14 +104,13 @@ export async function POST(request: NextRequest) {
     id: uuidv4(),
     name: (body.name as string).trim(),
     category: body.category as Category,
-    status: body.status as Status,
+    trip_priority: body.trip_priority as TripPriority,
     reservation_status: (body.reservation_status as ReservationStatus | null | undefined) ?? null,
     links: (body.links as Link[]) ?? [],
     created_at: now,
     updated_at: now,
   }
 
-  if (body.priority !== undefined && body.priority !== null) item.priority = body.priority as Priority
   if (body.address !== undefined) item.address = body.address as string
   if (body.lat !== undefined) item.lat = body.lat as number
   if (body.lng !== undefined) item.lng = body.lng as number
