@@ -1,5 +1,6 @@
 import type { TripItem } from '@/types'
 import {
+  CATEGORY_META,
   CHIP_TONE,
   ITEM_FIELD_LABELS,
   PLACEHOLDER_LABELS,
@@ -18,9 +19,10 @@ function PlaceholderChip({ label }: { label: string }) {
 
 function CategoryChip({ category }: { category: TripItem['category'] | undefined }) {
   if (!category) return <PlaceholderChip label={PLACEHOLDER_LABELS.category} />
+  const emoji = CATEGORY_META[category]?.emoji
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${CHIP_TONE}`}>
-      {category}
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${CHIP_TONE}`}>
+      {emoji} {category}
     </span>
   )
 }

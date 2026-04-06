@@ -5,18 +5,24 @@ import L from 'leaflet'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
 
-function createDotIcon(color: string) {
+function createEmojiChipIcon(emoji: string) {
   return L.divIcon({
     html: `<div style="
-      width:18px;height:18px;
-      border-radius:50%;
-      background:${color};
-      border:2.5px solid white;
-      box-shadow:0 1px 4px rgba(0,0,0,0.25);
-    "></div>`,
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:2px 6px;
+      background:white;
+      border:1.5px solid #e2e8f0;
+      border-radius:9999px;
+      box-shadow:0 1px 4px rgba(0,0,0,0.15);
+      font-size:14px;
+      line-height:1;
+      white-space:nowrap;
+    ">${emoji}</div>`,
     className: '',
-    iconSize: [18, 18],
-    iconAnchor: [9, 9],
+    iconSize: [28, 24],
+    iconAnchor: [14, 12],
   })
 }
 
@@ -45,7 +51,7 @@ export default function ResearchMap({ items, onSelectItem }: ResearchMapProps) {
         <Marker
           key={item.id}
           position={[item.lat!, item.lng!]}
-          icon={createDotIcon(CATEGORY_META[item.category]?.dot ?? '#D1D5DB')}
+          icon={createEmojiChipIcon(CATEGORY_META[item.category]?.emoji ?? '📌')}
           eventHandlers={
             onSelectItem
               ? {

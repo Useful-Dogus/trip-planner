@@ -99,10 +99,9 @@ export default function ItemCard({ item, onSelect, isActive = false }: ItemCardP
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <span
-            className="w-3 h-3 rounded-full flex-shrink-0 ring-2 ring-white shadow-sm"
-            style={{ backgroundColor: CATEGORY_META[item.category]?.dot ?? '#D1D5DB' }}
-          />
+          <span className="flex-shrink-0 text-base leading-none">
+            {CATEGORY_META[item.category]?.emoji ?? '📌'}
+          </span>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="font-semibold text-gray-900 truncate text-sm">{item.name}</span>
