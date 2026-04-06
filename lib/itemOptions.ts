@@ -37,42 +37,43 @@ export const PLACEHOLDER_LABELS = {
   priority: '우선순위 정보 없음',
 } as const
 
-export const CATEGORY_META: Record<Category, { tone: string; dot: string }> = {
-  교통: { tone: 'bg-slate-100 text-slate-700', dot: '#94A3B8' },
-  숙박: { tone: 'bg-sky-100 text-sky-700', dot: '#7DD3FC' },
-  명소: { tone: 'bg-emerald-100 text-emerald-700', dot: '#6EE7B7' },
-  식당: { tone: 'bg-orange-100 text-orange-700', dot: '#FB923C' },
-  카페: { tone: 'bg-amber-100 text-amber-700', dot: '#FDBA74' },
-  쇼핑: { tone: 'bg-violet-100 text-violet-700', dot: '#C4B5FD' },
-  문화시설: { tone: 'bg-cyan-100 text-cyan-700', dot: '#67E8F9' },
-  '공연·스포츠': { tone: 'bg-pink-100 text-pink-700', dot: '#F9A8D4' },
-  액티비티: { tone: 'bg-lime-100 text-lime-700', dot: '#86EFAC' },
-  휴양: { tone: 'bg-teal-100 text-teal-700', dot: '#5EEAD4' },
-  기타: { tone: 'bg-yellow-100 text-yellow-700', dot: '#FCD34D' },
+export const CHIP_BASE_TONE = 'bg-white border border-gray-200'
+export const CHIP_TONE = `${CHIP_BASE_TONE} text-gray-700`
+export const PLACEHOLDER_TONE = `${CHIP_BASE_TONE} text-gray-400`
+
+export const CATEGORY_META: Record<Category, { dot: string }> = {
+  교통: { dot: '#94A3B8' },
+  숙박: { dot: '#7DD3FC' },
+  명소: { dot: '#6EE7B7' },
+  식당: { dot: '#FB923C' },
+  카페: { dot: '#FDBA74' },
+  쇼핑: { dot: '#C4B5FD' },
+  문화시설: { dot: '#67E8F9' },
+  '공연·스포츠': { dot: '#F9A8D4' },
+  액티비티: { dot: '#86EFAC' },
+  휴양: { dot: '#5EEAD4' },
+  기타: { dot: '#FCD34D' },
 }
 
-export const STATUS_META: Record<Status, { tone: string; description: string }> = {
-  아이디어: { tone: 'bg-gray-100 text-gray-600 ring-1 ring-gray-200', description: '후보로 보관 중' },
-  검토: { tone: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200', description: '살펴보는 중' },
-  확정: { tone: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200', description: '일정에 넣기' },
-  제외: { tone: 'bg-rose-50 text-rose-600 ring-1 ring-rose-200', description: '이번엔 제외' },
+export const STATUS_META: Record<Status, { description: string }> = {
+  아이디어: { description: '후보로 보관 중' },
+  검토: { description: '살펴보는 중' },
+  확정: { description: '일정에 넣기' },
+  제외: { description: '이번엔 제외' },
 }
 
-export const RESERVATION_STATUS_META: Record<ReservationStatus, { tone: string; description: string }> = {
-  '확인 필요': { tone: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200', description: '예약 필요 여부 미확정' },
-  불필요: { tone: 'bg-slate-50 text-slate-600 ring-1 ring-slate-200', description: '예약 없이 진행 가능' },
-  '필요(미예약)': { tone: 'bg-orange-50 text-orange-700 ring-1 ring-orange-200', description: '예약이 필요하지만 아직 안 함' },
-  예약완료: { tone: 'bg-teal-50 text-teal-700 ring-1 ring-teal-200', description: '예약 완료' },
+export const RESERVATION_STATUS_META: Record<ReservationStatus, { description: string }> = {
+  '확인 필요': { description: '예약 필요 여부 미확정' },
+  불필요: { description: '예약 없이 진행 가능' },
+  '필요(미예약)': { description: '예약이 필요하지만 아직 안 함' },
+  예약완료: { description: '예약 완료' },
 }
 
-export const PRIORITY_META: Record<Priority, { tone: string; dot: string; description: string; order: number }> = {
-  반드시: { tone: 'bg-rose-50 text-rose-600 ring-1 ring-rose-200', dot: 'bg-rose-500', description: '꼭 포함', order: 0 },
-  들를만해: { tone: 'bg-orange-50 text-orange-600 ring-1 ring-orange-200', dot: 'bg-orange-400', description: '일정 맞으면 포함', order: 1 },
-  '시간 남으면': { tone: 'bg-gray-50 text-gray-500 ring-1 ring-gray-200', dot: 'bg-gray-300', description: '여유 있으면 포함', order: 2 },
+export const PRIORITY_META: Record<Priority, { description: string; order: number }> = {
+  반드시: { description: '꼭 포함', order: 0 },
+  들를만해: { description: '일정 맞으면 포함', order: 1 },
+  '시간 남으면': { description: '여유 있으면 포함', order: 2 },
 }
-
-export const PLACEHOLDER_TONE =
-  'border border-dashed border-gray-200 bg-white text-gray-400'
 
 const LEGACY_CATEGORY_MAP: Record<string, Category> = {
   교통: '교통',

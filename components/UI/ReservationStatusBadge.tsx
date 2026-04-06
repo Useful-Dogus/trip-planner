@@ -1,5 +1,5 @@
 import type { ReservationStatus } from '@/types'
-import { normalizeReservationStatus, RESERVATION_STATUS_META } from '@/lib/itemOptions'
+import { CHIP_TONE, normalizeReservationStatus } from '@/lib/itemOptions'
 
 export default function ReservationStatusBadge({
   reservationStatus,
@@ -9,7 +9,7 @@ export default function ReservationStatusBadge({
   const normalized = normalizeReservationStatus(reservationStatus) ?? '확인 필요'
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${RESERVATION_STATUS_META[normalized].tone}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${CHIP_TONE}`}
     >
       {normalized}
     </span>

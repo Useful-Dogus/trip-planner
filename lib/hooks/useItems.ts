@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import { useToast } from '@/components/UI/Toast'
-import type { TripItem, Status } from '@/types'
+import type { TripItem } from '@/types'
 import { normalizeTripItem } from '@/lib/itemOptions'
 
 const fetcher = (url: string) =>
@@ -135,10 +135,6 @@ export function useItems() {
     }
   }
 
-  async function updateStatus(id: string, status: Status) {
-    await updateItem(id, { status })
-  }
-
   return {
     items,
     isLoading: loading,
@@ -148,6 +144,5 @@ export function useItems() {
     updateItem,
     deleteItem,
     createItem,
-    updateStatus,
   }
 }

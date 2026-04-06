@@ -1,19 +1,26 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type { Category, Priority, ReservationStatus, Status, TripItem } from '@/types'
+import { createPortal } from 'react-dom'
+import type { TripItem } from '@/types'
 import PanelItemForm from './PanelItemForm'
 import { useItems } from '@/lib/hooks/useItems'
-import ItemMetadataChips from '@/components/UI/ItemMetadataChips'
 import {
   CATEGORY_OPTIONS,
+  CHIP_TONE,
   ITEM_FIELD_LABELS,
   PLACEHOLDER_LABELS,
   PLACEHOLDER_TONE,
+  PRIORITY_META,
   PRIORITY_OPTIONS,
+  RESERVATION_STATUS_META,
   RESERVATION_STATUS_OPTIONS,
+  STATUS_META,
   STATUS_OPTIONS,
 } from '@/lib/itemOptions'
+import StatusBadge from '@/components/UI/StatusBadge'
+import PriorityBadge from '@/components/UI/PriorityBadge'
+import ReservationStatusBadge from '@/components/UI/ReservationStatusBadge'
 
 export interface ItemPanelProps {
   item: TripItem | null
@@ -30,6 +37,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
   const [confirmingClose, setConfirmingClose] = useState(false)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
   const [savingField, setSavingField] = useState<'category' | 'status' | 'reservation_status' | 'priority' | null>(null)
+  const [openField, setOpenField] = useState<'category' | 'status' | 'reservation_status' | 'priority' | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -37,6 +45,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
     setIsDirty(false)
     setConfirmingClose(false)
     setSavingField(null)
+    setOpenField(null)
   }, [item?.id])
 
   useEffect(() => {
@@ -45,6 +54,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
       setIsDirty(false)
       setConfirmingClose(false)
       setSavingField(null)
+      setOpenField(null)
     }
   }, [isOpen])
 
@@ -122,6 +132,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
     setSavingField(field)
     await updateItem(displayItem.id, { [field]: value })
     setSavingField(null)
+    setOpenField(null)
     onSave()
   }
 
@@ -169,7 +180,15 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          {displayItem && mode === 'view' && <ItemDetailView item={displayItem} savingField={savingField} onQuickUpdate={handleQuickUpdate} />}
+          {displayItem && mode === 'view' && (
+            <ItemDetailView
+              item={displayItem}
+              openField={openField}
+              savingField={savingField}
+              onOpenField={setOpenField}
+              onQuickUpdate={handleQuickUpdate}
+            />
+          )}
           {displayItem && mode === 'edit' && (
             <PanelItemForm
               item={displayItem}
@@ -199,30 +218,84 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
 
 function ItemDetailView({
   item,
+  openField,
   savingField,
+  onOpenField,
   onQuickUpdate,
 }: {
   item: TripItem
+  openField: 'category' | 'status' | 'reservation_status' | 'priority' | null
   savingField: 'category' | 'status' | 'reservation_status' | 'priority' | null
+  onOpenField: (field: 'category' | 'status' | 'reservation_status' | 'priority' | null) => void
   onQuickUpdate: (field: 'category' | 'status' | 'reservation_status' | 'priority', value: string | null) => void
 }) {
   return (
     <div className="px-5 py-4 space-y-5 pb-8 overflow-y-auto">
       <div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">{item.name}</h2>
-        <ItemMetadataChips item={item} />
-      </div>
-
-      <section className="rounded-2xl border border-gray-200 bg-gray-50/80 p-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <SectionTitle className="mb-0">빠른 편집</SectionTitle>
-          {savingField && <span className="text-xs text-gray-400">저장 중...</span>}
+        <div className="flex flex-wrap gap-2">
+          <MetadataDropdownChip
+            label={ITEM_FIELD_LABELS.category}
+            isOpen={openField === 'category'}
+            saving={savingField === 'category'}
+            onToggle={() => onOpenField(openField === 'category' ? null : 'category')}
+            currentNode={
+              <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${CHIP_TONE}`}>
+                {item.category}
+              </span>
+            }
+            options={CATEGORY_OPTIONS}
+            onSelect={value => onQuickUpdate('category', value)}
+          />
+          <MetadataDropdownChip
+            label={ITEM_FIELD_LABELS.status}
+            isOpen={openField === 'status'}
+            saving={savingField === 'status'}
+            onToggle={() => onOpenField(openField === 'status' ? null : 'status')}
+            currentNode={<StatusBadge status={item.status} />}
+            options={STATUS_OPTIONS}
+            descriptions={STATUS_META}
+            onSelect={value => onQuickUpdate('status', value)}
+          />
+          <MetadataDropdownChip
+            label={ITEM_FIELD_LABELS.reservation_status}
+            isOpen={openField === 'reservation_status'}
+            saving={savingField === 'reservation_status'}
+            onToggle={() => onOpenField(openField === 'reservation_status' ? null : 'reservation_status')}
+            currentNode={
+              item.reservation_status ? (
+                <ReservationStatusBadge reservationStatus={item.reservation_status} />
+              ) : (
+                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${PLACEHOLDER_TONE}`}>
+                  {PLACEHOLDER_LABELS.reservation_status}
+                </span>
+              )
+            }
+            options={RESERVATION_STATUS_OPTIONS}
+            descriptions={RESERVATION_STATUS_META}
+            onSelect={value => onQuickUpdate('reservation_status', value)}
+          />
+          <MetadataDropdownChip
+            label={ITEM_FIELD_LABELS.priority}
+            isOpen={openField === 'priority'}
+            saving={savingField === 'priority'}
+            onToggle={() => onOpenField(openField === 'priority' ? null : 'priority')}
+            currentNode={
+              item.priority ? (
+                <PriorityBadge priority={item.priority} />
+              ) : (
+                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${PLACEHOLDER_TONE}`}>
+                  {PLACEHOLDER_LABELS.priority}
+                </span>
+              )
+            }
+            options={[null, ...PRIORITY_OPTIONS]}
+            descriptions={PRIORITY_META}
+            placeholderLabel={PLACEHOLDER_LABELS.priority}
+            onSelect={value => onQuickUpdate('priority', value)}
+          />
         </div>
-        <QuickSelectGroup label={ITEM_FIELD_LABELS.category} value={item.category} options={CATEGORY_OPTIONS} saving={savingField === 'category'} placeholderLabel={PLACEHOLDER_LABELS.category} onSelect={value => onQuickUpdate('category', value)} />
-        <QuickSelectGroup label={ITEM_FIELD_LABELS.status} value={item.status} options={STATUS_OPTIONS} saving={savingField === 'status'} placeholderLabel={PLACEHOLDER_LABELS.status} onSelect={value => onQuickUpdate('status', value)} />
-        <QuickSelectGroup label={ITEM_FIELD_LABELS.reservation_status} value={item.reservation_status ?? null} options={RESERVATION_STATUS_OPTIONS} saving={savingField === 'reservation_status'} placeholderLabel={PLACEHOLDER_LABELS.reservation_status} onSelect={value => onQuickUpdate('reservation_status', value)} />
-        <QuickSelectGroup label={ITEM_FIELD_LABELS.priority} value={item.priority ?? null} options={PRIORITY_OPTIONS} saving={savingField === 'priority'} placeholderLabel={PLACEHOLDER_LABELS.priority} onSelect={value => onQuickUpdate('priority', value)} allowEmpty />
-      </section>
+      </div>
 
       {(item.date || item.time_start || item.budget !== undefined) && (
         <section className="bg-gray-50 rounded-xl p-4 space-y-1.5">
@@ -267,49 +340,6 @@ function ItemDetailView({
   )
 }
 
-function QuickSelectGroup({
-  label,
-  value,
-  options,
-  saving,
-  placeholderLabel,
-  onSelect,
-  allowEmpty = false,
-}: {
-  label: string
-  value: string | null
-  options: string[]
-  saving: boolean
-  placeholderLabel: string
-  onSelect: (value: string | null) => void
-  allowEmpty?: boolean
-}) {
-  const values = allowEmpty ? [null, ...options] : options
-  return (
-    <section className="space-y-2">
-      <p className="text-xs font-medium text-gray-500">{label}</p>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {values.map(option => {
-          const active = option === value
-          return (
-            <button
-              key={option ?? 'empty'}
-              type="button"
-              disabled={saving}
-              onClick={() => onSelect(option)}
-              className={`rounded-xl border px-3 py-2 text-left transition-colors ${
-                active ? 'border-gray-900 bg-gray-900 text-white' : option === null ? PLACEHOLDER_TONE : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'
-              } ${saving ? 'cursor-wait opacity-60' : ''}`}
-            >
-              <div className="text-sm font-medium">{option ?? placeholderLabel}</div>
-            </button>
-          )
-        })}
-      </div>
-    </section>
-  )
-}
-
 function SectionTitle({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return <h3 className={`text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 ${className}`}>{children}</h3>
 }
@@ -319,6 +349,101 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between">
       <span className="text-xs text-gray-500">{label}</span>
       <span className="text-sm font-medium text-gray-900">{value}</span>
+    </div>
+  )
+}
+
+function MetadataDropdownChip({
+  label,
+  isOpen,
+  saving,
+  onToggle,
+  currentNode,
+  options,
+  onSelect,
+  descriptions,
+  placeholderLabel,
+}: {
+  label: string
+  isOpen: boolean
+  saving: boolean
+  onToggle: () => void
+  currentNode: React.ReactNode
+  options: Array<string | null>
+  onSelect: (value: string | null) => void
+  descriptions?: Record<string, { description: string }>
+  placeholderLabel?: string
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const [position, setPosition] = useState<{ top: number; left: number; width: number } | null>(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+    function updatePosition() {
+      const rect = buttonRef.current?.getBoundingClientRect()
+      if (!rect) return
+      setPosition({
+        top: rect.bottom + 8,
+        left: rect.left,
+        width: Math.max(rect.width, 224),
+      })
+    }
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node
+      if (ref.current?.contains(target) || dropdownRef.current?.contains(target)) return
+      onToggle()
+    }
+    updatePosition()
+    document.addEventListener('mousedown', handleClickOutside)
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
+  }, [isOpen, onToggle])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={onToggle}
+        disabled={saving}
+        className={`${saving ? 'opacity-60 cursor-wait' : ''}`}
+      >
+        {currentNode}
+      </button>
+      {isOpen &&
+        position &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            className="fixed z-[1200] rounded-xl border border-gray-200 bg-white shadow-lg p-1"
+            style={{ top: position.top, left: position.left, width: position.width }}
+          >
+            <div className="px-3 py-2 text-[11px] font-medium text-gray-400">{label}</div>
+            {options.map(option => {
+              const key = option ?? 'empty'
+              const description = option && descriptions?.[option]?.description
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => onSelect(option)}
+                  className="block w-full rounded-lg px-3 py-2 text-left hover:bg-gray-50 transition-colors"
+                >
+                  <div className="text-sm font-medium text-gray-800">{option ?? placeholderLabel ?? '없음'}</div>
+                  {description && <div className="mt-0.5 text-xs text-gray-400">{description}</div>}
+                </button>
+              )
+            })}
+          </div>,
+          document.body
+        )}
     </div>
   )
 }
