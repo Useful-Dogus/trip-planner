@@ -33,10 +33,11 @@ export default function SchedulePage() {
 
   const grouped = useMemo(() => {
     const groups: Record<string, TripItem[]> = {}
-    for (const item of scheduleItems) {
-      const date = item.date!
-      if (!groups[date]) groups[date] = []
-      groups[date].push(item)
+    for (const date of collectScheduleDates(scheduleItems)) {
+      const dateItems = scheduleItems.filter(item => occursOnDate(item, date))
+      if (dateItems.length > 0) {
+        groups[date] = dateItems
+      }
     }
     return groups
   }, [scheduleItems])
@@ -147,6 +148,32 @@ export default function SchedulePage() {
       <Navigation />
     </div>
   )
+}
+
+function occursOnDate(item: TripItem, date: string) {
+  if (!item.date) return false
+  if (!item.end_date) return item.date === date
+  return item.date <= date && date <= item.end_date
+}
+
+function collectScheduleDates(items: TripItem[]) {
+  const dates = new Set<string>()
+  items.forEach(item => {
+    if (!item.date) return
+    const rangeEnd = item.end_date ?? item.date
+    let cursor = item.date
+    while (cursor <= rangeEnd) {
+      dates.add(cursor)
+      cursor = nextDate(cursor)
+    }
+  })
+  return Array.from(dates).sort()
+}
+
+function nextDate(date: string) {
+  const current = new Date(`${date}T00:00:00`)
+  current.setDate(current.getDate() + 1)
+  return current.toISOString().slice(0, 10)
 }
 
 function TabSwitcher({
