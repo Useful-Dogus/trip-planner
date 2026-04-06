@@ -86,6 +86,10 @@ interface ItemCardProps {
 
 export default function ItemCard({ item, onSelect, isActive = false }: ItemCardProps) {
   const [branchesOpen, setBranchesOpen] = useState(false)
+  const scheduleTimeLabel =
+    item.time_start && item.time_end
+      ? `${item.time_start} - ${item.time_end}`
+      : item.time_start ?? item.time_end
 
   return (
     <div
@@ -138,10 +142,10 @@ export default function ItemCard({ item, onSelect, isActive = false }: ItemCardP
         <ItemMetadataChips item={item} />
       </div>
 
-      {(item.date || item.time_start || item.budget !== undefined) && (
+      {(item.date || scheduleTimeLabel || item.budget !== undefined) && (
         <div className="mt-2.5 flex items-center gap-2 text-xs text-gray-400 pl-[22px] flex-wrap">
           {item.date && <span>{item.date}</span>}
-          {item.time_start && <span>{item.time_start}</span>}
+          {scheduleTimeLabel && <span>{scheduleTimeLabel}</span>}
           {item.budget !== undefined && <span className="font-medium text-gray-500">${item.budget.toLocaleString()}</span>}
         </div>
       )}

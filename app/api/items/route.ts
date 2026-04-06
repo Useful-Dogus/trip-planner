@@ -42,6 +42,13 @@ function validateItem(body: Record<string, unknown>): string | null {
   if (body.time_start !== undefined && !/^\d{2}:\d{2}$/.test(body.time_start as string)) {
     return 'time_start는 HH:MM 형식이어야 합니다.'
   }
+  if (
+    body.time_end !== undefined &&
+    body.time_end !== null &&
+    !/^\d{2}:\d{2}$/.test(body.time_end as string)
+  ) {
+    return 'time_end는 HH:MM 형식이어야 합니다.'
+  }
   if (body.lat !== undefined && (typeof body.lat !== 'number' || body.lat < -90 || body.lat > 90)) {
     return 'lat은 -90~90 사이의 숫자여야 합니다.'
   }
@@ -82,6 +89,7 @@ export async function POST(request: NextRequest) {
   if (body.memo !== undefined) item.memo = body.memo as string
   if (body.date !== undefined) item.date = body.date as string
   if (body.time_start !== undefined) item.time_start = body.time_start as string
+  if (body.time_end !== undefined && body.time_end !== null) item.time_end = body.time_end as string
 
   const items = await readItems()
   items.push(item)

@@ -27,6 +27,7 @@ interface FormData {
   memo: string
   date: string
   time_start: string
+  time_end: string
   links: TripLink[]
 }
 
@@ -52,6 +53,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     memo: item.memo ?? '',
     date: item.date ?? '',
     time_start: item.time_start ?? '',
+    time_end: item.time_end ?? '',
     links: item.links ?? [],
   })
   const [geocoding, setGeocoding] = useState(false)
@@ -80,6 +82,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
       form.memo !== (item.memo ?? '') ||
       form.date !== (item.date ?? '') ||
       form.time_start !== (item.time_start ?? '') ||
+      form.time_end !== (item.time_end ?? '') ||
       JSON.stringify(cleanLinks) !== JSON.stringify(item.links ?? [])
     onDirtyChange(dirty)
   }, [form, item, onDirtyChange])
@@ -123,8 +126,9 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     if (form.lng.trim()) changes.lng = parseFloat(form.lng)
     if (form.budget.trim()) changes.budget = parseInt(form.budget)
     if (form.memo.trim()) changes.memo = form.memo.trim()
-    if (form.date.trim()) changes.date = form.date.trim()
-    if (form.time_start.trim()) changes.time_start = form.time_start.trim()
+    changes.date = form.date.trim() || null
+    changes.time_start = form.time_start.trim() || null
+    changes.time_end = form.time_end.trim() || null
     await updateItem(item.id, changes)
     onSave()
   }
@@ -159,12 +163,15 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
 
         <section className="space-y-4">
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">일정</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="날짜">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <Field label="시작 날짜">
               <input type="date" value={form.date} onChange={e => setField('date', e.target.value)} className={inputClass} />
             </Field>
             <Field label="시작 시간">
               <input type="time" value={form.time_start} onChange={e => setField('time_start', e.target.value)} className={inputClass} />
+            </Field>
+            <Field label="종료 시간">
+              <input type="time" value={form.time_end} onChange={e => setField('time_end', e.target.value)} className={inputClass} />
             </Field>
           </div>
           <Field label="예산 (USD)">

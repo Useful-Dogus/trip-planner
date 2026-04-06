@@ -49,6 +49,13 @@ function validatePartial(body: Record<string, unknown>): string | null {
   ) {
     return 'time_start는 HH:MM 형식이어야 합니다.'
   }
+  if (
+    body.time_end !== undefined &&
+    body.time_end !== null &&
+    !/^\d{2}:\d{2}$/.test(body.time_end as string)
+  ) {
+    return 'time_end는 HH:MM 형식이어야 합니다.'
+  }
   return null
 }
 

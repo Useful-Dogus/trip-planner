@@ -3,12 +3,14 @@ import { notFound } from 'next/navigation'
 import { readItems } from '@/lib/data'
 import Navigation from '@/components/Layout/Navigation'
 import ItemMetadataChips from '@/components/UI/ItemMetadataChips'
+import type { TripItem } from '@/types'
 
 export default async function ItemDetailPage({ params }: { params: { id: string } }) {
   const items = await readItems()
   const item = items.find(i => i.id === params.id)
 
   if (!item) notFound()
+  const scheduleRows = buildScheduleRows(item)
 
   return (
     <div className="md:pl-44">
@@ -37,10 +39,11 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
 
         <div className="space-y-5">
           {/* 일정 & 예산 */}
-          {(item.date || item.time_start || item.budget !== undefined) && (
+          {(scheduleRows.length > 0 || item.budget !== undefined) && (
             <section className="bg-gray-50 rounded-xl p-4 space-y-1.5">
-              {item.date && <Row label="날짜" value={item.date} />}
-              {item.time_start && <Row label="시작 시간" value={item.time_start} />}
+              {scheduleRows.map(row => (
+                <Row key={row.label} label={row.label} value={row.value} />
+              ))}
               {item.budget !== undefined && (
                 <Row label="예산" value={`$${item.budget.toLocaleString()}`} />
               )}
@@ -118,4 +121,13 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="text-sm font-medium text-gray-900">{value}</span>
     </div>
   )
+}
+
+function buildScheduleRows(item: TripItem): Array<{ label: string; value: string }> {
+  const rows: Array<{ label: string; value: string }> = []
+  if (item.date) rows.push({ label: '시작 날짜', value: item.date })
+  if (item.time_start) rows.push({ label: '시작 시간', value: item.time_start })
+  if (item.date && item.time_end) rows.push({ label: '종료 날짜', value: item.date })
+  if (item.time_end) rows.push({ label: '종료 시간', value: item.time_end })
+  return rows
 }

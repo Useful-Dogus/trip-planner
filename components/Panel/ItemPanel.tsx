@@ -229,6 +229,8 @@ function ItemDetailView({
   onOpenField: (field: 'category' | 'status' | 'reservation_status' | 'priority' | null) => void
   onQuickUpdate: (field: 'category' | 'status' | 'reservation_status' | 'priority', value: string | null) => void
 }) {
+  const scheduleRows = buildScheduleRows(item)
+
   return (
     <div className="px-5 py-4 space-y-5 pb-8 overflow-y-auto">
       <div>
@@ -297,10 +299,11 @@ function ItemDetailView({
         </div>
       </div>
 
-      {(item.date || item.time_start || item.budget !== undefined) && (
+      {(scheduleRows.length > 0 || item.budget !== undefined) && (
         <section className="bg-gray-50 rounded-xl p-4 space-y-1.5">
-          {item.date && <DetailRow label="날짜" value={item.date} />}
-          {item.time_start && <DetailRow label="시작 시간" value={item.time_start} />}
+          {scheduleRows.map(row => (
+            <DetailRow key={row.label} label={row.label} value={row.value} />
+          ))}
           {item.budget !== undefined && <DetailRow label="예산" value={`$${item.budget.toLocaleString()}`} />}
         </section>
       )}
@@ -351,6 +354,15 @@ function DetailRow({ label, value }: { label: string; value: string }) {
       <span className="text-sm font-medium text-gray-900">{value}</span>
     </div>
   )
+}
+
+function buildScheduleRows(item: TripItem): Array<{ label: string; value: string }> {
+  const rows: Array<{ label: string; value: string }> = []
+  if (item.date) rows.push({ label: '시작 날짜', value: item.date })
+  if (item.time_start) rows.push({ label: '시작 시간', value: item.time_start })
+  if (item.date && item.time_end) rows.push({ label: '종료 날짜', value: item.date })
+  if (item.time_end) rows.push({ label: '종료 시간', value: item.time_end })
+  return rows
 }
 
 function MetadataDropdownChip({
