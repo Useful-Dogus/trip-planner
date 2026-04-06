@@ -13,6 +13,8 @@ import {
   RESERVATION_STATUS_OPTIONS,
   STATUS_META,
   STATUS_OPTIONS,
+  TRIP_DATE_MAX,
+  TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
 
 interface FormData {
@@ -27,7 +29,9 @@ interface FormData {
   budget: string
   memo: string
   date: string
+  end_date: string
   time_start: string
+  time_end: string
   links: TripLink[]
 }
 
@@ -52,7 +56,9 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     budget: initialData?.budget?.toString() ?? '',
     memo: initialData?.memo ?? '',
     date: initialData?.date ?? '',
+    end_date: initialData?.end_date ?? '',
     time_start: initialData?.time_start ?? '',
+    time_end: initialData?.time_end ?? '',
     links: initialData?.links ?? [],
   })
   const [error, setError] = useState('')
@@ -123,8 +129,34 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     if (form.lng.trim()) body.lng = parseFloat(form.lng)
     if (form.budget.trim()) body.budget = parseInt(form.budget)
     if (form.memo.trim()) body.memo = form.memo.trim()
-    if (form.date.trim()) body.date = form.date.trim()
-    if (form.time_start.trim()) body.time_start = form.time_start.trim()
+    const trimmedDate = form.date.trim()
+    const trimmedEndDate = form.end_date.trim()
+    const trimmedTimeStart = form.time_start.trim()
+    const trimmedTimeEnd = form.time_end.trim()
+
+    if (trimmedDate) {
+      body.date = trimmedDate
+    } else if (mode === 'edit') {
+      body.date = null
+    }
+
+    if (trimmedEndDate) {
+      body.end_date = trimmedEndDate
+    } else if (mode === 'edit') {
+      body.end_date = null
+    }
+
+    if (trimmedTimeStart) {
+      body.time_start = trimmedTimeStart
+    } else if (mode === 'edit') {
+      body.time_start = null
+    }
+
+    if (trimmedTimeEnd) {
+      body.time_end = trimmedTimeEnd
+    } else if (mode === 'edit') {
+      body.time_end = null
+    }
 
     try {
       if (mode === 'create') {
@@ -167,14 +199,52 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
         <SelectField label={`${ITEM_FIELD_LABELS.reservation_status} *`} value={form.reservation_status} onChange={value => setField('reservation_status', value as ReservationStatus)} options={RESERVATION_STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${RESERVATION_STATUS_META[value].description}` }))} />
         <SelectField label={ITEM_FIELD_LABELS.priority} value={form.priority} onChange={value => setField('priority', value as Priority | '')} options={[{ value: '', label: '없음' }, ...PRIORITY_OPTIONS.map(value => ({ value, label: `${value} - ${PRIORITY_META[value].description}` }))]} />
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className={labelClass}>날짜</label>
-            <input type="date" value={form.date} onChange={e => setField('date', e.target.value)} className={inputClass} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-3">
+            <div>
+              <label className={labelClass}>시작 날짜</label>
+              <input
+                type="date"
+                value={form.date}
+                min={TRIP_DATE_MIN}
+                max={TRIP_DATE_MAX}
+                onChange={e => setField('date', e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>시작 시간</label>
+              <input
+                type="time"
+                value={form.time_start}
+                onChange={e => setField('time_start', e.target.value)}
+                className={inputClass}
+                disabled={!form.date}
+              />
+            </div>
           </div>
-          <div>
-            <label className={labelClass}>시작 시간</label>
-            <input type="time" value={form.time_start} onChange={e => setField('time_start', e.target.value)} className={inputClass} />
+          <div className="space-y-3">
+            <div>
+              <label className={labelClass}>종료 날짜</label>
+              <input
+                type="date"
+                value={form.end_date}
+                min={TRIP_DATE_MIN}
+                max={TRIP_DATE_MAX}
+                onChange={e => setField('end_date', e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>종료 시간</label>
+              <input
+                type="time"
+                value={form.time_end}
+                onChange={e => setField('time_end', e.target.value)}
+                className={inputClass}
+                disabled={!form.end_date}
+              />
+            </div>
           </div>
         </div>
 

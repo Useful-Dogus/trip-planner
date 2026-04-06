@@ -86,6 +86,7 @@ interface ItemCardProps {
 
 export default function ItemCard({ item, onSelect, isActive = false }: ItemCardProps) {
   const [branchesOpen, setBranchesOpen] = useState(false)
+  const scheduleLabel = formatScheduleLabel(item)
 
   return (
     <div
@@ -138,10 +139,9 @@ export default function ItemCard({ item, onSelect, isActive = false }: ItemCardP
         <ItemMetadataChips item={item} />
       </div>
 
-      {(item.date || item.time_start || item.budget !== undefined) && (
+      {(scheduleLabel || item.budget !== undefined) && (
         <div className="mt-2.5 flex items-center gap-2 text-xs text-gray-400 pl-[22px] flex-wrap">
-          {item.date && <span>{item.date}</span>}
-          {item.time_start && <span>{item.time_start}</span>}
+          {scheduleLabel && <span>{scheduleLabel}</span>}
           {item.budget !== undefined && <span className="font-medium text-gray-500">${item.budget.toLocaleString()}</span>}
         </div>
       )}
@@ -163,4 +163,17 @@ export default function ItemCard({ item, onSelect, isActive = false }: ItemCardP
       )}
     </div>
   )
+}
+
+function formatScheduleLabel(item: TripItem) {
+  const startLabel = formatDateTime(item.date, item.time_start)
+  const endLabel = formatDateTime(item.end_date, item.time_end)
+
+  if (startLabel && endLabel) return `${startLabel} - ${endLabel}`
+  return startLabel
+}
+
+function formatDateTime(date?: string, time?: string) {
+  if (!date) return ''
+  return time ? `${date} ${time}` : date
 }

@@ -9,12 +9,15 @@ import { useItems } from '@/lib/hooks/useItems'
 import type { TripItem } from '@/types'
 
 const ScheduleMap = dynamic(() => import('@/components/Map/ScheduleMap'), { ssr: false })
+const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
 export default function SchedulePage() {
   const { items, isLoading } = useItems()
   const [tab, setTab] = useState<'list' | 'map'>('list')
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
 
   const confirmedItems = useMemo(() => items.filter(item => item.status === '확정'), [items])
+  const selectedItem = confirmedItems.find(i => i.id === selectedItemId) ?? null
 
   const scheduleItems = useMemo(() => {
     return confirmedItems
@@ -33,10 +36,11 @@ export default function SchedulePage() {
 
   const grouped = useMemo(() => {
     const groups: Record<string, TripItem[]> = {}
-    for (const item of scheduleItems) {
-      const date = item.date!
-      if (!groups[date]) groups[date] = []
-      groups[date].push(item)
+    for (const date of collectScheduleDates(scheduleItems)) {
+      const dateItems = scheduleItems.filter(item => occursOnDate(item, date))
+      if (dateItems.length > 0) {
+        groups[date] = dateItems
+      }
     }
     return groups
   }, [scheduleItems])
@@ -49,7 +53,7 @@ export default function SchedulePage() {
   return (
     <div className="md:pl-44">
       {/* Header: 항상 제한된 너비 */}
-      <div className="max-w-2xl mx-auto px-4 pt-4">
+      <div className="max-w-3xl mx-auto px-4 pt-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-gray-900">일정</h1>
           <TabSwitcher tab={tab} onChange={setTab} />
@@ -58,13 +62,13 @@ export default function SchedulePage() {
 
       {/* 콘텐츠: 목록은 제한 너비, 지도는 전체 너비 */}
       {isLoading ? (
-        <div className="max-w-2xl mx-auto px-4 space-y-2">
+        <div className="max-w-3xl mx-auto px-4 space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <ItemCardSkeleton key={i} />
           ))}
         </div>
       ) : tab === 'list' ? (
-        <div className="max-w-2xl mx-auto px-4 pb-24 md:pb-6">
+        <div className="max-w-3xl mx-auto px-4 pb-24 md:pb-6">
           <div className="space-y-6">
             {confirmedItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -105,7 +109,12 @@ export default function SchedulePage() {
                       </div>
                       <div className="space-y-2">
                         {dateItems.map(item => (
-                          <ItemCard key={item.id} item={item} />
+                          <ItemCard
+                            key={item.id}
+                            item={item}
+                            onSelect={id => setSelectedItemId(prev => (prev === id ? null : id))}
+                            isActive={item.id === selectedItemId}
+                          />
                         ))}
                       </div>
                     </div>
@@ -130,7 +139,12 @@ export default function SchedulePage() {
                     </div>
                     <div className="space-y-3">
                       {undatedItems.map(item => (
-                        <ItemCard key={item.id} item={item} />
+                        <ItemCard
+                          key={item.id}
+                          item={item}
+                          onSelect={id => setSelectedItemId(prev => (prev === id ? null : id))}
+                          isActive={item.id === selectedItemId}
+                        />
                       ))}
                     </div>
                   </div>
@@ -141,12 +155,48 @@ export default function SchedulePage() {
         </div>
       ) : (
         <div className="h-[calc(100vh-72px)]">
-          <ScheduleMap items={items} />
+          <ScheduleMap
+            items={items}
+            onSelectItem={id => setSelectedItemId(prev => (prev === id ? null : id))}
+          />
         </div>
       )}
       <Navigation />
+
+      <ItemPanel
+        item={selectedItem}
+        isOpen={selectedItemId !== null}
+        onClose={() => setSelectedItemId(null)}
+        onSave={() => {}}
+        onDelete={() => setSelectedItemId(null)}
+      />
     </div>
   )
+}
+
+function occursOnDate(item: TripItem, date: string) {
+  if (!item.date) return false
+  if (!item.end_date) return item.date === date
+  return item.date <= date && date <= item.end_date
+}
+
+function collectScheduleDates(items: TripItem[]) {
+  const dates = new Set<string>()
+  items.forEach(item => {
+    if (!item.date) return
+    const rangeEnd = item.end_date ?? item.date
+    let cursor = item.date
+    while (cursor <= rangeEnd) {
+      dates.add(cursor)
+      cursor = nextDate(cursor)
+    }
+  })
+  return Array.from(dates).sort()
+}
+
+function nextDate(date: string) {
+  const [year, month, day] = date.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10)
 }
 
 function TabSwitcher({

@@ -6,6 +6,11 @@ import L from 'leaflet'
 import type { TripItem } from '@/types'
 import StatusBadge from '@/components/UI/StatusBadge'
 
+interface ScheduleMapProps {
+  items: TripItem[]
+  onSelectItem?: (id: string) => void
+}
+
 function createNumberIcon(num: number) {
   return L.divIcon({
     html: `<div style="
@@ -27,10 +32,9 @@ function createNumberIcon(num: number) {
   })
 }
 
-export default function ScheduleMap({ items }: { items: TripItem[] }) {
+export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
   const confirmedDates = useMemo(() => {
-    const dates = items.filter(i => i.status === '확정' && i.date).map(i => i.date!)
-    return Array.from(new Set(dates)).sort()
+    return collectScheduleDates(items.filter(i => i.status === '확정'))
   }, [items])
 
   const [selectedDate, setSelectedDate] = useState<string>(confirmedDates[0] ?? '')
@@ -40,7 +44,7 @@ export default function ScheduleMap({ items }: { items: TripItem[] }) {
       .filter(
         i =>
           i.status === '확정' &&
-          i.date === selectedDate &&
+          occursOnDate(i, selectedDate) &&
           i.lat !== undefined &&
           i.lng !== undefined
       )
@@ -90,7 +94,18 @@ export default function ScheduleMap({ items }: { items: TripItem[] }) {
         />
 
         {dayItems.map((item, idx) => (
-          <Marker key={item.id} position={[item.lat!, item.lng!]} icon={createNumberIcon(idx + 1)}>
+          <Marker
+            key={item.id}
+            position={[item.lat!, item.lng!]}
+            icon={createNumberIcon(idx + 1)}
+            eventHandlers={
+              onSelectItem
+                ? {
+                    click: () => onSelectItem(item.id),
+                  }
+                : undefined
+            }
+          >
             <Popup>
               <div className="space-y-1 min-w-[140px]">
                 <p className="font-semibold text-gray-900 text-sm">
@@ -112,4 +127,29 @@ export default function ScheduleMap({ items }: { items: TripItem[] }) {
       </MapContainer>
     </div>
   )
+}
+
+function occursOnDate(item: TripItem, date: string) {
+  if (!item.date) return false
+  if (!item.end_date) return item.date === date
+  return item.date <= date && date <= item.end_date
+}
+
+function collectScheduleDates(items: TripItem[]) {
+  const dates = new Set<string>()
+  items.forEach(item => {
+    if (!item.date) return
+    const rangeEnd = item.end_date ?? item.date
+    let cursor = item.date
+    while (cursor <= rangeEnd) {
+      dates.add(cursor)
+      cursor = nextDate(cursor)
+    }
+  })
+  return Array.from(dates).sort()
+}
+
+function nextDate(date: string) {
+  const [year, month, day] = date.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10)
 }
