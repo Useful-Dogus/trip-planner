@@ -1,5 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 import type { TripItem } from '@/types'
+import {
+  normalizePriority,
+  normalizeReservationStatus,
+  normalizeStatus,
+  normalizeTripItem,
+  normalizeCategory,
+} from '@/lib/itemOptions'
 
 function getSupabaseClient() {
   const url = process.env.SUPABASE_URL
@@ -17,7 +24,12 @@ export async function readItems(): Promise<TripItem[]> {
     .select('*')
     .order('created_at', { ascending: true })
   if (error) throw error
-  return (data ?? []).map(rowToItem)
+  const normalized = (data ?? []).map(rowToItem).map(normalizeTripItem)
+  const items = normalized.map(entry => entry.item)
+  if (normalized.some(entry => entry.changed)) {
+    await writeItems(items)
+  }
+  return items
 }
 
 export async function writeItems(items: TripItem[]): Promise<void> {
@@ -49,9 +61,10 @@ function rowToItem(row: Record<string, unknown>): TripItem {
   return {
     id: row.id as string,
     name: row.name as string,
-    category: row.category as TripItem['category'],
-    status: row.status as TripItem['status'],
-    priority: (row.priority ?? undefined) as TripItem['priority'],
+    category: normalizeCategory(row.category),
+    status: normalizeStatus(row.status),
+    reservation_status: normalizeReservationStatus(row.reservation_status) ?? null,
+    priority: normalizePriority(row.priority),
     address: (row.address as string) ?? undefined,
     lat: (row.lat as number) ?? undefined,
     lng: (row.lng as number) ?? undefined,
@@ -82,6 +95,7 @@ function itemToRow(item: TripItem): Record<string, unknown> {
     name: item.name,
     category: item.category,
     status: item.status,
+    reservation_status: item.reservation_status ?? null,
     priority: item.priority ?? null,
     address: item.address ?? null,
     lat: item.lat ?? null,

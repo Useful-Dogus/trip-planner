@@ -2,8 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { readItems } from '@/lib/data'
 import Navigation from '@/components/Layout/Navigation'
-import StatusBadge from '@/components/UI/StatusBadge'
-import PriorityBadge from '@/components/UI/PriorityBadge'
+import ItemMetadataChips from '@/components/UI/ItemMetadataChips'
 
 export default async function ItemDetailPage({ params }: { params: { id: string } }) {
   const items = await readItems()
@@ -33,13 +32,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
         {/* 이름 + 배지 */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{item.name}</h1>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-medium text-gray-500 bg-gray-100 rounded-full px-2.5 py-1">
-              {item.category}
-            </span>
-            <StatusBadge status={item.status} />
-            {item.priority && <PriorityBadge priority={item.priority} />}
-          </div>
+          <ItemMetadataChips item={item} />
         </div>
 
         <div className="space-y-5">

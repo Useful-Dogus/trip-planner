@@ -1,7 +1,7 @@
 import type { Category } from '@/types'
 
 /**
- * 구글 place types → 앱 9개 카테고리 매핑 룩업 테이블
+ * 구글 place types → 앱 카테고리 매핑 룩업 테이블
  */
 const CATEGORY_MAP: Record<string, Category> = {
   // 교통
@@ -16,17 +16,16 @@ const CATEGORY_MAP: Record<string, Category> = {
   car_rental: '교통',
   parking: '교통',
 
-  // 숙소
-  hotel: '숙소',
-  lodging: '숙소',
-  motel: '숙소',
-  hostel: '숙소',
-  resort: '숙소',
-  campground: '숙소',
-  rv_park: '숙소',
-  bed_and_breakfast: '숙소',
-  guest_house: '숙소',
-  vacation_rental: '숙소',
+  // 숙박
+  hotel: '숙박',
+  lodging: '숙박',
+  motel: '숙박',
+  hostel: '숙박',
+  campground: '숙박',
+  rv_park: '숙박',
+  bed_and_breakfast: '숙박',
+  guest_house: '숙박',
+  vacation_rental: '숙박',
 
   // 식당
   restaurant: '식당',
@@ -62,48 +61,55 @@ const CATEGORY_MAP: Record<string, Category> = {
   juice_bar: '카페',
   smoothie_bar: '카페',
 
-  // 관광
-  tourist_attraction: '관광',
-  museum: '관광',
-  park: '관광',
-  amusement_park: '관광',
-  zoo: '관광',
-  aquarium: '관광',
-  art_gallery: '관광',
-  landmark: '관광',
-  natural_feature: '관광',
-  national_park: '관광',
-  botanical_garden: '관광',
-  palace: '관광',
-  castle: '관광',
-  temple: '관광',
-  shrine: '관광',
-  church: '관광',
-  place_of_worship: '관광',
-  historic_site: '관광',
-  viewpoint: '관광',
-  hiking_area: '관광',
+  // 명소
+  tourist_attraction: '명소',
+  park: '명소',
+  landmark: '명소',
+  natural_feature: '명소',
+  national_park: '명소',
+  botanical_garden: '명소',
+  palace: '명소',
+  castle: '명소',
+  historic_site: '명소',
+  viewpoint: '명소',
 
-  // 공연
-  movie_theater: '공연',
-  theater: '공연',
-  concert_hall: '공연',
-  performing_arts_theater: '공연',
-  night_club: '공연',
-  comedy_club: '공연',
-  karaoke: '공연',
+  // 문화시설
+  museum: '문화시설',
+  art_gallery: '문화시설',
+  library: '문화시설',
+  temple: '문화시설',
+  shrine: '문화시설',
+  church: '문화시설',
+  place_of_worship: '문화시설',
 
-  // 스포츠
-  stadium: '스포츠',
-  gym: '스포츠',
-  sports_complex: '스포츠',
-  bowling_alley: '스포츠',
-  golf_course: '스포츠',
-  tennis_court: '스포츠',
-  swimming_pool: '스포츠',
-  fitness_center: '스포츠',
-  spa: '스포츠',
-  ski_resort: '스포츠',
+  // 공연·스포츠
+  movie_theater: '공연·스포츠',
+  theater: '공연·스포츠',
+  concert_hall: '공연·스포츠',
+  performing_arts_theater: '공연·스포츠',
+  night_club: '공연·스포츠',
+  comedy_club: '공연·스포츠',
+  karaoke: '공연·스포츠',
+  stadium: '공연·스포츠',
+  gym: '공연·스포츠',
+  sports_complex: '공연·스포츠',
+  bowling_alley: '공연·스포츠',
+  golf_course: '공연·스포츠',
+  tennis_court: '공연·스포츠',
+  swimming_pool: '공연·스포츠',
+  fitness_center: '공연·스포츠',
+  ski_resort: '공연·스포츠',
+
+  // 액티비티
+  amusement_park: '액티비티',
+  zoo: '액티비티',
+  aquarium: '액티비티',
+  hiking_area: '액티비티',
+  tour_agency: '액티비티',
+
+  // 휴양
+  resort: '휴양',
+  spa: '휴양',
 
   // 쇼핑
   shopping_mall: '쇼핑',

@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import { useToast } from '@/components/UI/Toast'
-import type { TripItem, Status } from '@/types'
+import type { TripItem } from '@/types'
+import { normalizeTripItem } from '@/lib/itemOptions'
 
 const fetcher = (url: string) =>
   fetch(url).then(r => {
@@ -12,6 +13,18 @@ const fetcher = (url: string) =>
   })
 
 export type SyncStatus = 'fresh' | 'stale' | 'offline' | 'error'
+
+function applyItemChanges(item: TripItem, changes: Record<string, unknown>): TripItem {
+  const next: Record<string, unknown> = { ...item }
+  Object.entries(changes).forEach(([key, value]) => {
+    if (value === null) {
+      delete next[key]
+      return
+    }
+    next[key] = value
+  })
+  return normalizeTripItem(next as unknown as TripItem).item
+}
 
 export function useItems() {
   const [hasMounted, setHasMounted] = useState(false)
@@ -26,7 +39,7 @@ export function useItems() {
   )
   const { showToast } = useToast()
 
-  const items = data?.items ?? []
+  const items = (data?.items ?? []).map(item => normalizeTripItem(item).item)
   const ready = hasMounted
   const loading = !ready || isLoading
 
@@ -38,7 +51,7 @@ export function useItems() {
     return 'fresh'
   })()
 
-  async function updateItem(id: string, changes: Partial<TripItem>) {
+  async function updateItem(id: string, changes: Record<string, unknown>) {
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       showToast({ type: 'info', message: '오프라인 상태입니다. 인터넷 연결 후 다시 시도해주세요.' })
       return
@@ -46,7 +59,7 @@ export function useItems() {
     const snapshot = data
     mutate(
       prev =>
-        prev ? { items: prev.items.map(i => (i.id === id ? { ...i, ...changes } : i)) } : prev,
+        prev ? { items: prev.items.map(i => (i.id === id ? applyItemChanges(i, changes) : i)) } : prev,
       { revalidate: false }
     )
     try {
@@ -122,10 +135,6 @@ export function useItems() {
     }
   }
 
-  async function updateStatus(id: string, status: Status) {
-    await updateItem(id, { status })
-  }
-
   return {
     items,
     isLoading: loading,
@@ -135,6 +144,5 @@ export function useItems() {
     updateItem,
     deleteItem,
     createItem,
-    updateStatus,
   }
 }

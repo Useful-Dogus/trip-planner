@@ -5,6 +5,7 @@ create table public.items (
   name        text        not null,
   category    text        not null,
   status      text        not null,
+  reservation_status text,
   priority    text,
   address     text,
   lat         double precision,
