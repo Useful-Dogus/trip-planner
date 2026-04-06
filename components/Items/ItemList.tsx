@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { Category, ReservationStatus, TripItem, TripPriority } from '@/types'
 import ItemCard from './ItemCard'
@@ -46,11 +46,6 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
   const [query, setQuery] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('name')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
-
-  const onSelectItemRef = useRef(onSelectItem)
-  useEffect(() => {
-    onSelectItemRef.current = onSelectItem
-  })
 
   const excludedCount = useMemo(() => items.filter(i => i.trip_priority === '제외').length, [items])
 
@@ -113,12 +108,6 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
 
     return result
   }, [items, query, selCats, selTripPriorities, selReservationStatuses, showExcluded, sortDir, sortKey])
-
-  useEffect(() => {
-    if (selectedItemId && !filtered.some(i => i.id === selectedItemId)) {
-      onSelectItemRef.current(selectedItemId)
-    }
-  }, [filtered, selectedItemId])
 
   const SORT_OPTIONS: { key: SortKey; label: string }[] = [
     { key: 'name', label: '이름' },
