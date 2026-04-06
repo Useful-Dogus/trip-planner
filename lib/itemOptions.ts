@@ -22,6 +22,8 @@ export const RESERVATION_STATUS_OPTIONS: ReservationStatus[] = [
   '예약완료',
 ]
 export const PRIORITY_OPTIONS: Priority[] = ['반드시', '들를만해', '시간 남으면']
+export const TRIP_DATE_MIN = '2026-07-01'
+export const TRIP_DATE_MAX = '2026-07-31'
 
 export const ITEM_FIELD_LABELS = {
   category: '카테고리',

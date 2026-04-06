@@ -6,6 +6,8 @@ import {
   PRIORITY_OPTIONS,
   RESERVATION_STATUS_OPTIONS,
   STATUS_OPTIONS,
+  TRIP_DATE_MAX,
+  TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
 
 function validatePartial(body: Record<string, unknown>): string | null {
@@ -41,6 +43,13 @@ function validatePartial(body: Record<string, unknown>): string | null {
     !/^\d{4}-\d{2}-\d{2}$/.test(body.date as string)
   ) {
     return 'date는 YYYY-MM-DD 형식이어야 합니다.'
+  }
+  if (
+    body.date !== undefined &&
+    body.date !== null &&
+    ((body.date as string) < TRIP_DATE_MIN || (body.date as string) > TRIP_DATE_MAX)
+  ) {
+    return 'date는 2026-07-01부터 2026-07-31 사이여야 합니다.'
   }
   if (
     body.time_start !== undefined &&

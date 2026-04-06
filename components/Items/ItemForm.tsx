@@ -13,6 +13,8 @@ import {
   RESERVATION_STATUS_OPTIONS,
   STATUS_META,
   STATUS_OPTIONS,
+  TRIP_DATE_MAX,
+  TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
 
 interface FormData {
@@ -191,7 +193,14 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
             <label className={labelClass}>시작 날짜</label>
-            <input type="date" value={form.date} onChange={e => setField('date', e.target.value)} className={inputClass} />
+            <input
+              type="date"
+              value={form.date}
+              min={TRIP_DATE_MIN}
+              max={TRIP_DATE_MAX}
+              onChange={e => setField('date', e.target.value)}
+              className={inputClass}
+            />
           </div>
           <div>
             <label className={labelClass}>시작 시간</label>

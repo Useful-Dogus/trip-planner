@@ -12,6 +12,8 @@ import {
   RESERVATION_STATUS_OPTIONS,
   STATUS_META,
   STATUS_OPTIONS,
+  TRIP_DATE_MAX,
+  TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
 
 interface FormData {
@@ -165,7 +167,14 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">일정</h3>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Field label="시작 날짜">
-              <input type="date" value={form.date} onChange={e => setField('date', e.target.value)} className={inputClass} />
+              <input
+                type="date"
+                value={form.date}
+                min={TRIP_DATE_MIN}
+                max={TRIP_DATE_MAX}
+                onChange={e => setField('date', e.target.value)}
+                className={inputClass}
+              />
             </Field>
             <Field label="시작 시간">
               <input type="time" value={form.time_start} onChange={e => setField('time_start', e.target.value)} className={inputClass} />
