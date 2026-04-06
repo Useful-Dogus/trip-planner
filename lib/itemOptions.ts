@@ -62,12 +62,12 @@ export const CATEGORY_META: Record<Category, { dot: string }> = {
   기타: { dot: '#FCD34D' },
 }
 
-export const TRIP_PRIORITY_META: Record<TripPriority, { description: string; order: number; chip: string }> = {
-  '검토 필요': { description: '아직 결정하지 않은 후보', order: 0, chip: 'bg-gray-100 text-gray-500' },
-  '시간 되면': { description: '여유가 있으면 가볼 곳', order: 1, chip: 'bg-blue-50 text-blue-500' },
-  '가고 싶음': { description: '꼭 가고 싶은 곳', order: 2, chip: 'bg-amber-50 text-amber-600' },
-  '확정': { description: '일정에 넣기로 결정', order: 3, chip: 'bg-emerald-100 text-emerald-700' },
-  '제외': { description: '이번 여행에서 제외', order: 4, chip: 'bg-red-50 text-red-400' },
+export const TRIP_PRIORITY_META: Record<TripPriority, { description: string; order: number }> = {
+  '검토 필요': { description: '아직 결정하지 않은 후보', order: 0 },
+  '시간 되면': { description: '여유가 있으면 가볼 곳', order: 1 },
+  '가고 싶음': { description: '꼭 가고 싶은 곳', order: 2 },
+  '확정': { description: '일정에 넣기로 결정', order: 3 },
+  '제외': { description: '이번 여행에서 제외', order: 4 },
 }
 
 export const RESERVATION_STATUS_META: Record<ReservationStatus, { description: string }> = {

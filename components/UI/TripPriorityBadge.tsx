@@ -1,11 +1,10 @@
 import type { TripPriority } from '@/types'
-import { TRIP_PRIORITY_META } from '@/lib/itemOptions'
+import { CHIP_TONE } from '@/lib/itemOptions'
 
 export default function TripPriorityBadge({ tripPriority }: { tripPriority: TripPriority }) {
-  const meta = TRIP_PRIORITY_META[tripPriority]
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${meta.chip}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${CHIP_TONE}`}
     >
       {tripPriority}
     </span>
