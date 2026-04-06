@@ -86,12 +86,13 @@ interface ItemCardProps {
 
 export default function ItemCard({ item, onSelect, isActive = false }: ItemCardProps) {
   const [branchesOpen, setBranchesOpen] = useState(false)
-  const scheduleLabel = [
-    item.date ? `시작 ${item.date}${item.time_start ? ` ${item.time_start}` : ''}` : null,
-    item.end_date ? `종료 ${item.end_date}${item.time_end ? ` ${item.time_end}` : ''}` : null,
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  const scheduleLabel = (() => {
+    if (item.date && item.end_date) return `${item.date} - ${item.end_date}`
+    if (item.date && item.time_start) return `${item.date} ${item.time_start}`
+    if (item.date) return item.date
+    if (item.time_start) return item.time_start
+    return ''
+  })()
 
   return (
     <div
