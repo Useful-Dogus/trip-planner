@@ -1,12 +1,14 @@
 # trip-planner Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-27
+Auto-generated from all feature plans. Last updated: 2026-04-06
 
 ## Active Technologies
 - TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), React 18, Tailwind CSS 3.x (004-mobile-panel-ux)
 - N/A (UI 전용 변경) (004-mobile-panel-ux)
 - TypeScript 5.x + Node.js 18+ + Next.js 14.2.0 (App Router), React 18.3.1, Tailwind CSS 3.x, SWR (신규 추가) (005-data-caching-fast-ux)
 - Supabase (서버), localStorage (클라이언트 캐시) (005-data-caching-fast-ux)
+- TypeScript 5.x + Node.js 18+ + Next.js 14.2.0 (App Router), React 18.3.1, fuse.js (신규), @supabase/supabase-js (006-gmaps-import)
+- Supabase (PostgreSQL) — `items` 테이블에 `google_place_id` 컬럼 추가 (006-gmaps-import)
 
 - TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS 3.x, React 18 (003-panel-editing-ux)
 - Supabase (데이터 저장소, 파일 기반에서 마이그레이션 완료)
@@ -33,10 +35,10 @@ npm run dev # 로컬 개발 서버 (http://localhost:3000)
 TypeScript + Node.js 18+: Follow standard conventions
 
 ## Recent Changes
+- 006-gmaps-import: Added TypeScript 5.x + Node.js 18+ + Next.js 14.2.0 (App Router), React 18.3.1, fuse.js (신규), @supabase/supabase-js
 - 005-data-caching-fast-ux: Added TypeScript 5.x + Node.js 18+ + Next.js 14.2.0 (App Router), React 18.3.1, Tailwind CSS 3.x, SWR (신규 추가)
 - 004-mobile-panel-ux: Added TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), React 18, Tailwind CSS 3.x
 
-- 003-panel-editing-ux: Added TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS 3.x, React 18
 
 
 <!-- MANUAL ADDITIONS START -->

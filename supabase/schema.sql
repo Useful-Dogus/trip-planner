@@ -15,10 +15,11 @@ create table public.items (
   date        text,
   time_start  text,
   time_end    text,
-  is_franchise boolean,
-  branches    jsonb,
-  created_at  text        not null,
-  updated_at  text        not null
+  is_franchise     boolean,
+  branches         jsonb,
+  google_place_id  text,
+  created_at       text        not null,
+  updated_at       text        not null
 );
 
 -- Row Level Security 비활성화 (서버사이드에서만 접근)

@@ -41,6 +41,29 @@ export interface TripItem {
   time_end?: string
   is_franchise?: boolean
   branches?: Branch[]
+  google_place_id?: string | null
   created_at: string
   updated_at: string
+}
+
+export interface GooglePlace {
+  name: string
+  address: string | null
+  lat: number | null
+  lng: number | null
+  googlePlaceId: string | null
+  googleCategory: string | null
+}
+
+export type ImportStatus = 'new' | 'similar' | 'duplicate'
+
+export interface ImportCandidate {
+  place: GooglePlace
+  status: ImportStatus
+  similarItem?: {
+    id: string
+    name: string
+  }
+  selected: boolean
+  mappedCategory: Category
 }

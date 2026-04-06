@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 
-const PROTECTED_PAGES = ['/research', '/schedule', '/items']
-const PROTECTED_API = ['/api/items', '/api/geocode']
+const PROTECTED_PAGES = ['/research', '/schedule', '/items', '/gmaps-import']
+const PROTECTED_API = ['/api/items', '/api/geocode', '/api/gmaps']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -40,7 +40,9 @@ export const config = {
     '/research/:path*',
     '/schedule/:path*',
     '/items/:path*',
+    '/gmaps-import/:path*',
     '/api/items/:path*',
     '/api/geocode',
+    '/api/gmaps/:path*',
   ],
 }
