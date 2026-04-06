@@ -360,7 +360,7 @@ function buildScheduleRows(item: TripItem): Array<{ label: string; value: string
   const rows: Array<{ label: string; value: string }> = []
   if (item.date) rows.push({ label: '시작 날짜', value: item.date })
   if (item.time_start) rows.push({ label: '시작 시간', value: item.time_start })
-  if (item.date && item.time_end) rows.push({ label: '종료 날짜', value: item.date })
+  if (item.end_date) rows.push({ label: '종료 날짜', value: item.end_date })
   if (item.time_end) rows.push({ label: '종료 시간', value: item.time_end })
   return rows
 }

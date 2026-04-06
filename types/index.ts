@@ -41,6 +41,7 @@ export interface TripItem {
   budget?: number
   memo?: string
   date?: string
+  end_date?: string
   time_start?: string
   time_end?: string
   is_franchise?: boolean

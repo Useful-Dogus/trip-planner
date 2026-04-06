@@ -9,9 +9,9 @@
 
 ## Phase 2: Foundation
 
-- [ ] T002 `components/Items/ItemForm.tsx`에 `time_end` 필드 추가 및 생성 payload 반영
-- [ ] T003 `components/Panel/PanelItemForm.tsx`에 `time_end` 필드 추가 및 수정 payload 반영
-- [ ] T004 `app/api/items/route.ts`, `app/api/items/[id]/route.ts`에 `time_end` 검증 및 저장 반영
+- [ ] T002 `components/Items/ItemForm.tsx`에 `end_date`, `time_end` 필드 추가 및 생성 payload 반영
+- [ ] T003 `components/Panel/PanelItemForm.tsx`에 `end_date`, `time_end` 필드 추가 및 수정 payload 반영
+- [ ] T004 `app/api/items/route.ts`, `app/api/items/[id]/route.ts`에 `end_date`, `time_end` 검증 및 저장 반영
 
 ## Phase 3: Detail Display
 

@@ -14,6 +14,7 @@ create table public.items (
   budget      integer,
   memo        text,
   date        text,
+  end_date    text,
   time_start  text,
   time_end    text,
   is_franchise     boolean,

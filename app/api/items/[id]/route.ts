@@ -52,6 +52,29 @@ function validatePartial(body: Record<string, unknown>): string | null {
     return 'date는 2026-07-01부터 2026-07-31 사이여야 합니다.'
   }
   if (
+    body.end_date !== undefined &&
+    body.end_date !== null &&
+    !/^\d{4}-\d{2}-\d{2}$/.test(body.end_date as string)
+  ) {
+    return 'end_date는 YYYY-MM-DD 형식이어야 합니다.'
+  }
+  if (
+    body.end_date !== undefined &&
+    body.end_date !== null &&
+    ((body.end_date as string) < TRIP_DATE_MIN || (body.end_date as string) > TRIP_DATE_MAX)
+  ) {
+    return 'end_date는 2026-07-01부터 2026-07-31 사이여야 합니다.'
+  }
+  if (
+    body.date !== undefined &&
+    body.date !== null &&
+    body.end_date !== undefined &&
+    body.end_date !== null &&
+    (body.end_date as string) < (body.date as string)
+  ) {
+    return 'end_date는 시작 날짜보다 빠를 수 없습니다.'
+  }
+  if (
     body.time_start !== undefined &&
     body.time_start !== null &&
     !/^\d{2}:\d{2}$/.test(body.time_start as string)
@@ -64,6 +87,12 @@ function validatePartial(body: Record<string, unknown>): string | null {
     !/^\d{2}:\d{2}$/.test(body.time_end as string)
   ) {
     return 'time_end는 HH:MM 형식이어야 합니다.'
+  }
+  if (body.time_start !== undefined && body.time_start !== null && !body.date) {
+    return 'time_start를 입력하려면 시작 날짜가 필요합니다.'
+  }
+  if (body.time_end !== undefined && body.time_end !== null && !body.end_date) {
+    return 'time_end를 입력하려면 종료 날짜가 필요합니다.'
   }
   return null
 }
