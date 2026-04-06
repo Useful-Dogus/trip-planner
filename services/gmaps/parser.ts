@@ -113,6 +113,54 @@ interface RawPlace {
   types: string[]
 }
 
+function parseEntityListPayload(payload: unknown): RawPlace[] {
+  if (!Array.isArray(payload) || payload.length === 0) return []
+
+  const root = payload.find(node => Array.isArray(node) && node.length >= 9) as unknown[] | undefined
+  if (!root) return []
+
+  const entries = root[8]
+  if (!Array.isArray(entries)) return []
+
+  const places: RawPlace[] = []
+
+  for (const entry of entries) {
+    if (!Array.isArray(entry)) continue
+
+    const details = entry[1]
+    const name = entry[2]
+
+    if (!Array.isArray(details) || typeof name !== 'string' || !name.trim()) {
+      continue
+    }
+
+    const address =
+      typeof details[4] === 'string'
+        ? details[4]
+        : typeof details[2] === 'string'
+          ? details[2]
+          : null
+
+    const coords = Array.isArray(details[5]) ? extractCoordinateArray(details[5]) : null
+
+    const idArray = Array.isArray(details[6])
+      ? details[6].filter((value): value is string => typeof value === 'string')
+      : []
+    const pathId = typeof details[7] === 'string' ? details[7] : null
+
+    places.push({
+      name: name.trim(),
+      address,
+      lat: coords?.lat ?? null,
+      lng: coords?.lng ?? null,
+      placeId: pathId ?? (idArray.length > 0 ? idArray.join(':') : null),
+      types: [],
+    })
+  }
+
+  return places.filter(place => place.lat !== null && place.lng !== null)
+}
+
 /**
  * 파싱된 JSON 데이터에서 장소 목록을 추출한다.
  */
@@ -214,6 +262,24 @@ function extractPlacesFromData(data: unknown): RawPlace[] {
  * @throws GmapsParserError
  */
 export function parseListPage(html: string): GooglePlace[] {
+  if (html.trim().startsWith(")]}'")) {
+    try {
+      const entityListPlaces = parseEntityListPayload(stripXssiPrefix(html))
+      if (entityListPlaces.length > 0) {
+        return entityListPlaces.map(p => ({
+          name: p.name,
+          address: p.address,
+          lat: p.lat,
+          lng: p.lng,
+          googlePlaceId: p.placeId,
+          googleCategory: p.types[0] ?? null,
+        }))
+      }
+    } catch {
+      // Fall through to legacy HTML parser when the payload format does not match.
+    }
+  }
+
   const jsonCandidates = extractJsonFromHtml(html)
 
   if (jsonCandidates.length === 0) {
