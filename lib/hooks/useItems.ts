@@ -13,6 +13,18 @@ const fetcher = (url: string) =>
 
 export type SyncStatus = 'fresh' | 'stale' | 'offline' | 'error'
 
+function applyItemChanges(item: TripItem, changes: Record<string, unknown>): TripItem {
+  const next: Record<string, unknown> = { ...item }
+  Object.entries(changes).forEach(([key, value]) => {
+    if (value === null) {
+      delete next[key]
+      return
+    }
+    next[key] = value
+  })
+  return next as unknown as TripItem
+}
+
 export function useItems() {
   const [hasMounted, setHasMounted] = useState(false)
 
@@ -38,7 +50,7 @@ export function useItems() {
     return 'fresh'
   })()
 
-  async function updateItem(id: string, changes: Partial<TripItem>) {
+  async function updateItem(id: string, changes: Record<string, unknown>) {
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       showToast({ type: 'info', message: '오프라인 상태입니다. 인터넷 연결 후 다시 시도해주세요.' })
       return
@@ -46,7 +58,7 @@ export function useItems() {
     const snapshot = data
     mutate(
       prev =>
-        prev ? { items: prev.items.map(i => (i.id === id ? { ...i, ...changes } : i)) } : prev,
+        prev ? { items: prev.items.map(i => (i.id === id ? applyItemChanges(i, changes) : i)) } : prev,
       { revalidate: false }
     )
     try {

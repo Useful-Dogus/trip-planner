@@ -2,39 +2,24 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import type { TripItem, Category, Status, Priority, Link as TripLink } from '@/types'
+import type { Category, Priority, ReservationStatus, Status, TripItem, Link as TripLink } from '@/types'
 import { useItems } from '@/lib/hooks/useItems'
-
-const CATEGORIES: Category[] = [
-  '교통',
-  '숙소',
-  '식당',
-  '카페',
-  '관광',
-  '공연',
-  '스포츠',
-  '쇼핑',
-  '기타',
-]
-
-const STATUS_OPTIONS: { value: Status; label: string }[] = [
-  { value: '검토중', label: '검토중 — 아직 결정 안 됨' },
-  { value: '보류', label: '보류 — 나중에 다시 볼 것' },
-  { value: '대기중', label: '대기중 — 거의 확정, 최종 확인 중' },
-  { value: '확정', label: '확정 — 간다' },
-  { value: '탈락', label: '탈락 — 안 간다' },
-]
-
-const PRIORITY_OPTIONS: { value: Priority; label: string }[] = [
-  { value: '반드시', label: '반드시 — 이건 꼭 가야 함' },
-  { value: '들를만해', label: '들를만해 — 일정 맞으면 가자' },
-  { value: '시간 남으면', label: '시간 남으면 — 여유 있을 때' },
-]
+import {
+  CATEGORY_OPTIONS,
+  ITEM_FIELD_LABELS,
+  PRIORITY_META,
+  PRIORITY_OPTIONS,
+  RESERVATION_STATUS_META,
+  RESERVATION_STATUS_OPTIONS,
+  STATUS_META,
+  STATUS_OPTIONS,
+} from '@/lib/itemOptions'
 
 interface FormData {
   name: string
   category: Category
   status: Status
+  reservation_status: ReservationStatus
   priority: Priority | ''
   address: string
   lat: string
@@ -55,11 +40,11 @@ interface ItemFormProps {
 export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   const router = useRouter()
   const { createItem, updateItem, deleteItem } = useItems()
-
   const [form, setForm] = useState<FormData>({
     name: initialData?.name ?? '',
-    category: initialData?.category ?? '관광',
-    status: initialData?.status ?? '검토중',
+    category: initialData?.category ?? '명소',
+    status: initialData?.status ?? '아이디어',
+    reservation_status: initialData?.reservation_status ?? '확인 필요',
     priority: initialData?.priority ?? '',
     address: initialData?.address ?? '',
     lat: initialData?.lat?.toString() ?? '',
@@ -70,12 +55,10 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     time_start: initialData?.time_start ?? '',
     links: initialData?.links ?? [],
   })
-
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [geocoding, setGeocoding] = useState(false)
   const [geocodeError, setGeocodeError] = useState('')
-
   const memoRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -114,15 +97,11 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   }
 
   function updateLink(i: number, field: keyof TripLink, value: string) {
-    const updated = form.links.map((l, idx) => (idx === i ? { ...l, [field]: value } : l))
-    setField('links', updated)
+    setField('links', form.links.map((l, idx) => (idx === i ? { ...l, [field]: value } : l)))
   }
 
   function removeLink(i: number) {
-    setField(
-      'links',
-      form.links.filter((_, idx) => idx !== i)
-    )
+    setField('links', form.links.filter((_, idx) => idx !== i))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -134,10 +113,11 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
       name: form.name,
       category: form.category,
       status: form.status,
+      reservation_status: form.reservation_status,
+      priority: form.priority || null,
       links: form.links.filter(l => l.url.trim()),
     }
 
-    if (form.priority) body.priority = form.priority
     if (form.address.trim()) body.address = form.address.trim()
     if (form.lat.trim()) body.lat = parseFloat(form.lat)
     if (form.lng.trim()) body.lng = parseFloat(form.lng)
@@ -151,7 +131,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
         await createItem(body as Omit<TripItem, 'id' | 'created_at' | 'updated_at'>)
         router.push('/research')
       } else if (itemId) {
-        await updateItem(itemId, body as Partial<TripItem>)
+        await updateItem(itemId, body)
         router.push(`/items/${itemId}`)
       }
     } catch {
@@ -169,230 +149,125 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     }
   }
 
-  const inputClass =
-    'w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white'
+  const inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white'
   const labelClass = 'block text-sm font-medium text-gray-700 mb-1'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 pb-28 md:pb-8">
-      {/* 기본 정보 */}
       <section className="space-y-4">
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">기본 정보</h2>
 
         <div>
           <label className={labelClass}>이름 *</label>
-          <input
-            type="text"
-            value={form.name}
-            onChange={e => setField('name', e.target.value)}
-            className={inputClass}
-            placeholder="장소 또는 활동 이름"
-            required
-          />
+          <input type="text" value={form.name} onChange={e => setField('name', e.target.value)} className={inputClass} placeholder="장소 또는 활동 이름" required />
         </div>
 
-        <div>
-          <label className={labelClass}>카테고리 *</label>
-          <select
-            value={form.category}
-            onChange={e => setField('category', e.target.value as Category)}
-            className={inputClass}
-          >
-            {CATEGORIES.map(c => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className={labelClass}>상태 *</label>
-          <select
-            value={form.status}
-            onChange={e => setField('status', e.target.value as Status)}
-            className={inputClass}
-          >
-            {STATUS_OPTIONS.map(o => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className={labelClass}>우선순위</label>
-          <select
-            value={form.priority}
-            onChange={e => setField('priority', e.target.value as Priority | '')}
-            className={inputClass}
-          >
-            <option value="">없음</option>
-            {PRIORITY_OPTIONS.map(o => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <SelectField label={`${ITEM_FIELD_LABELS.category} *`} value={form.category} onChange={value => setField('category', value as Category)} options={CATEGORY_OPTIONS.map(value => ({ value, label: value }))} />
+        <SelectField label={`${ITEM_FIELD_LABELS.status} *`} value={form.status} onChange={value => setField('status', value as Status)} options={STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${STATUS_META[value].description}` }))} />
+        <SelectField label={`${ITEM_FIELD_LABELS.reservation_status} *`} value={form.reservation_status} onChange={value => setField('reservation_status', value as ReservationStatus)} options={RESERVATION_STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${RESERVATION_STATUS_META[value].description}` }))} />
+        <SelectField label={ITEM_FIELD_LABELS.priority} value={form.priority} onChange={value => setField('priority', value as Priority | '')} options={[{ value: '', label: '없음' }, ...PRIORITY_OPTIONS.map(value => ({ value, label: `${value} - ${PRIORITY_META[value].description}` }))]} />
 
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className={labelClass}>날짜</label>
-            <input
-              type="date"
-              value={form.date}
-              onChange={e => setField('date', e.target.value)}
-              className={inputClass}
-            />
+            <input type="date" value={form.date} onChange={e => setField('date', e.target.value)} className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>시작 시간</label>
-            <input
-              type="time"
-              value={form.time_start}
-              onChange={e => setField('time_start', e.target.value)}
-              className={inputClass}
-            />
+            <input type="time" value={form.time_start} onChange={e => setField('time_start', e.target.value)} className={inputClass} />
           </div>
         </div>
 
         <div>
           <label className={labelClass}>예산 (USD)</label>
-          <input
-            type="number"
-            min="0"
-            value={form.budget}
-            onChange={e => setField('budget', e.target.value)}
-            className={inputClass}
-            placeholder="예: 50"
-          />
+          <input type="number" min="0" value={form.budget} onChange={e => setField('budget', e.target.value)} className={inputClass} placeholder="예: 50" />
         </div>
       </section>
 
-      {/* 위치 */}
       <section className="space-y-4">
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">위치</h2>
-
         <div>
           <label className={labelClass}>주소</label>
-          <input
-            type="text"
-            value={form.address}
-            onChange={e => setField('address', e.target.value)}
-            onBlur={handleAddressBlur}
-            className={inputClass}
-            placeholder="주소 입력 후 포커스를 벗어나면 좌표 자동 입력"
-          />
+          <input type="text" value={form.address} onChange={e => setField('address', e.target.value)} onBlur={handleAddressBlur} className={inputClass} placeholder="주소 입력 후 포커스를 벗어나면 좌표 자동 입력" />
           {geocoding && <p className="text-xs text-gray-400 mt-1">좌표 검색 중...</p>}
-          {!geocoding && geocodeError && (
-            <p className="text-xs text-amber-500 mt-1">{geocodeError}</p>
-          )}
+          {!geocoding && geocodeError && <p className="text-xs text-amber-500 mt-1">{geocodeError}</p>}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className={labelClass}>위도 (lat)</label>
-            <input
-              type="number"
-              step="any"
-              value={form.lat}
-              onChange={e => setField('lat', e.target.value)}
-              className={inputClass}
-              placeholder="40.748817"
-            />
+            <input type="number" step="any" value={form.lat} onChange={e => setField('lat', e.target.value)} className={inputClass} placeholder="40.748817" />
           </div>
           <div>
             <label className={labelClass}>경도 (lng)</label>
-            <input
-              type="number"
-              step="any"
-              value={form.lng}
-              onChange={e => setField('lng', e.target.value)}
-              className={inputClass}
-              placeholder="-73.985428"
-            />
+            <input type="number" step="any" value={form.lng} onChange={e => setField('lng', e.target.value)} className={inputClass} placeholder="-73.985428" />
           </div>
         </div>
       </section>
 
-      {/* 링크 */}
       <section className="space-y-3">
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">링크</h2>
-
         {form.links.map((link, i) => (
           <div key={i} className="flex gap-2 items-start">
-            <div className="flex-1 grid grid-cols-2 gap-2">
-              <input
-                type="text"
-                value={link.label}
-                onChange={e => updateLink(i, 'label', e.target.value)}
-                className={inputClass}
-                placeholder="이름 (예: 공식 사이트)"
-              />
-              <input
-                type="url"
-                value={link.url}
-                onChange={e => updateLink(i, 'url', e.target.value)}
-                className={inputClass}
-                placeholder="https://..."
-              />
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
+              <input type="text" value={link.label} onChange={e => updateLink(i, 'label', e.target.value)} className={inputClass} placeholder="이름 (예: 공식 사이트)" />
+              <input type="url" value={link.url} onChange={e => updateLink(i, 'url', e.target.value)} className={inputClass} placeholder="https://..." />
             </div>
-            <button
-              type="button"
-              onClick={() => removeLink(i)}
-              className="mt-1.5 text-gray-300 hover:text-red-400 text-xl leading-none transition-colors"
-            >
-              ×
-            </button>
+            <button type="button" onClick={() => removeLink(i)} className="mt-1.5 text-gray-300 hover:text-red-400 text-xl leading-none transition-colors">×</button>
           </div>
         ))}
-
-        <button
-          type="button"
-          onClick={addLink}
-          className="w-full text-sm text-gray-400 hover:text-gray-600 border border-dashed border-gray-300 rounded-lg px-4 py-2 transition-colors"
-        >
+        <button type="button" onClick={addLink} className="w-full text-sm text-gray-400 hover:text-gray-600 border border-dashed border-gray-300 rounded-lg px-4 py-2 transition-colors">
           + 링크 추가
         </button>
       </section>
 
-      {/* 메모 */}
       <section className="space-y-3">
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">메모</h2>
-        <textarea
-          ref={memoRef}
-          value={form.memo}
-          onChange={e => setField('memo', e.target.value)}
-          className={`${inputClass} resize-none overflow-hidden`}
-          rows={5}
-          placeholder="자유롭게 메모..."
-        />
+        <textarea ref={memoRef} value={form.memo} onChange={e => setField('memo', e.target.value)} className={`${inputClass} resize-none overflow-hidden`} rows={4} placeholder="자유롭게 메모..." />
       </section>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
 
-      {/* Actions */}
-      <div className="flex gap-3">
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex-1 bg-gray-900 text-white rounded-lg px-4 py-2.5 text-sm font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors"
-        >
-          {loading ? '저장 중...' : '저장'}
-        </button>
-        {mode === 'edit' && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={loading}
-            className="px-4 py-2.5 rounded-lg text-sm font-medium text-red-500 border border-red-200 hover:bg-red-50 disabled:opacity-50 transition-colors"
-          >
-            삭제
+      <div className="fixed bottom-0 left-0 right-0 md:static bg-white/95 backdrop-blur border-t md:border-t-0 px-4 py-3 md:px-0 md:py-0">
+        <div className="max-w-lg mx-auto md:max-w-none flex gap-3">
+          {mode === 'edit' && (
+            <button type="button" onClick={handleDelete} disabled={loading} className="px-4 py-2.5 rounded-lg text-sm font-medium text-red-500 border border-red-200 hover:bg-red-50 transition-colors">
+              삭제
+            </button>
+          )}
+          <button type="button" onClick={() => router.back()} className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">
+            취소
           </button>
-        )}
+          <button type="submit" disabled={loading} className="flex-1 bg-gray-900 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">
+            {loading ? '저장 중...' : '저장'}
+          </button>
+        </div>
       </div>
     </form>
+  )
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  options: { value: string; label: string }[]
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white">
+        {options.map(option => (
+          <option key={option.value || 'empty'} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
   )
 }

@@ -2,20 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import type { TripItem } from '@/types'
-import PriorityBadge from '@/components/UI/PriorityBadge'
-import StatusDropdown from '@/components/Items/StatusDropdown'
-
-const categoryColors: Record<string, string> = {
-  교통: '#94A3B8',
-  숙소: '#7DD3FC',
-  식당: '#FB923C',
-  카페: '#FDBA74',
-  관광: '#6EE7B7',
-  공연: '#F9A8D4',
-  스포츠: '#86EFAC',
-  쇼핑: '#C4B5FD',
-  기타: '#FCD34D',
-}
+import { CATEGORY_META } from '@/lib/itemOptions'
+import ItemMetadataChips from '@/components/UI/ItemMetadataChips'
 
 function LinkButton({ links }: { links: TripItem['links'] }) {
   const [open, setOpen] = useState(false)
@@ -42,12 +30,7 @@ function LinkButton({ links }: { links: TripItem['links'] }) {
         className="flex-shrink-0 p-1 text-gray-400 hover:text-blue-500 transition-colors"
         title={links[0].label || '링크 열기'}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-3.5 h-3.5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
           <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
           <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
         </svg>
@@ -66,12 +49,7 @@ function LinkButton({ links }: { links: TripItem['links'] }) {
         className="p-1 text-gray-400 hover:text-blue-500 transition-colors flex items-center gap-0.5"
         title="링크 목록"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-3.5 h-3.5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
           <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
           <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
         </svg>
@@ -122,7 +100,7 @@ export default function ItemCard({ item, onSelect, isActive = false }: ItemCardP
         <div className="flex items-center gap-2.5 min-w-0">
           <span
             className="w-3 h-3 rounded-full flex-shrink-0 ring-2 ring-white shadow-sm"
-            style={{ backgroundColor: categoryColors[item.category] ?? '#D1D5DB' }}
+            style={{ backgroundColor: CATEGORY_META[item.category]?.dot ?? '#D1D5DB' }}
           />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
@@ -133,14 +111,10 @@ export default function ItemCard({ item, onSelect, isActive = false }: ItemCardP
                 </span>
               )}
             </div>
-            {item.address && (
-              <span className="text-xs text-gray-400 truncate block">{item.address}</span>
-            )}
+            {item.address && <span className="text-xs text-gray-400 truncate block">{item.address}</span>}
           </div>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
-          <StatusDropdown item={item} />
-          {item.priority && <PriorityBadge priority={item.priority} />}
           <LinkButton links={item.links} />
           {item.is_franchise && item.branches && item.branches.length > 0 && (
             <button
@@ -152,46 +126,23 @@ export default function ItemCard({ item, onSelect, isActive = false }: ItemCardP
               className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
               title="지점 목록"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`w-4 h-4 transition-transform ${branchesOpen ? 'rotate-180' : ''}`}
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
+              <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 transition-transform ${branchesOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </button>
           )}
         </div>
       </div>
 
+      <div className="mt-3 pl-[22px]">
+        <ItemMetadataChips item={item} />
+      </div>
+
       {(item.date || item.time_start || item.budget !== undefined) && (
-        <div className="mt-2.5 flex items-center gap-2 text-xs text-gray-400 pl-[22px]">
-          {item.date && (
-            <span className="flex items-center gap-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-3 h-3"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              {item.date}
-            </span>
-          )}
+        <div className="mt-2.5 flex items-center gap-2 text-xs text-gray-400 pl-[22px] flex-wrap">
+          {item.date && <span>{item.date}</span>}
           {item.time_start && <span>{item.time_start}</span>}
-          {item.budget !== undefined && (
-            <span className="font-medium text-gray-500">${item.budget.toLocaleString()}</span>
-          )}
+          {item.budget !== undefined && <span className="font-medium text-gray-500">${item.budget.toLocaleString()}</span>}
         </div>
       )}
 
@@ -199,17 +150,8 @@ export default function ItemCard({ item, onSelect, isActive = false }: ItemCardP
         <div className="mt-3 pl-[22px] space-y-1.5 border-t border-gray-100 pt-3">
           {item.branches.map(branch => (
             <div key={branch.id} className="flex items-start gap-1.5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-3.5 h-3.5 text-gray-300 flex-shrink-0 mt-0.5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                  clipRule="evenodd"
-                />
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-gray-300 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
               </svg>
               <div>
                 <span className="text-xs font-medium text-gray-700">{branch.name}</span>

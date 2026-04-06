@@ -3,18 +3,7 @@
 import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
-
-const categoryColors: Record<string, string> = {
-  교통: '#94A3B8',
-  숙소: '#7DD3FC',
-  식당: '#FB923C',
-  카페: '#FDBA74',
-  관광: '#6EE7B7',
-  공연: '#F9A8D4',
-  스포츠: '#86EFAC',
-  쇼핑: '#C4B5FD',
-  기타: '#FCD34D',
-}
+import { CATEGORY_META } from '@/lib/itemOptions'
 
 function createDotIcon(color: string) {
   return L.divIcon({
@@ -38,7 +27,7 @@ interface ResearchMapProps {
 
 export default function ResearchMap({ items, onSelectItem }: ResearchMapProps) {
   const mapItems = items.filter(
-    item => item.status !== '탈락' && item.lat !== undefined && item.lng !== undefined
+    item => item.status !== '제외' && item.lat !== undefined && item.lng !== undefined
   )
 
   return (
@@ -56,7 +45,7 @@ export default function ResearchMap({ items, onSelectItem }: ResearchMapProps) {
         <Marker
           key={item.id}
           position={[item.lat!, item.lng!]}
-          icon={createDotIcon(categoryColors[item.category])}
+          icon={createDotIcon(CATEGORY_META[item.category]?.dot ?? '#D1D5DB')}
           eventHandlers={
             onSelectItem
               ? {

@@ -1,11 +1,10 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import type { TripItem, Status } from '@/types'
+import type { TripItem } from '@/types'
 import StatusBadge from '@/components/UI/StatusBadge'
 import { useItems } from '@/lib/hooks/useItems'
-
-const STATUS_OPTIONS: Status[] = ['검토중', '보류', '대기중', '확정', '탈락']
+import { STATUS_OPTIONS } from '@/lib/itemOptions'
 
 export default function StatusDropdown({ item }: { item: TripItem }) {
   const [open, setOpen] = useState(false)
