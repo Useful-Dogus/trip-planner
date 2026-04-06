@@ -27,7 +27,7 @@ interface ResearchMapProps {
 
 export default function ResearchMap({ items, onSelectItem }: ResearchMapProps) {
   const mapItems = items.filter(
-    item => item.status !== '제외' && item.lat !== undefined && item.lng !== undefined
+    item => item.trip_priority !== '제외' && item.lat !== undefined && item.lng !== undefined
   )
 
   return (

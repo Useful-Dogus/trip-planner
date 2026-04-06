@@ -16,7 +16,7 @@ export default function SchedulePage() {
   const [tab, setTab] = useState<'list' | 'map'>('list')
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
 
-  const confirmedItems = useMemo(() => items.filter(item => item.status === '확정'), [items])
+  const confirmedItems = useMemo(() => items.filter(item => item.trip_priority === '확정'), [items])
   const selectedItem = confirmedItems.find(i => i.id === selectedItemId) ?? null
 
   const scheduleItems = useMemo(() => {

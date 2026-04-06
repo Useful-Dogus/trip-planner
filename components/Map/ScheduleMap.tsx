@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
-import StatusBadge from '@/components/UI/StatusBadge'
+import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 
 interface ScheduleMapProps {
   items: TripItem[]
@@ -34,7 +34,7 @@ function createNumberIcon(num: number) {
 
 export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
   const confirmedDates = useMemo(() => {
-    return collectScheduleDates(items.filter(i => i.status === '확정'))
+    return collectScheduleDates(items.filter(i => i.trip_priority === '확정'))
   }, [items])
 
   const [selectedDate, setSelectedDate] = useState<string>(confirmedDates[0] ?? '')
@@ -43,7 +43,7 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
     return items
       .filter(
         i =>
-          i.status === '확정' &&
+          i.trip_priority === '확정' &&
           occursOnDate(i, selectedDate) &&
           i.lat !== undefined &&
           i.lng !== undefined
@@ -115,7 +115,7 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
                 {item.budget !== undefined && (
                   <p className="text-xs text-gray-500">${item.budget}</p>
                 )}
-                <StatusBadge status={item.status} />
+                <TripPriorityBadge tripPriority={item.trip_priority} />
               </div>
             </Popup>
           </Marker>

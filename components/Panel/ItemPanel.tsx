@@ -11,15 +11,12 @@ import {
   ITEM_FIELD_LABELS,
   PLACEHOLDER_LABELS,
   PLACEHOLDER_TONE,
-  PRIORITY_META,
-  PRIORITY_OPTIONS,
+  TRIP_PRIORITY_META,
+  TRIP_PRIORITY_OPTIONS,
   RESERVATION_STATUS_META,
   RESERVATION_STATUS_OPTIONS,
-  STATUS_META,
-  STATUS_OPTIONS,
 } from '@/lib/itemOptions'
-import StatusBadge from '@/components/UI/StatusBadge'
-import PriorityBadge from '@/components/UI/PriorityBadge'
+import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 import ReservationStatusBadge from '@/components/UI/ReservationStatusBadge'
 
 export interface ItemPanelProps {
@@ -36,8 +33,8 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
   const [isDirty, setIsDirty] = useState(false)
   const [confirmingClose, setConfirmingClose] = useState(false)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
-  const [savingField, setSavingField] = useState<'category' | 'status' | 'reservation_status' | 'priority' | null>(null)
-  const [openField, setOpenField] = useState<'category' | 'status' | 'reservation_status' | 'priority' | null>(null)
+  const [savingField, setSavingField] = useState<'category' | 'trip_priority' | 'reservation_status' | null>(null)
+  const [openField, setOpenField] = useState<'category' | 'trip_priority' | 'reservation_status' | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -127,7 +124,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
     onClose()
   }
 
-  async function handleQuickUpdate(field: 'category' | 'status' | 'reservation_status' | 'priority', value: string | null) {
+  async function handleQuickUpdate(field: 'category' | 'trip_priority' | 'reservation_status', value: string | null) {
     if (!displayItem) return
     setSavingField(field)
     await updateItem(displayItem.id, { [field]: value })
@@ -224,10 +221,10 @@ function ItemDetailView({
   onQuickUpdate,
 }: {
   item: TripItem
-  openField: 'category' | 'status' | 'reservation_status' | 'priority' | null
-  savingField: 'category' | 'status' | 'reservation_status' | 'priority' | null
-  onOpenField: (field: 'category' | 'status' | 'reservation_status' | 'priority' | null) => void
-  onQuickUpdate: (field: 'category' | 'status' | 'reservation_status' | 'priority', value: string | null) => void
+  openField: 'category' | 'trip_priority' | 'reservation_status' | null
+  savingField: 'category' | 'trip_priority' | 'reservation_status' | null
+  onOpenField: (field: 'category' | 'trip_priority' | 'reservation_status' | null) => void
+  onQuickUpdate: (field: 'category' | 'trip_priority' | 'reservation_status', value: string | null) => void
 }) {
   const scheduleRows = buildScheduleRows(item)
 
@@ -250,14 +247,14 @@ function ItemDetailView({
             onSelect={value => onQuickUpdate('category', value)}
           />
           <MetadataDropdownChip
-            label={ITEM_FIELD_LABELS.status}
-            isOpen={openField === 'status'}
-            saving={savingField === 'status'}
-            onToggle={() => onOpenField(openField === 'status' ? null : 'status')}
-            currentNode={<StatusBadge status={item.status} />}
-            options={STATUS_OPTIONS}
-            descriptions={STATUS_META}
-            onSelect={value => onQuickUpdate('status', value)}
+            label={ITEM_FIELD_LABELS.trip_priority}
+            isOpen={openField === 'trip_priority'}
+            saving={savingField === 'trip_priority'}
+            onToggle={() => onOpenField(openField === 'trip_priority' ? null : 'trip_priority')}
+            currentNode={<TripPriorityBadge tripPriority={item.trip_priority} />}
+            options={TRIP_PRIORITY_OPTIONS}
+            descriptions={TRIP_PRIORITY_META}
+            onSelect={value => onQuickUpdate('trip_priority', value)}
           />
           <MetadataDropdownChip
             label={ITEM_FIELD_LABELS.reservation_status}
@@ -276,25 +273,6 @@ function ItemDetailView({
             options={RESERVATION_STATUS_OPTIONS}
             descriptions={RESERVATION_STATUS_META}
             onSelect={value => onQuickUpdate('reservation_status', value)}
-          />
-          <MetadataDropdownChip
-            label={ITEM_FIELD_LABELS.priority}
-            isOpen={openField === 'priority'}
-            saving={savingField === 'priority'}
-            onToggle={() => onOpenField(openField === 'priority' ? null : 'priority')}
-            currentNode={
-              item.priority ? (
-                <PriorityBadge priority={item.priority} />
-              ) : (
-                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${PLACEHOLDER_TONE}`}>
-                  {PLACEHOLDER_LABELS.priority}
-                </span>
-              )
-            }
-            options={[null, ...PRIORITY_OPTIONS]}
-            descriptions={PRIORITY_META}
-            placeholderLabel={PLACEHOLDER_LABELS.priority}
-            onSelect={value => onQuickUpdate('priority', value)}
           />
         </div>
       </div>

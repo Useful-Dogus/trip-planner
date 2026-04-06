@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readItems, writeItems } from '@/lib/data'
-import type { Category, Priority, ReservationStatus, Status } from '@/types'
+import type { Category, TripPriority, ReservationStatus } from '@/types'
 import {
   CATEGORY_OPTIONS,
-  PRIORITY_OPTIONS,
   RESERVATION_STATUS_OPTIONS,
-  STATUS_OPTIONS,
+  TRIP_PRIORITY_OPTIONS,
   TRIP_DATE_MAX,
   TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
@@ -17,8 +16,8 @@ function validatePartial(body: Record<string, unknown>): string | null {
   if (body.category !== undefined && !CATEGORY_OPTIONS.includes(body.category as Category)) {
     return '유효하지 않은 category입니다.'
   }
-  if (body.status !== undefined && !STATUS_OPTIONS.includes(body.status as Status)) {
-    return '유효하지 않은 status입니다.'
+  if (body.trip_priority !== undefined && !TRIP_PRIORITY_OPTIONS.includes(body.trip_priority as TripPriority)) {
+    return '유효하지 않은 trip_priority입니다.'
   }
   if (
     body.reservation_status !== undefined &&
@@ -26,13 +25,6 @@ function validatePartial(body: Record<string, unknown>): string | null {
     !RESERVATION_STATUS_OPTIONS.includes(body.reservation_status as ReservationStatus)
   ) {
     return '유효하지 않은 reservation_status입니다.'
-  }
-  if (
-    body.priority !== undefined &&
-    body.priority !== null &&
-    !PRIORITY_OPTIONS.includes(body.priority as Priority)
-  ) {
-    return '유효하지 않은 priority입니다.'
   }
   if (body.budget !== undefined && (typeof body.budget !== 'number' || body.budget < 0)) {
     return 'budget은 0 이상의 숫자여야 합니다.'
@@ -125,9 +117,6 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
     id: items[idx].id,
     created_at: items[idx].created_at,
     updated_at: new Date().toISOString(),
-  }
-  if (body.priority === null) {
-    delete updated.priority
   }
 
   items[idx] = updated

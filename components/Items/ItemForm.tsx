@@ -2,17 +2,15 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Category, Priority, ReservationStatus, Status, TripItem, Link as TripLink } from '@/types'
+import type { Category, ReservationStatus, TripItem, TripPriority, Link as TripLink } from '@/types'
 import { useItems } from '@/lib/hooks/useItems'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
-  PRIORITY_META,
-  PRIORITY_OPTIONS,
+  TRIP_PRIORITY_META,
+  TRIP_PRIORITY_OPTIONS,
   RESERVATION_STATUS_META,
   RESERVATION_STATUS_OPTIONS,
-  STATUS_META,
-  STATUS_OPTIONS,
   TRIP_DATE_MAX,
   TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
@@ -20,9 +18,8 @@ import {
 interface FormData {
   name: string
   category: Category
-  status: Status
+  trip_priority: TripPriority
   reservation_status: ReservationStatus
-  priority: Priority | ''
   address: string
   lat: string
   lng: string
@@ -47,9 +44,8 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   const [form, setForm] = useState<FormData>({
     name: initialData?.name ?? '',
     category: initialData?.category ?? '명소',
-    status: initialData?.status ?? '아이디어',
+    trip_priority: initialData?.trip_priority ?? '검토 필요',
     reservation_status: initialData?.reservation_status ?? '확인 필요',
-    priority: initialData?.priority ?? '',
     address: initialData?.address ?? '',
     lat: initialData?.lat?.toString() ?? '',
     lng: initialData?.lng?.toString() ?? '',
@@ -118,9 +114,8 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     const body: Record<string, unknown> = {
       name: form.name,
       category: form.category,
-      status: form.status,
+      trip_priority: form.trip_priority,
       reservation_status: form.reservation_status,
-      priority: form.priority || null,
       links: form.links.filter(l => l.url.trim()),
     }
 
@@ -195,9 +190,8 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
         </div>
 
         <SelectField label={`${ITEM_FIELD_LABELS.category} *`} value={form.category} onChange={value => setField('category', value as Category)} options={CATEGORY_OPTIONS.map(value => ({ value, label: value }))} />
-        <SelectField label={`${ITEM_FIELD_LABELS.status} *`} value={form.status} onChange={value => setField('status', value as Status)} options={STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${STATUS_META[value].description}` }))} />
+        <SelectField label={`${ITEM_FIELD_LABELS.trip_priority} *`} value={form.trip_priority} onChange={value => setField('trip_priority', value as TripPriority)} options={TRIP_PRIORITY_OPTIONS.map(value => ({ value, label: `${value} - ${TRIP_PRIORITY_META[value].description}` }))} />
         <SelectField label={`${ITEM_FIELD_LABELS.reservation_status} *`} value={form.reservation_status} onChange={value => setField('reservation_status', value as ReservationStatus)} options={RESERVATION_STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${RESERVATION_STATUS_META[value].description}` }))} />
-        <SelectField label={ITEM_FIELD_LABELS.priority} value={form.priority} onChange={value => setField('priority', value as Priority | '')} options={[{ value: '', label: '없음' }, ...PRIORITY_OPTIONS.map(value => ({ value, label: `${value} - ${PRIORITY_META[value].description}` }))]} />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-3">
