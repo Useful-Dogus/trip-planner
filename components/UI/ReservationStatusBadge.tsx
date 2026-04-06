@@ -1,5 +1,5 @@
 import type { ReservationStatus } from '@/types'
-import { CHIP_TONE, normalizeReservationStatus } from '@/lib/itemOptions'
+import { RESERVATION_STATUS_META, normalizeReservationStatus } from '@/lib/itemOptions'
 
 export default function ReservationStatusBadge({
   reservationStatus,
@@ -7,11 +7,13 @@ export default function ReservationStatusBadge({
   reservationStatus: ReservationStatus
 }) {
   const normalized = normalizeReservationStatus(reservationStatus) ?? '확인 필요'
+  const meta = RESERVATION_STATUS_META[normalized]
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${CHIP_TONE}`}
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border"
+      style={meta.style}
     >
-      {normalized}
+      {meta.emoji} {normalized}
     </span>
   )
 }

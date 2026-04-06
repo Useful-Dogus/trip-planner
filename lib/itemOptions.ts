@@ -1,5 +1,13 @@
 import type { Category, ReservationStatus, TripItem, TripPriority } from '@/types'
 
+interface BadgeStyle {
+  background: string
+  color: string
+  borderColor: string
+  fontWeight?: number
+  textDecoration?: string
+}
+
 export const CATEGORY_OPTIONS: Category[] = [
   '교통',
   '숙박',
@@ -48,33 +56,33 @@ export const CHIP_BASE_TONE = 'bg-white border border-gray-200'
 export const CHIP_TONE = `${CHIP_BASE_TONE} text-gray-700`
 export const PLACEHOLDER_TONE = `${CHIP_BASE_TONE} text-gray-400`
 
-export const CATEGORY_META: Record<Category, { dot: string }> = {
-  교통: { dot: '#94A3B8' },
-  숙박: { dot: '#7DD3FC' },
-  명소: { dot: '#6EE7B7' },
-  식당: { dot: '#FB923C' },
-  카페: { dot: '#FDBA74' },
-  쇼핑: { dot: '#C4B5FD' },
-  문화시설: { dot: '#67E8F9' },
-  '공연·스포츠': { dot: '#F9A8D4' },
-  액티비티: { dot: '#86EFAC' },
-  휴양: { dot: '#5EEAD4' },
-  기타: { dot: '#FCD34D' },
+export const CATEGORY_META: Record<Category, { emoji: string }> = {
+  교통: { emoji: '🚌' },
+  숙박: { emoji: '🏨' },
+  명소: { emoji: '🏛️' },
+  식당: { emoji: '🍽️' },
+  카페: { emoji: '☕' },
+  쇼핑: { emoji: '🛍️' },
+  문화시설: { emoji: '🎨' },
+  '공연·스포츠': { emoji: '🎭' },
+  액티비티: { emoji: '🎯' },
+  휴양: { emoji: '🌴' },
+  기타: { emoji: '🔖' },
 }
 
-export const TRIP_PRIORITY_META: Record<TripPriority, { description: string; order: number }> = {
-  '검토 필요': { description: '아직 결정하지 않은 후보', order: 0 },
-  '시간 되면': { description: '여유가 있으면 가볼 곳', order: 1 },
-  '가고 싶음': { description: '꼭 가고 싶은 곳', order: 2 },
-  '확정': { description: '일정에 넣기로 결정', order: 3 },
-  '제외': { description: '이번 여행에서 제외', order: 4 },
+export const TRIP_PRIORITY_META: Record<TripPriority, { description: string; order: number; emoji: string; style: BadgeStyle }> = {
+  '검토 필요': { description: '아직 결정하지 않은 후보', order: 0, emoji: '🤔', style: { background: '#f8fafc', color: '#94a3b8', borderColor: '#e2e8f0' } },
+  '시간 되면': { description: '여유가 있으면 가볼 곳', order: 1, emoji: '⏳', style: { background: '#eff6ff', color: '#3b82f6', borderColor: '#bfdbfe' } },
+  '가고 싶음': { description: '꼭 가고 싶은 곳', order: 2, emoji: '⭐', style: { background: '#f5f3ff', color: '#7c3aed', borderColor: '#ddd6fe' } },
+  '확정': { description: '일정에 넣기로 결정', order: 3, emoji: '✅', style: { background: '#f0fdf4', color: '#16a34a', borderColor: '#bbf7d0', fontWeight: 600 } },
+  '제외': { description: '이번 여행에서 제외', order: 4, emoji: '❌', style: { background: '#f8fafc', color: '#cbd5e1', borderColor: '#e2e8f0', textDecoration: 'line-through' } },
 }
 
-export const RESERVATION_STATUS_META: Record<ReservationStatus, { description: string }> = {
-  '확인 필요': { description: '예약 필요 여부 미확정' },
-  불필요: { description: '예약 없이 진행 가능' },
-  '필요(미예약)': { description: '예약이 필요하지만 아직 안 함' },
-  예약완료: { description: '예약 완료' },
+export const RESERVATION_STATUS_META: Record<ReservationStatus, { description: string; emoji: string; style: BadgeStyle }> = {
+  '확인 필요': { description: '예약 필요 여부 미확정', emoji: '🔍', style: { background: '#fffbeb', color: '#d97706', borderColor: '#fde68a' } },
+  불필요: { description: '예약 없이 진행 가능', emoji: '🆓', style: { background: '#f8fafc', color: '#94a3b8', borderColor: '#e2e8f0' } },
+  '필요(미예약)': { description: '예약이 필요하지만 아직 안 함', emoji: '🔔', style: { background: '#fff7ed', color: '#ea580c', borderColor: '#fed7aa', fontWeight: 600 } },
+  예약완료: { description: '예약 완료', emoji: '✅', style: { background: '#f0fdf4', color: '#16a34a', borderColor: '#bbf7d0' } },
 }
 
 const LEGACY_CATEGORY_MAP: Record<string, Category> = {
