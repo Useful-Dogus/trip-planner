@@ -9,12 +9,15 @@ import { useItems } from '@/lib/hooks/useItems'
 import type { TripItem } from '@/types'
 
 const ScheduleMap = dynamic(() => import('@/components/Map/ScheduleMap'), { ssr: false })
+const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
 export default function SchedulePage() {
   const { items, isLoading } = useItems()
   const [tab, setTab] = useState<'list' | 'map'>('list')
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
 
   const confirmedItems = useMemo(() => items.filter(item => item.status === '확정'), [items])
+  const selectedItem = confirmedItems.find(i => i.id === selectedItemId) ?? null
 
   const scheduleItems = useMemo(() => {
     return confirmedItems
@@ -106,7 +109,12 @@ export default function SchedulePage() {
                       </div>
                       <div className="space-y-2">
                         {dateItems.map(item => (
-                          <ItemCard key={item.id} item={item} />
+                          <ItemCard
+                            key={item.id}
+                            item={item}
+                            onSelect={id => setSelectedItemId(prev => (prev === id ? null : id))}
+                            isActive={item.id === selectedItemId}
+                          />
                         ))}
                       </div>
                     </div>
@@ -131,7 +139,12 @@ export default function SchedulePage() {
                     </div>
                     <div className="space-y-3">
                       {undatedItems.map(item => (
-                        <ItemCard key={item.id} item={item} />
+                        <ItemCard
+                          key={item.id}
+                          item={item}
+                          onSelect={id => setSelectedItemId(prev => (prev === id ? null : id))}
+                          isActive={item.id === selectedItemId}
+                        />
                       ))}
                     </div>
                   </div>
@@ -142,10 +155,21 @@ export default function SchedulePage() {
         </div>
       ) : (
         <div className="h-[calc(100vh-72px)]">
-          <ScheduleMap items={items} />
+          <ScheduleMap
+            items={items}
+            onSelectItem={id => setSelectedItemId(prev => (prev === id ? null : id))}
+          />
         </div>
       )}
       <Navigation />
+
+      <ItemPanel
+        item={selectedItem}
+        isOpen={selectedItemId !== null}
+        onClose={() => setSelectedItemId(null)}
+        onSave={() => {}}
+        onDelete={() => setSelectedItemId(null)}
+      />
     </div>
   )
 }

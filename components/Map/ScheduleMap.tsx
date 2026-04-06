@@ -6,6 +6,11 @@ import L from 'leaflet'
 import type { TripItem } from '@/types'
 import StatusBadge from '@/components/UI/StatusBadge'
 
+interface ScheduleMapProps {
+  items: TripItem[]
+  onSelectItem?: (id: string) => void
+}
+
 function createNumberIcon(num: number) {
   return L.divIcon({
     html: `<div style="
@@ -27,7 +32,7 @@ function createNumberIcon(num: number) {
   })
 }
 
-export default function ScheduleMap({ items }: { items: TripItem[] }) {
+export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
   const confirmedDates = useMemo(() => {
     return collectScheduleDates(items.filter(i => i.status === '확정'))
   }, [items])
@@ -89,7 +94,18 @@ export default function ScheduleMap({ items }: { items: TripItem[] }) {
         />
 
         {dayItems.map((item, idx) => (
-          <Marker key={item.id} position={[item.lat!, item.lng!]} icon={createNumberIcon(idx + 1)}>
+          <Marker
+            key={item.id}
+            position={[item.lat!, item.lng!]}
+            icon={createNumberIcon(idx + 1)}
+            eventHandlers={
+              onSelectItem
+                ? {
+                    click: () => onSelectItem(item.id),
+                  }
+                : undefined
+            }
+          >
             <Popup>
               <div className="space-y-1 min-w-[140px]">
                 <p className="font-semibold text-gray-900 text-sm">
