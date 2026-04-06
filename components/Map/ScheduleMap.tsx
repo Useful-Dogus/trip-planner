@@ -150,7 +150,6 @@ function collectScheduleDates(items: TripItem[]) {
 }
 
 function nextDate(date: string) {
-  const current = new Date(`${date}T00:00:00`)
-  current.setDate(current.getDate() + 1)
-  return current.toISOString().slice(0, 10)
+  const [year, month, day] = date.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10)
 }
