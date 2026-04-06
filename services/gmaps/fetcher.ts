@@ -66,6 +66,33 @@ export async function fetchListPage(listId: string): Promise<string> {
       )
     }
 
+    const entityListPath = extractEntityListPath(html)
+    if (!entityListPath) {
+      return html
+    }
+
+    const entityListUrl = new URL(entityListPath, 'https://www.google.com').toString()
+
+    const payloadResponse = await fetch(entityListUrl, {
+      method: 'GET',
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
+        Accept: '*/*',
+      },
+      signal: controller.signal,
+    })
+
+    if (!payloadResponse.ok) {
+      return html
+    }
+
+    const payload = await payloadResponse.text()
+    if (payload.trim()) {
+      return payload
+    }
+
     return html
   } catch (err) {
     if (err instanceof GmapsFetcherError) throw err
@@ -79,4 +106,11 @@ export async function fetchListPage(listId: string): Promise<string> {
   } finally {
     clearTimeout(timeout)
   }
+}
+
+function extractEntityListPath(html: string): string | null {
+  const match = html.match(/<link href="([^"]*\/maps\/preview\/entitylist\/getlist[^"]*)" as="fetch"/i)
+  if (!match) return null
+
+  return match[1].replace(/&amp;/g, '&')
 }

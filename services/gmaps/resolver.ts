@@ -17,30 +17,102 @@ export class GmapsResolverError extends Error {
  * HTTP redirect를 따라가며 최종 URL을 얻는다.
  */
 async function resolveShortUrl(shortUrl: string): Promise<string> {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 5000)
+  const maxRedirects = 5
+  const timeoutMs = 5000
 
   try {
-    const response = await fetch(shortUrl, {
-      method: 'GET',
-      redirect: 'follow',
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      },
-      signal: controller.signal,
-    })
+    let finalUrl = await followRedirect(shortUrl, maxRedirects, timeoutMs)
 
-    const finalUrl = response.url
+    if (finalUrl === shortUrl) {
+      const curlResolvedUrl = await resolveShortUrlWithCurl(shortUrl, timeoutMs)
+      if (curlResolvedUrl) {
+        finalUrl = curlResolvedUrl
+      }
+    }
+
     return finalUrl
   } catch (err) {
     if ((err as Error).name === 'AbortError') {
       throw new GmapsResolverError('요청 시간이 초과되었습니다.', 'NETWORK_ERROR')
     }
     throw new GmapsResolverError('URL을 불러오는 중 오류가 발생했습니다.', 'NETWORK_ERROR')
-  } finally {
-    clearTimeout(timeout)
   }
+}
+
+async function resolveShortUrlWithCurl(shortUrl: string, timeoutMs: number): Promise<string | null> {
+  try {
+    const { execFile } = await import('node:child_process')
+
+    const effectiveUrl = await new Promise<string>((resolve, reject) => {
+      execFile(
+        'curl',
+        ['-Ls', '--max-time', String(Math.ceil(timeoutMs / 1000)), '-o', '/dev/null', '-w', '%{url_effective}', shortUrl],
+        (error, stdout) => {
+          if (error) {
+            reject(error)
+            return
+          }
+          resolve(stdout.trim())
+        }
+      )
+    })
+
+    return effectiveUrl || null
+  } catch {
+    return null
+  }
+}
+
+function followRedirect(url: string, redirectsLeft: number, timeoutMs: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(url)
+    // Use Node's builtin HTTP client directly. In this route, fetch() receives a
+    // durable deep-link HTML page instead of the 302 Location we need.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const http = require('node:http') as typeof import('node:http')
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const https = require('node:https') as typeof import('node:https')
+    const client = parsed.protocol === 'https:' ? https : http
+    const request = client.request(
+      url,
+      {
+        method: 'GET',
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        },
+      },
+      response => {
+        response.resume()
+
+        const location = response.headers.location
+        const isRedirect =
+          response.statusCode !== undefined &&
+          response.statusCode >= 300 &&
+          response.statusCode < 400
+
+        if (isRedirect && location) {
+          if (redirectsLeft <= 0) {
+            reject(new Error('Too many redirects'))
+            return
+          }
+
+          const nextUrl = new URL(location, parsed).toString()
+          followRedirect(nextUrl, redirectsLeft - 1, timeoutMs).then(resolve).catch(reject)
+          return
+        }
+
+        resolve(url)
+      }
+    )
+
+    request.setTimeout(timeoutMs, () => {
+      request.destroy(new Error('AbortError'))
+    })
+
+    request.on('error', reject)
+    request.end()
+  })
 }
 
 /**
@@ -48,12 +120,21 @@ async function resolveShortUrl(shortUrl: string): Promise<string> {
  * 지원 형식:
  *   - /maps/placelists/list/[listId]
  *   - /maps/placelists/list/[listId]/...
+ *   - /maps/@/data=!...[!2s[listId]]...
  */
 export function extractListId(url: string): string | null {
   try {
     const parsed = new URL(url)
-    const match = parsed.pathname.match(/\/maps\/placelists\/list\/([^/?#]+)/)
-    if (match) return match[1]
+
+    const placelistMatch = parsed.pathname.match(/\/maps\/placelists\/list\/([^/?#]+)/)
+    if (placelistMatch) return placelistMatch[1]
+
+    // Newer shared list redirects often encode the list id in the path data payload:
+    // /maps/@/data=!3m1!...!2sLIST_ID!3e3
+    const dataPayload = `${parsed.pathname}${parsed.search}${parsed.hash}`
+    const dataMatch = dataPayload.match(/![12]s([^!/?#&]+)/)
+    if (dataMatch) return dataMatch[1]
+
     return null
   } catch {
     return null

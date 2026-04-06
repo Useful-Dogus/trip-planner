@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import { useToast } from '@/components/UI/Toast'
 import type { TripItem, Status } from '@/types'
@@ -13,18 +14,27 @@ const fetcher = (url: string) =>
 export type SyncStatus = 'fresh' | 'stale' | 'offline' | 'error'
 
 export function useItems() {
+  const [hasMounted, setHasMounted] = useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
+
   const { data, error, isLoading, isValidating, mutate } = useSWR<{ items: TripItem[] }>(
-    '/api/items',
+    hasMounted ? '/api/items' : null,
     fetcher
   )
   const { showToast } = useToast()
 
   const items = data?.items ?? []
+  const ready = hasMounted
+  const loading = !ready || isLoading
 
   const syncStatus: SyncStatus = (() => {
+    if (!ready) return 'fresh'
     if (typeof navigator !== 'undefined' && !navigator.onLine) return 'offline'
     if (error) return 'error'
-    if (isValidating && !isLoading) return 'stale'
+    if (isValidating && !loading) return 'stale'
     return 'fresh'
   })()
 
@@ -118,7 +128,7 @@ export function useItems() {
 
   return {
     items,
-    isLoading,
+    isLoading: loading,
     isValidating,
     syncStatus,
     error: error ?? null,
