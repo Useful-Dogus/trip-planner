@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import { useToast } from '@/components/UI/Toast'
 import type { TripItem, Status } from '@/types'
+import { normalizeTripItem } from '@/lib/itemOptions'
 
 const fetcher = (url: string) =>
   fetch(url).then(r => {
@@ -22,7 +23,7 @@ function applyItemChanges(item: TripItem, changes: Record<string, unknown>): Tri
     }
     next[key] = value
   })
-  return next as unknown as TripItem
+  return normalizeTripItem(next as unknown as TripItem).item
 }
 
 export function useItems() {
@@ -38,7 +39,7 @@ export function useItems() {
   )
   const { showToast } = useToast()
 
-  const items = data?.items ?? []
+  const items = (data?.items ?? []).map(item => normalizeTripItem(item).item)
   const ready = hasMounted
   const loading = !ready || isLoading
 
