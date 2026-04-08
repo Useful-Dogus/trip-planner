@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Navigation from '@/components/Layout/Navigation'
 import UrlInput from '@/components/GmapsImport/UrlInput'
 import CandidateList from '@/components/GmapsImport/CandidateList'
 import type { ImportCandidate } from '@/types'
@@ -88,8 +89,8 @@ export default function GmapsImportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="md:pl-44 min-h-screen bg-gray-50">
+      <div className="max-w-2xl mx-auto px-4 py-8 pb-24 md:pb-8">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-gray-900">구글맵 연동</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -178,6 +179,7 @@ export default function GmapsImportPage() {
           </div>
         )}
       </div>
+      <Navigation />
     </div>
   )
 }
