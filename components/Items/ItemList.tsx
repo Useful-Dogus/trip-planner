@@ -62,8 +62,9 @@ export default function ItemList({ items, selectedItemId, onSelectItem }: ItemLi
       selCats.length > 0 ||
       selTripPriorities.length > 0 ||
       selReservationStatuses.length > 0 ||
-      query.trim().length > 0,
-    [selCats, selTripPriorities, selReservationStatuses, query]
+      query.trim().length > 0 ||
+      showExcluded,
+    [selCats, selTripPriorities, selReservationStatuses, query, showExcluded]
   )
 
   function handleSortChange(key: SortKey) {
