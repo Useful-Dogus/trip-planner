@@ -137,7 +137,7 @@ export default function SchedulePage() {
                         </span>
                       )}
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {undatedItems.map(item => (
                         <ItemCard
                           key={item.id}
