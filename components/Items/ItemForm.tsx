@@ -180,7 +180,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   const labelClass = 'block text-sm font-medium text-gray-700 mb-1'
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 pb-28 md:pb-8">
+    <form onSubmit={handleSubmit} className="space-y-8 pb-36 md:pb-8">
       <section className="space-y-4">
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">기본 정보</h2>
 
@@ -292,7 +292,10 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 
-      <div className="fixed bottom-0 left-0 right-0 md:static bg-white/95 backdrop-blur border-t md:border-t-0 px-4 py-3 md:px-0 md:py-0">
+      <div
+        className="fixed left-0 right-0 md:static bg-white/95 backdrop-blur border-t md:border-t-0 px-4 py-3 md:px-0 md:py-0 z-40"
+        style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom))' }}
+      >
         <div className="max-w-lg mx-auto md:max-w-none flex gap-3">
           {mode === 'edit' && (
             <button type="button" onClick={handleDelete} disabled={loading} className="px-4 py-2.5 rounded-lg text-sm font-medium text-red-500 border border-red-200 hover:bg-red-50 transition-colors">
