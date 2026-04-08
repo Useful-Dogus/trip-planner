@@ -374,11 +374,11 @@ function MetadataDropdownChip({
     function updatePosition() {
       const rect = buttonRef.current?.getBoundingClientRect()
       if (!rect) return
-      setPosition({
-        top: rect.bottom + 8,
-        left: rect.left,
-        width: Math.max(rect.width, 224),
-      })
+      const width = Math.max(rect.width, 224)
+      const left = rect.left + width > window.innerWidth
+        ? Math.max(0, rect.right - width)
+        : rect.left
+      setPosition({ top: rect.bottom + 8, left, width })
     }
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node

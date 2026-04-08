@@ -137,7 +137,7 @@ export default function SchedulePage() {
                         </span>
                       )}
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {undatedItems.map(item => (
                         <ItemCard
                           key={item.id}
@@ -154,7 +154,7 @@ export default function SchedulePage() {
           </div>
         </div>
       ) : (
-        <div className="h-[calc(100vh-72px)]">
+        <div className="h-[calc(100vh-72px-56px)] md:h-[calc(100vh-72px)]">
           <ScheduleMap
             items={items}
             onSelectItem={id => setSelectedItemId(prev => (prev === id ? null : id))}

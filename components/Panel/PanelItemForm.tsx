@@ -113,18 +113,19 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    const trimmedAddress = form.address.trim()
     const changes: Record<string, unknown> = {
       name: form.name,
       category: form.category,
       trip_priority: form.trip_priority,
       reservation_status: form.reservation_status,
       links: form.links.filter(l => l.url.trim()),
+      address: trimmedAddress || null,
+      lat: trimmedAddress && form.lat.trim() ? parseFloat(form.lat) : null,
+      lng: trimmedAddress && form.lng.trim() ? parseFloat(form.lng) : null,
+      budget: form.budget.trim() ? parseInt(form.budget) : null,
+      memo: form.memo.trim() || null,
     }
-    if (form.address.trim()) changes.address = form.address.trim()
-    if (form.lat.trim()) changes.lat = parseFloat(form.lat)
-    if (form.lng.trim()) changes.lng = parseFloat(form.lng)
-    if (form.budget.trim()) changes.budget = parseInt(form.budget)
-    if (form.memo.trim()) changes.memo = form.memo.trim()
     changes.date = form.date.trim() || null
     changes.end_date = form.end_date.trim() || null
     changes.time_start = form.time_start.trim() || null
