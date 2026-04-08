@@ -11,7 +11,7 @@ const ResearchMap = dynamic(() => import('@/components/Map/ResearchMap'), { ssr:
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
 export default function ResearchPage() {
-  const { items, isLoading } = useItems()
+  const { items, isLoading, updateItem } = useItems()
   const [tab, setTab] = useState<'list' | 'map'>('list')
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
 
@@ -40,6 +40,7 @@ export default function ResearchPage() {
             items={items}
             selectedItemId={selectedItemId}
             onSelectItem={id => setSelectedItemId(prev => (prev === id ? null : id))}
+            onUpdateItem={updateItem}
           />
         </div>
       ) : (

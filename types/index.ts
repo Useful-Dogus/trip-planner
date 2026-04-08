@@ -18,14 +18,6 @@ export interface Link {
   url: string
 }
 
-export interface Branch {
-  id: string
-  name: string
-  address?: string
-  lat?: number
-  lng?: number
-}
-
 export interface TripItem {
   id: string
   name: string
@@ -42,8 +34,6 @@ export interface TripItem {
   end_date?: string
   time_start?: string
   time_end?: string
-  is_franchise?: boolean
-  branches?: Branch[]
   google_place_id?: string | null
   created_at: string
   updated_at: string
