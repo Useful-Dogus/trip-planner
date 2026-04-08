@@ -63,7 +63,7 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
       {/* Date chips */}
       {confirmedDates.length > 0 && (
         <div
-          className="absolute top-2 left-2 right-2 z-[1000] flex gap-2 overflow-x-auto pb-1"
+          className="absolute top-2 left-12 right-2 z-[1000] flex gap-2 overflow-x-auto pb-1"
           style={{ scrollbarWidth: 'none' }}
         >
           {confirmedDates.map(date => (
