@@ -146,7 +146,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     setField('links', form.links.filter((_, idx) => idx !== i))
   }
 
-  const inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white'
+  const inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white'
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
@@ -154,11 +154,16 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
         <section className="space-y-4">
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">기본 정보</h3>
           <Field label="이름 *">
-            <input type="text" value={form.name} onChange={e => setField('name', e.target.value)} className={inputClass} placeholder="장소 또는 활동 이름" required autoFocus />
+            <input type="text" value={form.name} onChange={e => setField('name', e.target.value)} className={inputClass} placeholder="장소 또는 활동 이름" required />
           </Field>
           <SelectField label={`${ITEM_FIELD_LABELS.category} *`} value={form.category} onChange={value => setField('category', value as Category)} options={CATEGORY_OPTIONS.map(value => ({ value, label: value }))} />
           <SelectField label={`${ITEM_FIELD_LABELS.trip_priority} *`} value={form.trip_priority} onChange={value => setField('trip_priority', value as TripPriority)} options={TRIP_PRIORITY_OPTIONS.map(value => ({ value, label: `${value} - ${TRIP_PRIORITY_META[value].description}` }))} />
           <SelectField label={`${ITEM_FIELD_LABELS.reservation_status} *`} value={form.reservation_status} onChange={value => setField('reservation_status', value as ReservationStatus)} options={RESERVATION_STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${RESERVATION_STATUS_META[value].description}` }))} />
+        </section>
+
+        <section className="space-y-3">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">메모</h3>
+          <textarea ref={memoRef} value={form.memo} onChange={e => setField('memo', e.target.value)} className={`${inputClass} resize-none overflow-hidden`} rows={4} placeholder="자유롭게 메모..." />
         </section>
 
         <section className="space-y-4">
@@ -244,11 +249,6 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
             + 링크 추가
           </button>
         </section>
-
-        <section className="space-y-3">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">메모</h3>
-          <textarea ref={memoRef} value={form.memo} onChange={e => setField('memo', e.target.value)} className={`${inputClass} resize-none overflow-hidden`} rows={4} placeholder="자유롭게 메모..." />
-        </section>
       </div>
 
       <div className="flex-shrink-0 px-5 py-3 border-t border-gray-100">
@@ -287,7 +287,7 @@ function SelectField({
 }) {
   return (
     <Field label={label}>
-      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white">
+      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white">
         {options.map(option => (
           <option key={option.value || 'empty'} value={option.value}>
             {option.label}
