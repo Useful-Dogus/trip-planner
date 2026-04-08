@@ -43,7 +43,7 @@ export default function ResearchPage() {
           />
         </div>
       ) : (
-        <div className="h-[calc(100vh-72px)]">
+        <div className="h-[calc(100vh-72px-56px)] md:h-[calc(100vh-72px)]">
           <ResearchMap
             items={items}
             onSelectItem={id => setSelectedItemId(prev => (prev === id ? null : id))}
