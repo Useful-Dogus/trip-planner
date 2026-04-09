@@ -24,5 +24,6 @@ create table public.items (
   updated_at       text        not null
 );
 
--- Row Level Security 비활성화 (서버사이드에서만 접근)
-alter table public.items disable row level security;
+-- Row Level Security 활성화 (서버사이드에서 service role key로만 접근)
+-- service role key는 RLS를 우회하므로 별도 정책 없이도 서버에서 정상 동작
+alter table public.items enable row level security;
