@@ -2,16 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { TripItem, TripPriority } from '@/types'
-import { TRIP_PRIORITY_META, TRIP_PRIORITY_OPTIONS } from '@/lib/itemOptions'
+import { TRIP_PRIORITY_META } from '@/lib/itemOptions'
 import NameCell from '@/components/Schedule/cells/NameCell'
 import CategoryCell from '@/components/Schedule/cells/CategoryCell'
 import PriorityCell from '@/components/Schedule/cells/PriorityCell'
 import StatusCell from '@/components/Schedule/cells/StatusCell'
 import BudgetCell from '@/components/Schedule/cells/BudgetCell'
 import type { Category, ReservationStatus } from '@/types'
-
-// 우선순위 표시 순서 (확정이 맨 위, 제외가 맨 아래)
-const PRIORITY_ORDER: TripPriority[] = ['확정', '가고 싶음', '시간 되면', '검토 필요', '제외']
+type SortKey = 'name' | 'trip_priority' | 'reservation_status' | 'budget'
+type SortDir = 'asc' | 'desc'
 
 type EditableField = 'name' | 'category' | 'trip_priority' | 'reservation_status' | 'budget'
 const EDITABLE_FIELDS: EditableField[] = ['name', 'category', 'trip_priority', 'reservation_status', 'budget']
@@ -26,6 +25,31 @@ interface ResearchTableProps {
   onUpdateItem: (id: string, changes: Record<string, unknown>) => void
   onCreateItem: (item: Omit<TripItem, 'id' | 'created_at' | 'updated_at'>) => void
   onOpenPanel: (id: string) => void
+  hasActiveSearch?: boolean
+}
+
+const PRIORITY_ORDER: Record<TripPriority, number> = {
+  '확정': 0,
+  '가고 싶음': 1,
+  '시간 되면': 2,
+  '검토 필요': 3,
+  '제외': 4,
+}
+
+function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
+  if (!active) return (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zM3 6a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm4 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
+    </svg>
+  )
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+      {dir === 'asc'
+        ? <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+        : <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+      }
+    </svg>
+  )
 }
 
 export default function ResearchTable({
@@ -33,41 +57,43 @@ export default function ResearchTable({
   onUpdateItem,
   onCreateItem,
   onOpenPanel,
+  hasActiveSearch = false,
 }: ResearchTableProps) {
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
-  // 제외 그룹은 기본 접힘
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<TripPriority>>(new Set(['제외' as TripPriority]))
-  const [addingToGroup, setAddingToGroup] = useState<TripPriority | null>(null)
+  const [sortKey, setSortKey] = useState<SortKey>('trip_priority')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+
+  function handleSortHeader(key: SortKey) {
+    if (key === sortKey) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+  const [addingRow, setAddingRow] = useState(false)
   const [newItemName, setNewItemName] = useState('')
   const newItemInputRef = useCallback((el: HTMLInputElement | null) => {
     if (el) setTimeout(() => el.focus(), 0)
   }, [])
 
-  // 우선순위별 그룹
-  const priorityGroups = useMemo(() => {
-    const groups = new Map<TripPriority, TripItem[]>()
-    for (const priority of PRIORITY_ORDER) {
-      groups.set(priority, [])
-    }
-    for (const item of items) {
-      const group = groups.get(item.trip_priority)
-      if (group) group.push(item)
-    }
-    // 각 그룹 내 이름순 정렬
-    PRIORITY_ORDER.forEach(p => {
-      groups.get(p)?.sort((a, b) => a.name.localeCompare(b.name, 'ko'))
-    })
-    return groups
-  }, [items])
-
-  // 키보드 내비게이션용 flat 목록
   const sortedItems = useMemo(() => {
-    const result: TripItem[] = []
-    for (const priority of PRIORITY_ORDER) {
-      result.push(...(priorityGroups.get(priority) ?? []))
-    }
-    return result
-  }, [priorityGroups])
+    return [...items].sort((a, b) => {
+      let cmp = 0
+      if (sortKey === 'budget') {
+        cmp = (a.budget ?? 0) - (b.budget ?? 0)
+      } else if (sortKey === 'reservation_status') {
+        cmp = (a.reservation_status ?? 'zzz').localeCompare(b.reservation_status ?? 'zzz')
+      } else if (sortKey === 'trip_priority') {
+        cmp = (PRIORITY_ORDER[a.trip_priority] ?? 99) - (PRIORITY_ORDER[b.trip_priority] ?? 99)
+        if (cmp === 0) cmp = a.name.localeCompare(b.name, 'ko')
+      } else {
+        // name
+        cmp = a.name.localeCompare(b.name, 'ko')
+      }
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+  }, [items, sortKey, sortDir])
 
   function handleNavigate(
     direction: 'tab' | 'shift-tab' | 'enter' | 'escape',
@@ -114,29 +140,26 @@ export default function ResearchTable({
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  function handleNewItemBlur(priority: TripPriority) {
+  function handleNewItemBlur() {
     const name = newItemName.trim()
     if (name) {
       onCreateItem({
         name,
         category: '기타',
-        trip_priority: priority,
+        trip_priority: '검토 필요',
         links: [],
       })
     }
-    setAddingToGroup(null)
+    setAddingRow(false)
     setNewItemName('')
   }
 
-  function handleNewItemKeyDown(
-    e: React.KeyboardEvent<HTMLInputElement>,
-    priority: TripPriority
-  ) {
+  function handleNewItemKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
       e.preventDefault()
-      handleNewItemBlur(priority)
+      handleNewItemBlur()
     } else if (e.key === 'Escape') {
-      setAddingToGroup(null)
+      setAddingRow(false)
       setNewItemName('')
     }
   }
@@ -144,179 +167,106 @@ export default function ResearchTable({
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="text-4xl mb-3">🔍</div>
-        <p className="text-sm font-medium text-gray-700 mb-1">아직 등록된 항목이 없어요</p>
-        <p className="text-xs text-gray-400">항목을 추가하면 여기에 표시됩니다</p>
+        <div className="text-4xl mb-3">{hasActiveSearch ? '🔍' : '📍'}</div>
+        <p className="text-sm font-medium text-gray-700 mb-1">
+          {hasActiveSearch ? '검색 결과가 없어요' : '아직 등록된 항목이 없어요'}
+        </p>
+        <p className="text-xs text-gray-400">
+          {hasActiveSearch ? '필터 조건을 바꿔보세요' : '항목을 추가하면 여기에 표시됩니다'}
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="border border-gray-100 rounded-xl overflow-hidden">
+    <div className="border border-gray-200 rounded-xl overflow-x-auto">
       {/* 컬럼 헤더 */}
-      <div className="flex items-center border-b border-gray-100 bg-white">
-        <div className="flex-1 min-w-0 px-3 py-2">
-          <span className="text-xs font-medium text-gray-400">이름</span>
+      <div className="flex items-center border-b border-gray-200 bg-white">
+        <button
+          type="button"
+          onClick={() => handleSortHeader('name')}
+          className="flex-1 min-w-0 px-3 py-2.5 flex items-center gap-1 group text-left hover:bg-gray-50 transition-colors"
+        >
+          <span className={`text-xs font-semibold ${sortKey === 'name' ? 'text-gray-800' : 'text-gray-500'}`}>이름</span>
+          <SortIcon active={sortKey === 'name'} dir={sortDir} />
+        </button>
+        <div className="w-10 flex-shrink-0 px-2 py-2.5 text-center">
+          <span className="text-xs font-semibold text-gray-500">분류</span>
         </div>
-        <div className="w-10 flex-shrink-0 px-2 py-2 text-center">
-          <span className="text-xs font-medium text-gray-400">분류</span>
-        </div>
-        <div className="w-28 flex-shrink-0 px-2 py-2">
-          <span className="text-xs font-medium text-gray-400">우선순위</span>
-        </div>
-        <div className="w-28 flex-shrink-0 px-2 py-2">
-          <span className="text-xs font-medium text-gray-400">예약상태</span>
-        </div>
-        <div className="w-24 flex-shrink-0 px-3 py-2 text-right">
-          <span className="text-xs font-medium text-gray-400">예산</span>
-        </div>
+        <button
+          type="button"
+          onClick={() => handleSortHeader('trip_priority')}
+          className="w-28 flex-shrink-0 px-2 py-2.5 flex items-center gap-1 group hover:bg-gray-50 transition-colors"
+        >
+          <span className={`text-xs font-semibold ${sortKey === 'trip_priority' ? 'text-gray-800' : 'text-gray-500'}`}>우선순위</span>
+          <SortIcon active={sortKey === 'trip_priority'} dir={sortDir} />
+        </button>
+        <button
+          type="button"
+          onClick={() => handleSortHeader('reservation_status')}
+          className="w-28 flex-shrink-0 px-2 py-2.5 flex items-center gap-1 group hover:bg-gray-50 transition-colors"
+        >
+          <span className={`text-xs font-semibold ${sortKey === 'reservation_status' ? 'text-gray-800' : 'text-gray-500'}`}>예약상태</span>
+          <SortIcon active={sortKey === 'reservation_status'} dir={sortDir} />
+        </button>
+        <button
+          type="button"
+          onClick={() => handleSortHeader('budget')}
+          className="w-24 flex-shrink-0 px-3 py-2.5 flex items-center justify-end gap-1 group hover:bg-gray-50 transition-colors"
+        >
+          <span className={`text-xs font-semibold ${sortKey === 'budget' ? 'text-gray-800' : 'text-gray-500'}`}>예산</span>
+          <SortIcon active={sortKey === 'budget'} dir={sortDir} />
+        </button>
         <div className="w-8 flex-shrink-0" />
       </div>
 
-      {PRIORITY_ORDER.map(priority => {
-        const groupItems = priorityGroups.get(priority) ?? []
-        const isCollapsed = collapsedGroups.has(priority)
-        const meta = TRIP_PRIORITY_META[priority]
-        const totalBudget = groupItems.reduce((s, i) => s + (i.budget ?? 0), 0)
+      {/* 행 목록 */}
+      {sortedItems.map(item => (
+        <ResearchTableRow
+          key={item.id}
+          item={item}
+          editingField={editingCell?.itemId === item.id ? editingCell.field : null}
+          onCellActivate={field => setEditingCell({ itemId: item.id, field })}
+          onCellSave={(field, value) => onUpdateItem(item.id, { [field]: value })}
+          onCellDeactivate={() => setEditingCell(null)}
+          onNavigate={handleNavigate}
+          onOpenPanel={onOpenPanel}
+        />
+      ))}
 
-        return (
-          <div key={priority}>
-            {/* 그룹 헤더 */}
-            <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
-              <button
-                type="button"
-                onClick={() =>
-                  setCollapsedGroups(prev => {
-                    const next = new Set(prev)
-                    if (next.has(priority)) next.delete(priority)
-                    else next.add(priority)
-                    return next
-                  })
-                }
-                className="flex items-center gap-2 flex-1 min-w-0 text-left"
-              >
-                <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border"
-                  style={meta.style as React.CSSProperties}
-                >
-                  {meta.emoji} {priority}
-                </span>
-                <span className="text-xs text-gray-400">{groupItems.length}개</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`w-3.5 h-3.5 text-gray-400 transition-transform flex-shrink-0 ${isCollapsed ? '-rotate-90' : ''}`}
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-
-              <div className="flex items-center gap-3 flex-shrink-0">
-                {totalBudget > 0 && (
-                  <span className="text-xs text-gray-400 tabular-nums">
-                    ${totalBudget.toLocaleString()}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCollapsedGroups(prev => {
-                      const next = new Set(prev)
-                      next.delete(priority)
-                      return next
-                    })
-                    setAddingToGroup(priority)
-                    setNewItemName('')
-                  }}
-                  className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-700 transition-colors"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-3.5 h-3.5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  추가
-                </button>
-              </div>
-            </div>
-
-            {!isCollapsed && (
-              <>
-                {groupItems.map(item => (
-                  <ResearchTableRow
-                    key={item.id}
-                    item={item}
-                    editingField={editingCell?.itemId === item.id ? editingCell.field : null}
-                    onCellActivate={field => setEditingCell({ itemId: item.id, field })}
-                    onCellSave={(field, value) => onUpdateItem(item.id, { [field]: value })}
-                    onCellDeactivate={() => setEditingCell(null)}
-                    onNavigate={handleNavigate}
-                    onOpenPanel={onOpenPanel}
-                  />
-                ))}
-
-                {/* 새 항목 입력 행 */}
-                {addingToGroup === priority ? (
-                  <div className="flex items-center border-b border-gray-50 bg-blue-50/30">
-                    <div className="flex-1 min-w-0 px-3 py-2.5">
-                      <input
-                        ref={newItemInputRef}
-                        value={newItemName}
-                        onChange={e => setNewItemName(e.target.value)}
-                        onBlur={() => handleNewItemBlur(priority)}
-                        onKeyDown={e => handleNewItemKeyDown(e, priority)}
-                        placeholder="이름 입력 후 Enter…"
-                        className="w-full bg-transparent border-b border-blue-300 focus:border-blue-500 outline-none text-sm text-gray-900 py-0.5"
-                        style={{ fontSize: 16 }}
-                      />
-                    </div>
-                    <div className="w-10 flex-shrink-0" />
-                    <div className="w-28 flex-shrink-0" />
-                    <div className="w-28 flex-shrink-0" />
-                    <div className="w-24 flex-shrink-0" />
-                    <div className="w-8 flex-shrink-0" />
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAddingToGroup(priority)
-                      setNewItemName('')
-                    }}
-                    className="flex items-center w-full px-3 py-2 text-xs text-gray-300 hover:text-gray-500 hover:bg-gray-50/50 transition-colors text-left gap-1.5"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-3.5 h-3.5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    항목 추가…
-                  </button>
-                )}
-              </>
-            )}
+      {/* 새 항목 추가 행 */}
+      {addingRow ? (
+        <div className="flex items-center border-b border-gray-100 bg-blue-50/30">
+          <div className="flex-1 min-w-0 px-3 py-2.5">
+            <input
+              ref={newItemInputRef}
+              value={newItemName}
+              onChange={e => setNewItemName(e.target.value)}
+              onBlur={handleNewItemBlur}
+              onKeyDown={handleNewItemKeyDown}
+              placeholder="이름 입력 후 Enter…"
+              className="w-full bg-transparent border-b border-blue-300 focus:border-blue-500 outline-none text-sm text-gray-900 py-0.5"
+              style={{ fontSize: 16 }}
+            />
           </div>
-        )
-      })}
+          <div className="w-10 flex-shrink-0" />
+          <div className="w-28 flex-shrink-0" />
+          <div className="w-28 flex-shrink-0" />
+          <div className="w-24 flex-shrink-0" />
+          <div className="w-8 flex-shrink-0" />
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => { setAddingRow(true); setNewItemName('') }}
+          className="flex items-center w-full px-3 py-2 text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors text-left gap-1.5"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+          </svg>
+          항목 추가…
+        </button>
+      )}
     </div>
   )
 }
@@ -364,7 +314,7 @@ function ResearchTableRow({
   return (
     <div
       data-research-row="true"
-      className="flex items-center border-b border-gray-50 hover:bg-gray-50/50 group transition-colors"
+      className="flex items-center border-b border-gray-100 hover:bg-gray-50 group transition-colors"
     >
       {/* 이름 */}
       <div className="flex-1 min-w-0 px-3 py-2.5">
@@ -458,12 +408,7 @@ function ResearchTableRow({
           aria-label="상세 보기"
           title="상세 편집"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-4 h-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
             <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
           </svg>
         </button>

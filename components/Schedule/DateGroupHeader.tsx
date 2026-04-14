@@ -5,6 +5,7 @@ interface DateGroupHeaderProps {
   dayOffset: number | null
   totalBudget: number
   isCollapsed: boolean
+  isToday?: boolean
   onToggleCollapse: () => void
   onAddItem: () => void
 }
@@ -23,23 +24,29 @@ export default function DateGroupHeader({
   dayOffset,
   totalBudget,
   isCollapsed,
+  isToday = false,
   onToggleCollapse,
   onAddItem,
 }: DateGroupHeaderProps) {
   const isUndated = date === '__undated__'
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
+    <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-gray-200 sticky top-0 z-10">
       <button
         type="button"
         onClick={onToggleCollapse}
         className="flex items-center gap-2 flex-1 min-w-0 text-left group"
       >
-        <span className="text-xs font-semibold text-gray-700">
+        <span className="text-sm font-semibold text-gray-800">
           {formatDate(date)}
         </span>
+        {isToday && (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
+            오늘
+          </span>
+        )}
         {!isUndated && dayOffset !== null && (
-          <span className="text-xs text-gray-400 font-normal">D+{dayOffset}</span>
+          <span className="text-xs text-gray-500 font-normal">D+{dayOffset}</span>
         )}
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +64,7 @@ export default function DateGroupHeader({
 
       <div className="flex items-center gap-3 flex-shrink-0">
         {totalBudget > 0 && (
-          <span className="text-xs text-gray-400 tabular-nums">
+          <span className="text-xs text-gray-500 tabular-nums">
             ${totalBudget.toLocaleString()}
           </span>
         )}

@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     })
 
     const supabase = getSupabaseClient()
-    const { error } = await supabase.from('items').insert(rows)
+    const { data: insertedRows, error } = await supabase.from('items').insert(rows).select('id')
 
     if (error) {
       console.error('[gmaps/import] supabase error:', error)
@@ -95,7 +95,8 @@ export async function POST(request: Request) {
       )
     }
 
-    return NextResponse.json({ inserted: rows.length }, { status: 201 })
+    const insertedIds = (insertedRows ?? []).map((r: { id: string }) => r.id)
+    return NextResponse.json({ inserted: insertedIds.length, ids: insertedIds }, { status: 201 })
   } catch (err) {
     console.error('[gmaps/import] unexpected error:', err)
     return NextResponse.json(

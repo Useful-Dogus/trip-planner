@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Layout/Navigation'
 import UrlInput from '@/components/GmapsImport/UrlInput'
 import CandidateList from '@/components/GmapsImport/CandidateList'
@@ -9,10 +10,22 @@ import type { ImportCandidate } from '@/types'
 type PageState = 'idle' | 'loading' | 'review' | 'importing' | 'done'
 
 export default function GmapsImportPage() {
+  const router = useRouter()
   const [state, setState] = useState<PageState>('idle')
   const [candidates, setCandidates] = useState<ImportCandidate[]>([])
   const [error, setError] = useState<string | null>(null)
   const [insertedCount, setInsertedCount] = useState(0)
+  const [insertedIds, setInsertedIds] = useState<string[]>([])
+
+  // 완료 시 전체 탭으로 자동 이동
+  useEffect(() => {
+    if (state !== 'done') return
+    const target =
+      insertedIds.length > 0
+        ? `/research?imported=${insertedIds.join(',')}`
+        : '/research'
+    router.push(target)
+  }, [state, insertedIds, router])
 
   async function handleUrlSubmit(url: string) {
     setState('loading')
@@ -74,6 +87,7 @@ export default function GmapsImportPage() {
       }
 
       setInsertedCount(data.inserted ?? selected.length)
+      setInsertedIds(data.ids ?? [])
       setState('done')
     } catch {
       setError('네트워크 오류가 발생했습니다.')
@@ -86,10 +100,11 @@ export default function GmapsImportPage() {
     setCandidates([])
     setError(null)
     setInsertedCount(0)
+    setInsertedIds([])
   }
 
   return (
-    <div className="md:pl-44 min-h-screen bg-gray-50">
+    <div className="md:pl-44 min-h-screen bg-white">
       <div className="max-w-2xl mx-auto px-4 py-8 pb-24 md:pb-8">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-gray-900">구글맵 연동</h1>
@@ -142,7 +157,7 @@ export default function GmapsImportPage() {
           </div>
         )}
 
-        {/* done */}
+        {/* done: 이동 중 표시 */}
         {state === 'done' && (
           <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
             <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
@@ -159,23 +174,7 @@ export default function GmapsImportPage() {
             <p className="text-base font-semibold text-gray-900 mb-1">
               {insertedCount}개 장소가 추가되었습니다.
             </p>
-            <p className="text-sm text-gray-500 mb-6">
-              리서치 탭에서 확인하세요.
-            </p>
-            <div className="flex justify-center gap-3">
-              <a
-                href="/research"
-                className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                리서치로 이동
-              </a>
-              <button
-                onClick={handleReset}
-                className="px-4 py-2 text-sm font-medium border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                더 추가하기
-              </button>
-            </div>
+            <p className="text-sm text-gray-500">전체 탭으로 이동 중…</p>
           </div>
         )}
       </div>

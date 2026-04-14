@@ -12,6 +12,8 @@ Auto-generated from all feature plans. Last updated: 2026-04-14
 - Markdown (표준) + N/A (문서 파일만 작성) (010-add-readme-docs)
 - TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x (013-filter-ui-mobile)
 - N/A (클라이언트 상태만 변경) (013-filter-ui-mobile)
+- TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x, SWR (014-nav-ux-overhaul)
+- N/A (UI 전용 변경, 데이터 모델 변경 없음) (014-nav-ux-overhaul)
 
 - TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS 3.x, React 18 (003-panel-editing-ux)
 - Supabase (데이터 저장소, 파일 기반에서 마이그레이션 완료)
@@ -38,9 +40,9 @@ npm run dev # 로컬 개발 서버 (http://localhost:3000)
 TypeScript + Node.js 18+: Follow standard conventions
 
 ## Recent Changes
+- 014-nav-ux-overhaul: Added TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x, SWR
 - 013-filter-ui-mobile: Added TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x
 - 010-add-readme-docs: Added Markdown (표준) + N/A (문서 파일만 작성)
-- 006-gmaps-import: Added TypeScript 5.x + Node.js 18+ + Next.js 14.2.0 (App Router), React 18.3.1, fuse.js (신규), @supabase/supabase-js
 
 
 

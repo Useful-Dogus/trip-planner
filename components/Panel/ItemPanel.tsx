@@ -9,12 +9,13 @@ import {
   CATEGORY_OPTIONS,
   CHIP_TONE,
   ITEM_FIELD_LABELS,
-  PLACEHOLDER_LABELS,
   PLACEHOLDER_TONE,
   TRIP_PRIORITY_META,
   TRIP_PRIORITY_OPTIONS,
   RESERVATION_STATUS_META,
   RESERVATION_STATUS_OPTIONS,
+  TRIP_DATE_MAX,
+  TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
 import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 import ReservationStatusBadge from '@/components/UI/ReservationStatusBadge'
@@ -133,6 +134,12 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
     onSave()
   }
 
+  async function handleFieldSave(changes: Record<string, unknown>) {
+    if (!displayItem) return
+    await updateItem(displayItem.id, changes)
+    onSave()
+  }
+
   const cachedItem = useRef<TripItem | null>(null)
   if (item) cachedItem.current = item
   const displayItem = item ?? cachedItem.current
@@ -154,15 +161,10 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
           isOpen ? 'translate-y-0 md:translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-y-0 md:translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
           <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-gray-200 rounded-full md:hidden" />
           <span className="text-sm font-semibold text-gray-900">{mode === 'edit' ? '편집' : '상세 정보'}</span>
           <div className="flex items-center gap-2">
-            {mode === 'view' && displayItem && (
-              <button onClick={() => setMode('edit')} className="px-3 py-1.5 text-xs font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
-                편집
-              </button>
-            )}
             {mode === 'edit' && displayItem && (
               <button onClick={() => handleDelete(displayItem.id)} aria-label="항목 삭제" className="px-3 py-1.5 text-xs font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
                 삭제
@@ -184,6 +186,8 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
               savingField={savingField}
               onOpenField={setOpenField}
               onQuickUpdate={handleQuickUpdate}
+              onFieldSave={handleFieldSave}
+              onDeleteRequest={() => handleDelete(displayItem.id)}
             />
           )}
           {displayItem && mode === 'edit' && (
@@ -213,38 +217,216 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
   )
 }
 
+// ─── 인라인 편집 가능한 뷰 ───────────────────────────────────────────────────
+
+type InlineField = 'name' | 'budget' | 'date' | 'time_start' | 'end_date' | 'time_end' | 'address' | 'memo'
+
 function ItemDetailView({
   item,
   openField,
   savingField,
   onOpenField,
   onQuickUpdate,
+  onFieldSave,
+  onDeleteRequest,
 }: {
   item: TripItem
   openField: 'category' | 'trip_priority' | 'reservation_status' | null
   savingField: 'category' | 'trip_priority' | 'reservation_status' | null
   onOpenField: (field: 'category' | 'trip_priority' | 'reservation_status' | null) => void
   onQuickUpdate: (field: 'category' | 'trip_priority' | 'reservation_status', value: string | null) => void
+  onFieldSave: (changes: Record<string, unknown>) => Promise<void>
+  onDeleteRequest: () => void
 }) {
-  const scheduleRows = buildScheduleRows(item)
+  const [editing, setEditing] = useState<InlineField | null>(null)
+  const [vals, setVals] = useState({
+    name: item.name,
+    budget: item.budget?.toString() ?? '',
+    date: item.date ?? '',
+    time_start: item.time_start ?? '',
+    end_date: item.end_date ?? '',
+    time_end: item.time_end ?? '',
+    address: item.address ?? '',
+    memo: item.memo ?? '',
+  })
+  const [links, setLinks] = useState(item.links ?? [])
+  const [editingLinkIdx, setEditingLinkIdx] = useState<number | null>(null)
+  const [geocoding, setGeocoding] = useState(false)
+  const memoRef = useRef<HTMLTextAreaElement>(null)
+
+  // item 변경 시 값 동기화
+  useEffect(() => {
+    setVals({
+      name: item.name,
+      budget: item.budget?.toString() ?? '',
+      date: item.date ?? '',
+      time_start: item.time_start ?? '',
+      end_date: item.end_date ?? '',
+      time_end: item.time_end ?? '',
+      address: item.address ?? '',
+      memo: item.memo ?? '',
+    })
+    setLinks(item.links ?? [])
+    setEditing(null)
+    setEditingLinkIdx(null)
+  }, [item.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // textarea 자동 높이
+  useEffect(() => {
+    const el = memoRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [vals.memo, editing])
+
+  function activate(field: InlineField) {
+    setEditing(field)
+  }
+
+  function cancel(field: InlineField) {
+    // 원래 값으로 복원
+    setVals(prev => ({
+      ...prev,
+      name: field === 'name' ? item.name : prev.name,
+      budget: field === 'budget' ? (item.budget?.toString() ?? '') : prev.budget,
+      date: field === 'date' ? (item.date ?? '') : prev.date,
+      time_start: field === 'time_start' ? (item.time_start ?? '') : prev.time_start,
+      end_date: field === 'end_date' ? (item.end_date ?? '') : prev.end_date,
+      time_end: field === 'time_end' ? (item.time_end ?? '') : prev.time_end,
+      address: field === 'address' ? (item.address ?? '') : prev.address,
+      memo: field === 'memo' ? (item.memo ?? '') : prev.memo,
+    }))
+    setEditing(null)
+  }
+
+  async function commit(field: InlineField) {
+    setEditing(null)
+    const v = vals[field]
+    switch (field) {
+      case 'name': {
+        const trimmed = v.trim()
+        if (!trimmed || trimmed === item.name) return
+        await onFieldSave({ name: trimmed })
+        break
+      }
+      case 'budget': {
+        const parsed = v.trim() ? parseInt(v) : null
+        if (parsed === (item.budget ?? null)) return
+        await onFieldSave({ budget: parsed })
+        break
+      }
+      case 'date': {
+        if (v === (item.date ?? '')) return
+        await onFieldSave({ date: v || null, ...((!v) ? { time_start: null } : {}) })
+        break
+      }
+      case 'time_start': {
+        if (v === (item.time_start ?? '')) return
+        await onFieldSave({ time_start: v || null })
+        break
+      }
+      case 'end_date': {
+        if (v === (item.end_date ?? '')) return
+        await onFieldSave({ end_date: v || null, ...((!v) ? { time_end: null } : {}) })
+        break
+      }
+      case 'time_end': {
+        if (v === (item.time_end ?? '')) return
+        await onFieldSave({ time_end: v || null })
+        break
+      }
+      case 'address': {
+        const trimmed = v.trim()
+        if (trimmed === (item.address ?? '')) return
+        if (!trimmed) { await onFieldSave({ address: null, lat: null, lng: null }); return }
+        setGeocoding(true)
+        try {
+          const res = await fetch(`/api/geocode?q=${encodeURIComponent(trimmed)}`)
+          const data = await res.json()
+          await onFieldSave({
+            address: trimmed,
+            lat: data.lat ?? null,
+            lng: data.lng ?? null,
+          })
+        } finally {
+          setGeocoding(false)
+        }
+        break
+      }
+      case 'memo': {
+        const trimmed = v.trim()
+        if (trimmed === (item.memo ?? '')) return
+        await onFieldSave({ memo: trimmed || null })
+        break
+      }
+    }
+  }
+
+  async function saveLinks(newLinks: TripItem['links']) {
+    setLinks(newLinks)
+    await onFieldSave({ links: newLinks.filter(l => l.url.trim()) })
+  }
+
+  function inlineInput(field: InlineField, opts?: { type?: string; min?: string; max?: string; placeholder?: string; className?: string }) {
+    return (
+      <input
+        autoFocus
+        type={opts?.type ?? 'text'}
+        min={opts?.min}
+        max={opts?.max}
+        value={vals[field]}
+        placeholder={opts?.placeholder}
+        onChange={e => setVals(prev => ({ ...prev, [field]: e.target.value }))}
+        onBlur={() => commit(field)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') { e.preventDefault(); commit(field) }
+          if (e.key === 'Escape') cancel(field)
+        }}
+        className={`border-b border-gray-400 outline-none bg-transparent ${opts?.className ?? 'text-sm text-gray-900 w-full'}`}
+      />
+    )
+  }
+
+  const inputClass = 'border-b border-gray-400 outline-none bg-transparent text-sm text-gray-900 w-full'
+  const emptyClass = 'text-sm text-gray-400 cursor-text'
 
   return (
     <div className="px-5 py-4 space-y-5 pb-8 overflow-y-auto">
+
+      {/* 이름 */}
       <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">{item.name}</h2>
+        {editing === 'name' ? (
+          <input
+            autoFocus
+            type="text"
+            value={vals.name}
+            onChange={e => setVals(prev => ({ ...prev, name: e.target.value }))}
+            onBlur={() => commit('name')}
+            onKeyDown={e => {
+              if (e.key === 'Enter') commit('name')
+              if (e.key === 'Escape') cancel('name')
+            }}
+            className="text-xl font-bold text-gray-900 w-full border-b-2 border-gray-400 outline-none bg-transparent mb-2"
+          />
+        ) : (
+          <h2
+            className="text-xl font-bold text-gray-900 mb-2 cursor-text"
+            onClick={() => activate('name')}
+          >
+            {item.name}
+          </h2>
+        )}
+
+        {/* 칩 */}
         <div className="flex flex-wrap gap-2">
           <MetadataDropdownChip
             label={ITEM_FIELD_LABELS.category}
             isOpen={openField === 'category'}
             saving={savingField === 'category'}
             onToggle={() => onOpenField(openField === 'category' ? null : 'category')}
-            currentNode={
-              <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${CHIP_TONE}`}>
-                {item.category}
-              </span>
-            }
+            currentNode={<span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${CHIP_TONE}`}>{item.category}</span>}
             options={CATEGORY_OPTIONS}
-            onSelect={value => onQuickUpdate('category', value)}
+            onSelect={v => onQuickUpdate('category', v)}
           />
           <MetadataDropdownChip
             label={ITEM_FIELD_LABELS.trip_priority}
@@ -254,7 +436,7 @@ function ItemDetailView({
             currentNode={<TripPriorityBadge tripPriority={item.trip_priority} />}
             options={TRIP_PRIORITY_OPTIONS}
             descriptions={TRIP_PRIORITY_META}
-            onSelect={value => onQuickUpdate('trip_priority', value)}
+            onSelect={v => onQuickUpdate('trip_priority', v)}
           />
           <MetadataDropdownChip
             label={ITEM_FIELD_LABELS.reservation_status}
@@ -262,86 +444,254 @@ function ItemDetailView({
             saving={savingField === 'reservation_status'}
             onToggle={() => onOpenField(openField === 'reservation_status' ? null : 'reservation_status')}
             currentNode={
-              item.reservation_status ? (
-                <ReservationStatusBadge reservationStatus={item.reservation_status} />
-              ) : (
-                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${PLACEHOLDER_TONE}`}>
-                  {PLACEHOLDER_LABELS.reservation_status}
-                </span>
-              )
+              item.reservation_status
+                ? <ReservationStatusBadge reservationStatus={item.reservation_status} />
+                : <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${PLACEHOLDER_TONE}`}>예약 정보 없음</span>
             }
             options={RESERVATION_STATUS_OPTIONS}
             descriptions={RESERVATION_STATUS_META}
-            onSelect={value => onQuickUpdate('reservation_status', value)}
+            onSelect={v => onQuickUpdate('reservation_status', v)}
           />
         </div>
       </div>
 
-      {(scheduleRows.length > 0 || item.budget !== undefined) && (
-        <section className="bg-gray-50 rounded-xl p-4 space-y-1.5">
-          {scheduleRows.map(row => (
-            <DetailRow key={row.label} label={row.label} value={row.value} />
+      {/* 일정 + 예산 */}
+      <section className="bg-gray-50 rounded-xl p-4 space-y-2.5">
+        <SectionTitle>일정 · 예산</SectionTitle>
+
+        <InlineRow label="시작 날짜">
+          {editing === 'date'
+            ? inlineInput('date', { type: 'date', min: TRIP_DATE_MIN, max: TRIP_DATE_MAX })
+            : <span className={vals.date ? 'text-sm text-gray-900 cursor-text' : emptyClass} onClick={() => activate('date')}>{vals.date || '날짜 선택'}</span>
+          }
+        </InlineRow>
+
+        <InlineRow label="시작 시간">
+          {editing === 'time_start'
+            ? inlineInput('time_start', { type: 'time' })
+            : <span className={vals.time_start ? 'text-sm text-gray-900 cursor-text' : emptyClass} onClick={() => vals.date && activate('time_start')}>{vals.time_start || (vals.date ? '시간 선택' : '—')}</span>
+          }
+        </InlineRow>
+
+        <InlineRow label="종료 날짜">
+          {editing === 'end_date'
+            ? inlineInput('end_date', { type: 'date', min: TRIP_DATE_MIN, max: TRIP_DATE_MAX })
+            : <span className={vals.end_date ? 'text-sm text-gray-900 cursor-text' : emptyClass} onClick={() => activate('end_date')}>{vals.end_date || '날짜 선택'}</span>
+          }
+        </InlineRow>
+
+        <InlineRow label="종료 시간">
+          {editing === 'time_end'
+            ? inlineInput('time_end', { type: 'time' })
+            : <span className={vals.time_end ? 'text-sm text-gray-900 cursor-text' : emptyClass} onClick={() => vals.end_date && activate('time_end')}>{vals.time_end || (vals.end_date ? '시간 선택' : '—')}</span>
+          }
+        </InlineRow>
+
+        <InlineRow label="예산 (USD)">
+          {editing === 'budget'
+            ? <input
+                autoFocus
+                type="number"
+                min="0"
+                value={vals.budget}
+                onChange={e => setVals(prev => ({ ...prev, budget: e.target.value }))}
+                onBlur={() => commit('budget')}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') commit('budget')
+                  if (e.key === 'Escape') cancel('budget')
+                }}
+                className={`${inputClass} text-right w-28`}
+                placeholder="0"
+              />
+            : <span className={vals.budget ? 'text-sm font-medium text-gray-900 cursor-text' : emptyClass} onClick={() => activate('budget')}>
+                {vals.budget ? `$${parseInt(vals.budget).toLocaleString()}` : '입력'}
+              </span>
+          }
+        </InlineRow>
+      </section>
+
+      {/* 위치 */}
+      <section>
+        <SectionTitle>위치</SectionTitle>
+        {editing === 'address'
+          ? <input
+              autoFocus
+              type="text"
+              value={vals.address}
+              onChange={e => setVals(prev => ({ ...prev, address: e.target.value }))}
+              onBlur={() => commit('address')}
+              onKeyDown={e => {
+                if (e.key === 'Enter') commit('address')
+                if (e.key === 'Escape') cancel('address')
+              }}
+              className={`${inputClass} mb-1`}
+              placeholder="주소 입력 후 포커스를 벗어나면 좌표 자동 입력"
+            />
+          : <p
+              className={vals.address ? 'text-sm text-gray-700 cursor-text' : emptyClass}
+              onClick={() => activate('address')}
+            >
+              {vals.address || '주소 추가'}
+            </p>
+        }
+        {geocoding && <p className="text-xs text-gray-400 mt-1">좌표 검색 중...</p>}
+        {!geocoding && item.lat !== undefined && item.lng !== undefined && (
+          <p className="text-xs text-gray-400 mt-1">{item.lat}, {item.lng}</p>
+        )}
+      </section>
+
+      {/* 링크 */}
+      <section>
+        <SectionTitle>링크</SectionTitle>
+        <div className="space-y-2">
+          {links.map((link, i) => (
+            <div key={i}>
+              {editingLinkIdx === i ? (
+                <div className="space-y-1.5">
+                  <input
+                    autoFocus
+                    type="text"
+                    value={link.label}
+                    placeholder="이름 (예: 공식 사이트)"
+                    onChange={e => {
+                      const next = links.map((l, idx) => idx === i ? { ...l, label: e.target.value } : l)
+                      setLinks(next)
+                    }}
+                    onKeyDown={e => e.key === 'Escape' && setEditingLinkIdx(null)}
+                    className={inputClass}
+                  />
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="url"
+                      value={link.url}
+                      placeholder="https://..."
+                      onChange={e => {
+                        const next = links.map((l, idx) => idx === i ? { ...l, url: e.target.value } : l)
+                        setLinks(next)
+                      }}
+                      onBlur={() => { saveLinks(links); setEditingLinkIdx(null) }}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') { saveLinks(links); setEditingLinkIdx(null) }
+                        if (e.key === 'Escape') setEditingLinkIdx(null)
+                      }}
+                      className={`${inputClass} flex-1`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { const next = links.filter((_, idx) => idx !== i); saveLinks(next); setEditingLinkIdx(null) }}
+                      className="text-gray-300 hover:text-red-400 text-xl leading-none transition-colors flex-shrink-0"
+                    >×</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 group">
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors min-w-0 flex-1"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                      <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                    </svg>
+                    <span className="truncate">{link.label || link.url}</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setEditingLinkIdx(i)}
+                    className="text-gray-300 hover:text-gray-500 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100 md:block hidden"
+                    title="링크 편집"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                  </button>
+                  {/* 모바일: 탭으로 편집 활성화 */}
+                  <button
+                    type="button"
+                    onClick={() => setEditingLinkIdx(i)}
+                    className="text-gray-300 hover:text-gray-500 transition-colors flex-shrink-0 md:hidden"
+                    title="링크 편집"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
           ))}
-          {item.budget !== undefined && <DetailRow label="예산" value={`$${item.budget.toLocaleString()}`} />}
-        </section>
-      )}
+          <button
+            type="button"
+            onClick={() => {
+              const next = [...links, { label: '', url: '' }]
+              setLinks(next)
+              setEditingLinkIdx(next.length - 1)
+            }}
+            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            + 링크 추가
+          </button>
+        </div>
+      </section>
 
-      {item.address && (
-        <section>
-          <SectionTitle>위치</SectionTitle>
-          <p className="text-sm text-gray-700">{item.address}</p>
-          {item.lat !== undefined && item.lng !== undefined && <p className="text-xs text-gray-400 mt-1">{item.lat}, {item.lng}</p>}
-        </section>
-      )}
+      {/* 메모 */}
+      <section>
+        <SectionTitle>메모</SectionTitle>
+        {editing === 'memo'
+          ? <textarea
+              ref={memoRef}
+              autoFocus
+              value={vals.memo}
+              onChange={e => setVals(prev => ({ ...prev, memo: e.target.value }))}
+              onBlur={() => commit('memo')}
+              onKeyDown={e => {
+                if (e.key === 'Escape') cancel('memo')
+              }}
+              className="text-sm text-gray-700 w-full border-b border-gray-400 outline-none bg-transparent resize-none overflow-hidden"
+              rows={3}
+              placeholder="자유롭게 메모..."
+            />
+          : <p
+              className={vals.memo ? 'text-sm text-gray-700 whitespace-pre-wrap cursor-text' : emptyClass}
+              onClick={() => activate('memo')}
+            >
+              {vals.memo || '메모 추가'}
+            </p>
+        }
+      </section>
 
-      {item.links.length > 0 && (
-        <section>
-          <SectionTitle>링크</SectionTitle>
-          <div className="space-y-1.5">
-            {item.links.map((link, i) => (
-              <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                  <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                </svg>
-                {link.label || link.url}
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {item.memo && (
-        <section>
-          <SectionTitle>메모</SectionTitle>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.memo}</p>
-        </section>
-      )}
+      {/* 삭제 버튼 */}
+      <div className="pt-2">
+        <button
+          onClick={onDeleteRequest}
+          className="w-full px-4 py-2.5 rounded-lg text-sm font-medium text-red-500 border border-red-200 hover:bg-red-50 transition-colors"
+        >
+          삭제
+        </button>
+      </div>
     </div>
   )
 }
+
+// ─── 공통 UI ──────────────────────────────────────────────────────────────────
 
 function SectionTitle({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <h3 className={`text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 ${className}`}>{children}</h3>
+  return <h3 className={`text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ${className}`}>{children}</h3>
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function InlineRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-xs text-gray-500">{label}</span>
-      <span className="text-sm font-medium text-gray-900">{value}</span>
+    <div className="flex items-center justify-between gap-4">
+      <span className="text-xs text-gray-500 flex-shrink-0">{label}</span>
+      <div className="flex-1 text-right">{children}</div>
     </div>
   )
 }
 
-function buildScheduleRows(item: TripItem): Array<{ label: string; value: string }> {
-  const rows: Array<{ label: string; value: string }> = []
-  if (item.date) rows.push({ label: '시작 날짜', value: item.date })
-  if (item.time_start) rows.push({ label: '시작 시간', value: item.time_start })
-  if (item.end_date) rows.push({ label: '종료 날짜', value: item.end_date })
-  if (item.time_end) rows.push({ label: '종료 시간', value: item.time_end })
-  return rows
-}
+// ─── MetadataDropdownChip ─────────────────────────────────────────────────────
 
 function MetadataDropdownChip({
   label,
@@ -403,37 +753,35 @@ function MetadataDropdownChip({
         type="button"
         onClick={onToggle}
         disabled={saving}
-        className={`${saving ? 'opacity-60 cursor-wait' : ''}`}
+        className={saving ? 'opacity-60 cursor-wait' : ''}
       >
         {currentNode}
       </button>
-      {isOpen &&
-        position &&
-        createPortal(
-          <div
-            ref={dropdownRef}
-            className="fixed z-[1200] rounded-xl border border-gray-200 bg-white shadow-lg p-1"
-            style={{ top: position.top, left: position.left, width: position.width }}
-          >
-            <div className="px-3 py-2 text-[11px] font-medium text-gray-400">{label}</div>
-            {options.map(option => {
-              const key = option ?? 'empty'
-              const description = option && descriptions?.[option]?.description
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => onSelect(option)}
-                  className="block w-full rounded-lg px-3 py-2 text-left hover:bg-gray-50 transition-colors"
-                >
-                  <div className="text-sm font-medium text-gray-800">{option ?? placeholderLabel ?? '없음'}</div>
-                  {description && <div className="mt-0.5 text-xs text-gray-400">{description}</div>}
-                </button>
-              )
-            })}
-          </div>,
-          document.body
-        )}
+      {isOpen && position && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-[1200] rounded-xl border border-gray-200 bg-white shadow-lg p-1"
+          style={{ top: position.top, left: position.left, width: position.width }}
+        >
+          <div className="px-3 py-2 text-[11px] font-medium text-gray-400">{label}</div>
+          {options.map(option => {
+            const key = option ?? 'empty'
+            const description = option && descriptions?.[option]?.description
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => onSelect(option)}
+                className="block w-full rounded-lg px-3 py-2 text-left hover:bg-gray-50 transition-colors"
+              >
+                <div className="text-sm font-medium text-gray-800">{option ?? placeholderLabel ?? '없음'}</div>
+                {description && <div className="mt-0.5 text-xs text-gray-400">{description}</div>}
+              </button>
+            )
+          })}
+        </div>,
+        document.body
+      )}
     </div>
   )
 }

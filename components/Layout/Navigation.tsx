@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 const navItems = [
   {
     href: '/research',
-    label: '리서치',
+    label: '목록',
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -24,44 +24,8 @@ const navItems = [
     ),
   },
   {
-    href: '/schedule',
-    label: '일정',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <path
-          fillRule="evenodd"
-          d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: '/items/new',
-    label: '추가',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <path
-          fillRule="evenodd"
-          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: '/gmaps-import',
-    label: '지도 연동',
+    href: '/map',
+    label: '지도',
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -85,11 +49,10 @@ export default function Navigation() {
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' })
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   function isActive(href: string) {
-    if (href === '/items/new') return false
     return pathname.startsWith(href)
   }
 
@@ -138,24 +101,45 @@ export default function Navigation() {
             </Link>
           ))}
         </div>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-gray-600 text-left rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-4 h-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
+        <div className="border-t border-gray-100 pt-3 mt-2 space-y-0.5">
+          {/* 지도연동 보조 버튼 */}
+          <Link
+            href="/gmaps-import"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            <path
-              fillRule="evenodd"
-              d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"
-              clipRule="evenodd"
-            />
-          </svg>
-          로그아웃
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+            지도 연동
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-gray-600 text-left rounded-lg hover:bg-gray-50 transition-colors w-full"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"
+                clipRule="evenodd"
+              />
+            </svg>
+            로그아웃
+          </button>
+        </div>
       </aside>
     </>
   )

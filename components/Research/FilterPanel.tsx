@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Category, ReservationStatus, TripPriority } from '@/types'
 import type { FilterState } from '@/components/Items/ItemList'
@@ -151,6 +151,8 @@ function FilterPanelContent({
 
 export default function FilterPanel({ isOpen, filterState, onChange, onClose }: FilterPanelProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   // 데스크탑: 외부 클릭 감지
   useEffect(() => {
@@ -193,10 +195,9 @@ export default function FilterPanel({ isOpen, filterState, onChange, onClose }: 
     </div>
   )
 
-  // 모바일 바텀시트 (portal)
-  const mobileBottomSheet =
-    typeof window !== 'undefined'
-      ? createPortal(
+  // 모바일 바텀시트 (portal) — mounted 후에만 렌더 (hydration mismatch 방지)
+  const mobileBottomSheet = mounted
+    ? createPortal(
           <>
             {/* 백드롭 */}
             <div
