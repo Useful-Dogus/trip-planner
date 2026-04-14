@@ -9,7 +9,8 @@ import PriorityCell from '@/components/Schedule/cells/PriorityCell'
 import StatusCell from '@/components/Schedule/cells/StatusCell'
 import BudgetCell from '@/components/Schedule/cells/BudgetCell'
 import type { Category, ReservationStatus } from '@/types'
-import type { SortKey, SortDir } from '@/components/Items/ItemList'
+type SortKey = 'name' | 'trip_priority' | 'reservation_status' | 'budget'
+type SortDir = 'asc' | 'desc'
 
 type EditableField = 'name' | 'category' | 'trip_priority' | 'reservation_status' | 'budget'
 const EDITABLE_FIELDS: EditableField[] = ['name', 'category', 'trip_priority', 'reservation_status', 'budget']
@@ -24,8 +25,6 @@ interface ResearchTableProps {
   onUpdateItem: (id: string, changes: Record<string, unknown>) => void
   onCreateItem: (item: Omit<TripItem, 'id' | 'created_at' | 'updated_at'>) => void
   onOpenPanel: (id: string) => void
-  sortKey?: SortKey
-  sortDir?: SortDir
   hasActiveSearch?: boolean
 }
 
@@ -37,16 +36,41 @@ const PRIORITY_ORDER: Record<TripPriority, number> = {
   '제외': 4,
 }
 
+function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
+  if (!active) return (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zM3 6a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm4 8a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
+    </svg>
+  )
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+      {dir === 'asc'
+        ? <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+        : <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+      }
+    </svg>
+  )
+}
+
 export default function ResearchTable({
   items,
   onUpdateItem,
   onCreateItem,
   onOpenPanel,
-  sortKey = 'trip_priority',
-  sortDir = 'asc',
   hasActiveSearch = false,
 }: ResearchTableProps) {
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
+  const [sortKey, setSortKey] = useState<SortKey>('trip_priority')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+
+  function handleSortHeader(key: SortKey) {
+    if (key === sortKey) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
   const [addingRow, setAddingRow] = useState(false)
   const [newItemName, setNewItemName] = useState('')
   const newItemInputRef = useCallback((el: HTMLInputElement | null) => {
@@ -58,8 +82,8 @@ export default function ResearchTable({
       let cmp = 0
       if (sortKey === 'budget') {
         cmp = (a.budget ?? 0) - (b.budget ?? 0)
-      } else if (sortKey === 'date') {
-        cmp = (a.date ?? '').localeCompare(b.date ?? '')
+      } else if (sortKey === 'reservation_status') {
+        cmp = (a.reservation_status ?? 'zzz').localeCompare(b.reservation_status ?? 'zzz')
       } else if (sortKey === 'trip_priority') {
         cmp = (PRIORITY_ORDER[a.trip_priority] ?? 99) - (PRIORITY_ORDER[b.trip_priority] ?? 99)
         if (cmp === 0) cmp = a.name.localeCompare(b.name, 'ko')
@@ -158,21 +182,41 @@ export default function ResearchTable({
     <div className="border border-gray-200 rounded-xl overflow-x-auto">
       {/* 컬럼 헤더 */}
       <div className="flex items-center border-b border-gray-200 bg-white">
-        <div className="flex-1 min-w-0 px-3 py-2.5">
-          <span className="text-xs font-semibold text-gray-500">이름</span>
-        </div>
+        <button
+          type="button"
+          onClick={() => handleSortHeader('name')}
+          className="flex-1 min-w-0 px-3 py-2.5 flex items-center gap-1 group text-left hover:bg-gray-50 transition-colors"
+        >
+          <span className={`text-xs font-semibold ${sortKey === 'name' ? 'text-gray-800' : 'text-gray-500'}`}>이름</span>
+          <SortIcon active={sortKey === 'name'} dir={sortDir} />
+        </button>
         <div className="w-10 flex-shrink-0 px-2 py-2.5 text-center">
           <span className="text-xs font-semibold text-gray-500">분류</span>
         </div>
-        <div className="w-28 flex-shrink-0 px-2 py-2.5">
-          <span className="text-xs font-semibold text-gray-500">우선순위</span>
-        </div>
-        <div className="w-28 flex-shrink-0 px-2 py-2.5">
-          <span className="text-xs font-semibold text-gray-500">예약상태</span>
-        </div>
-        <div className="w-24 flex-shrink-0 px-3 py-2.5 text-right">
-          <span className="text-xs font-semibold text-gray-500">예산</span>
-        </div>
+        <button
+          type="button"
+          onClick={() => handleSortHeader('trip_priority')}
+          className="w-28 flex-shrink-0 px-2 py-2.5 flex items-center gap-1 group hover:bg-gray-50 transition-colors"
+        >
+          <span className={`text-xs font-semibold ${sortKey === 'trip_priority' ? 'text-gray-800' : 'text-gray-500'}`}>우선순위</span>
+          <SortIcon active={sortKey === 'trip_priority'} dir={sortDir} />
+        </button>
+        <button
+          type="button"
+          onClick={() => handleSortHeader('reservation_status')}
+          className="w-28 flex-shrink-0 px-2 py-2.5 flex items-center gap-1 group hover:bg-gray-50 transition-colors"
+        >
+          <span className={`text-xs font-semibold ${sortKey === 'reservation_status' ? 'text-gray-800' : 'text-gray-500'}`}>예약상태</span>
+          <SortIcon active={sortKey === 'reservation_status'} dir={sortDir} />
+        </button>
+        <button
+          type="button"
+          onClick={() => handleSortHeader('budget')}
+          className="w-24 flex-shrink-0 px-3 py-2.5 flex items-center justify-end gap-1 group hover:bg-gray-50 transition-colors"
+        >
+          <span className={`text-xs font-semibold ${sortKey === 'budget' ? 'text-gray-800' : 'text-gray-500'}`}>예산</span>
+          <SortIcon active={sortKey === 'budget'} dir={sortDir} />
+        </button>
         <div className="w-8 flex-shrink-0" />
       </div>
 

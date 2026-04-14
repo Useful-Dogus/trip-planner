@@ -11,10 +11,9 @@ import ScheduleTable from '@/components/Schedule/ScheduleTable'
 import FAB from '@/components/UI/FAB'
 import FilterButton from '@/components/Research/FilterButton'
 import FilterPanel from '@/components/Research/FilterPanel'
-import SortButton from '@/components/Research/SortButton'
 import ActiveFilterChips from '@/components/Research/ActiveFilterChips'
 import { useItems } from '@/lib/hooks/useItems'
-import type { FilterState, SortKey, SortDir } from '@/components/Items/ItemList'
+import type { FilterState } from '@/components/Items/ItemList'
 import { getActiveFilterCount } from '@/components/Items/ItemList'
 import type { Category, ReservationStatus, TripPriority } from '@/types'
 
@@ -50,9 +49,6 @@ function ResearchPageContent() {
     showExcluded: false,
   })
   const [filterPanelOpen, setFilterPanelOpen] = useState(false)
-  const [sortKey, setSortKey] = useState<SortKey>('trip_priority')
-  const [sortDir, setSortDir] = useState<SortDir>('asc')
-
   const activeCount = useMemo(() => getActiveFilterCount(filterState), [filterState])
 
   const activeChips = useMemo(() => {
@@ -179,7 +175,6 @@ function ResearchPageContent() {
                   onChange={setFilterState}
                   onClose={() => setFilterPanelOpen(false)}
                 />
-                <SortButton sortKey={sortKey} sortDir={sortDir} onChange={(k, d) => { setSortKey(k); setSortDir(d) }} />
               </div>
             </div>
             {activeChips.length > 0 && (
@@ -218,8 +213,6 @@ function ResearchPageContent() {
               onUpdateItem={updateItem}
               onCreateItem={createItem}
               onOpenPanel={handleSelectItem}
-              sortKey={sortKey}
-              sortDir={sortDir}
               hasActiveSearch={query.trim().length > 0 || activeCount > 0}
             />
           </div>
