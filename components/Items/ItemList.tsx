@@ -5,37 +5,36 @@ import Link from 'next/link'
 import type { Category, ReservationStatus, TripItem, TripPriority } from '@/types'
 import ItemCard from './ItemCard'
 import GroupCard from './GroupCard'
+import FilterButton from '@/components/Research/FilterButton'
+import FilterPanel from '@/components/Research/FilterPanel'
+import SortButton from '@/components/Research/SortButton'
+import ActiveFilterChips from '@/components/Research/ActiveFilterChips'
 import {
-  CATEGORY_OPTIONS,
-  ITEM_FIELD_LABELS,
   TRIP_PRIORITY_META,
-  TRIP_PRIORITY_OPTIONS,
-  RESERVATION_STATUS_OPTIONS,
 } from '@/lib/itemOptions'
 
-type SortKey = 'name' | 'date' | 'budget' | 'trip_priority'
-type SortDir = 'asc' | 'desc'
+export type SortKey = 'name' | 'date' | 'budget' | 'trip_priority'
+export type SortDir = 'asc' | 'desc'
+
+export interface FilterState {
+  categories: Category[]
+  tripPriorities: TripPriority[]
+  reservationStatuses: ReservationStatus[]
+  showExcluded: boolean
+}
+
+export function getActiveFilterCount(state: FilterState): number {
+  return (
+    state.categories.length +
+    state.tripPriorities.length +
+    state.reservationStatuses.length +
+    (state.showExcluded ? 1 : 0)
+  )
+}
 
 type RenderEntry =
   | { type: 'single'; item: TripItem; sortKey: string | number }
   | { type: 'group'; name: string; visibleItems: TripItem[]; totalCount: number; sortKey: string | number }
-
-function toggle<T>(arr: T[], val: T): T[] {
-  return arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
-}
-
-function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-        active ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
-      }`}
-    >
-      {label}
-    </button>
-  )
-}
 
 interface ItemListProps {
   items: TripItem[]
@@ -45,41 +44,62 @@ interface ItemListProps {
 }
 
 export default function ItemList({ items, selectedItemId, onSelectItem, onUpdateItem }: ItemListProps) {
-  const [selCats, setSelCats] = useState<Category[]>([])
-  const [selTripPriorities, setSelTripPriorities] = useState<TripPriority[]>([])
-  const [selReservationStatuses, setSelReservationStatuses] = useState<ReservationStatus[]>([])
-  const [showExcluded, setShowExcluded] = useState(false)
+  const [filterState, setFilterState] = useState<FilterState>({
+    categories: [],
+    tripPriorities: [],
+    reservationStatuses: [],
+    showExcluded: false,
+  })
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('name')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
 
-  const excludedCount = useMemo(() => items.filter(i => i.trip_priority === '제외').length, [items])
+  const activeCount = useMemo(() => getActiveFilterCount(filterState), [filterState])
+
+  const activeChips = useMemo(() => {
+    const chips: { id: string; label: string; onRemove: () => void }[] = []
+    for (const c of filterState.categories) {
+      chips.push({
+        id: `cat-${c}`,
+        label: c,
+        onRemove: () => setFilterState(prev => ({ ...prev, categories: prev.categories.filter(x => x !== c) })),
+      })
+    }
+    for (const p of filterState.tripPriorities) {
+      chips.push({
+        id: `pri-${p}`,
+        label: p,
+        onRemove: () => setFilterState(prev => ({ ...prev, tripPriorities: prev.tripPriorities.filter(x => x !== p) })),
+      })
+    }
+    for (const s of filterState.reservationStatuses) {
+      chips.push({
+        id: `res-${s}`,
+        label: s,
+        onRemove: () => setFilterState(prev => ({ ...prev, reservationStatuses: prev.reservationStatuses.filter(x => x !== s) })),
+      })
+    }
+    if (filterState.showExcluded) {
+      chips.push({
+        id: 'excluded',
+        label: '제외 포함',
+        onRemove: () => setFilterState(prev => ({ ...prev, showExcluded: false })),
+      })
+    }
+    return chips
+  }, [filterState])
+
+  const hasActiveFilter = activeCount > 0 || query.trim().length > 0
 
   function clearFilters() {
-    setSelCats([])
-    setSelTripPriorities([])
-    setSelReservationStatuses([])
-    setShowExcluded(false)
+    setFilterState({ categories: [], tripPriorities: [], reservationStatuses: [], showExcluded: false })
     setQuery('')
   }
 
-  const hasActiveFilter = useMemo(
-    () =>
-      selCats.length > 0 ||
-      selTripPriorities.length > 0 ||
-      selReservationStatuses.length > 0 ||
-      query.trim().length > 0 ||
-      showExcluded,
-    [selCats, selTripPriorities, selReservationStatuses, query, showExcluded]
-  )
-
-  function handleSortChange(key: SortKey) {
-    if (sortKey === key) {
-      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'))
-    } else {
-      setSortKey(key)
-      setSortDir('asc')
-    }
+  function handleSortChange(key: SortKey, dir: SortDir) {
+    setSortKey(key)
+    setSortDir(dir)
   }
 
   // 전체 아이템 기준 그룹 맵 (필터 전)
@@ -96,22 +116,23 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
   // 필터 적용
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
+    const { categories, tripPriorities, reservationStatuses, showExcluded } = filterState
     return items.filter(item => {
       if (!showExcluded && item.trip_priority === '제외') return false
-      if (selCats.length && !selCats.includes(item.category)) return false
-      if (selTripPriorities.length && !selTripPriorities.includes(item.trip_priority)) return false
-      if (selReservationStatuses.length) {
-        if (!item.reservation_status || !selReservationStatuses.includes(item.reservation_status)) return false
+      if (categories.length && !categories.includes(item.category)) return false
+      if (tripPriorities.length && !tripPriorities.includes(item.trip_priority)) return false
+      if (reservationStatuses.length) {
+        if (!item.reservation_status || !reservationStatuses.includes(item.reservation_status)) return false
       }
       if (q && !item.name.toLowerCase().includes(q)) return false
       return true
     })
-  }, [items, query, selCats, selTripPriorities, selReservationStatuses, showExcluded])
+  }, [items, query, filterState])
 
   // 렌더 엔트리 생성 + 정렬
   const renderEntries = useMemo(() => {
     const filteredIdSet = new Set(filtered.map(i => i.id))
-    const seen = new Set<string>() // 이미 처리한 그룹 normalizedKey
+    const seen = new Set<string>()
 
     const entries: RenderEntry[] = []
 
@@ -120,14 +141,12 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
       const groupAll = allGroups.get(key) ?? []
 
       if (groupAll.length >= 2) {
-        // 그룹 아이템
         if (seen.has(key)) continue
         seen.add(key)
 
         const visibleItems = groupAll.filter(i => filteredIdSet.has(i.id))
         if (visibleItems.length === 0) continue
 
-        // 정렬 대표값 계산
         let sk: string | number = key
         if (sortKey === 'date') {
           const dates = visibleItems.map(i => i.date ?? '').filter(Boolean)
@@ -142,7 +161,6 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
 
         entries.push({ type: 'group', name: item.name, visibleItems, totalCount: groupAll.length, sortKey: sk })
       } else {
-        // 단독 아이템
         let sk: string | number = key
         if (sortKey === 'date') sk = item.date ?? ''
         else if (sortKey === 'budget') sk = item.budget ?? 0
@@ -167,81 +185,35 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
     return entries
   }, [filtered, allGroups, sortKey, sortDir])
 
-  // 총 아이템 수 (그룹 내 지점 포함)
   const totalDisplayCount = useMemo(
     () => renderEntries.reduce((acc, e) => acc + (e.type === 'group' ? e.visibleItems.length : 1), 0),
     [renderEntries]
   )
 
-  const SORT_OPTIONS: { key: SortKey; label: string }[] = [
-    { key: 'name', label: '이름' },
-    { key: 'date', label: '날짜' },
-    { key: 'budget', label: '예산' },
-    { key: 'trip_priority', label: '이번 여행에서' },
-  ]
-
   return (
-    <div className="space-y-4">
-      <input
-        type="text"
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        placeholder="이름으로 검색..."
-        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
-      />
-
-      <div className="space-y-2">
-        <p className="text-xs font-medium text-gray-400">{ITEM_FIELD_LABELS.category}</p>
-        <div className="flex flex-wrap gap-1.5">
-          {CATEGORY_OPTIONS.map(c => <Chip key={c} label={c} active={selCats.includes(c)} onClick={() => setSelCats(toggle(selCats, c))} />)}
-        </div>
-        <p className="text-xs font-medium text-gray-400">{ITEM_FIELD_LABELS.trip_priority}</p>
-        <div className="flex flex-wrap gap-1.5">
-          {TRIP_PRIORITY_OPTIONS.map(p => (
-            <Chip key={p} label={p} active={selTripPriorities.includes(p)} onClick={() => setSelTripPriorities(toggle(selTripPriorities, p))} />
-          ))}
-        </div>
-        <p className="text-xs font-medium text-gray-400">{ITEM_FIELD_LABELS.reservation_status}</p>
-        <div className="flex flex-wrap gap-1.5">
-          {RESERVATION_STATUS_OPTIONS.map(status => (
-            <Chip
-              key={status}
-              label={status}
-              active={selReservationStatuses.includes(status)}
-              onClick={() => setSelReservationStatuses(toggle(selReservationStatuses, status))}
-            />
-          ))}
+    <div className="space-y-3">
+      {/* 검색 + 툴바 */}
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="이름으로 검색..."
+          className="flex-1 min-w-0 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
+        />
+        <div className="relative flex items-center gap-1.5 flex-shrink-0">
+          <FilterButton activeCount={activeCount} onClick={() => setFilterPanelOpen(true)} />
+          <SortButton sortKey={sortKey} sortDir={sortDir} onChange={handleSortChange} />
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-xs text-gray-400">정렬:</span>
-        {SORT_OPTIONS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => handleSortChange(key)}
-            className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-              sortKey === key ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
-            }`}
-          >
-            {label}
-            {sortKey === key && <span className="ml-0.5">{sortDir === 'asc' ? '↑' : '↓'}</span>}
-          </button>
-        ))}
-      </div>
+      {/* 활성 필터 요약 칩 */}
+      <ActiveFilterChips chips={activeChips} />
 
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-400">{totalDisplayCount}개 항목</p>
-        {excludedCount > 0 && (
-          <button
-            onClick={() => setShowExcluded(v => !v)}
-            className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 transition-colors"
-          >
-            {showExcluded ? `제외 항목 숨기기` : `제외 항목 보기 (${excludedCount})`}
-          </button>
-        )}
-      </div>
+      {/* 아이템 수 */}
+      <p className="text-xs text-gray-400">{totalDisplayCount}개 항목</p>
 
+      {/* 목록 */}
       <div className="space-y-2">
         {renderEntries.map(entry =>
           entry.type === 'group' ? (
@@ -287,6 +259,14 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
           </div>
         )}
       </div>
+
+      {/* 필터 패널 (모바일 바텀시트 + 데스크탑 드롭다운) */}
+      <FilterPanel
+        isOpen={filterPanelOpen}
+        filterState={filterState}
+        onChange={setFilterState}
+        onClose={() => setFilterPanelOpen(false)}
+      />
     </div>
   )
 }
