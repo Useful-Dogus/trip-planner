@@ -14,10 +14,10 @@ function validateItem(body: Record<string, unknown>): string | null {
   if (!body.name || typeof body.name !== 'string' || !body.name.trim()) {
     return 'name은 필수입니다.'
   }
-  if (!CATEGORY_OPTIONS.includes(body.category as Category)) {
+  if (body.category !== undefined && !CATEGORY_OPTIONS.includes(body.category as Category)) {
     return '유효하지 않은 category입니다.'
   }
-  if (!TRIP_PRIORITY_OPTIONS.includes(body.trip_priority as TripPriority)) {
+  if (body.trip_priority !== undefined && !TRIP_PRIORITY_OPTIONS.includes(body.trip_priority as TripPriority)) {
     return '유효하지 않은 trip_priority입니다.'
   }
   if (
@@ -103,8 +103,8 @@ export async function POST(request: NextRequest) {
   const item: TripItem = {
     id: uuidv4(),
     name: (body.name as string).trim(),
-    category: body.category as Category,
-    trip_priority: body.trip_priority as TripPriority,
+    category: (body.category as Category | undefined) ?? '기타',
+    trip_priority: (body.trip_priority as TripPriority | undefined) ?? '검토 필요',
     reservation_status: (body.reservation_status as ReservationStatus | null | undefined) ?? null,
     links: (body.links as Link[]) ?? [],
     created_at: now,
