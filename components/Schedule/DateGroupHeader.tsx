@@ -37,7 +37,7 @@ export default function DateGroupHeader({
         onClick={onToggleCollapse}
         className="flex items-center gap-2 flex-1 min-w-0 text-left group"
       >
-        <span className="text-sm font-semibold text-gray-800">
+        <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">
           {formatDate(date)}
         </span>
         {isToday && (
@@ -46,7 +46,7 @@ export default function DateGroupHeader({
           </span>
         )}
         {!isUndated && dayOffset !== null && (
-          <span className="text-xs text-gray-500 font-normal">D+{dayOffset}</span>
+          <span className="text-xs text-gray-500 font-normal whitespace-nowrap">D+{dayOffset}</span>
         )}
         <svg
           xmlns="http://www.w3.org/2000/svg"
