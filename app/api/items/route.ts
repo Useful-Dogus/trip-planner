@@ -27,7 +27,7 @@ function validateItem(body: Record<string, unknown>): string | null {
   ) {
     return '유효하지 않은 reservation_status입니다.'
   }
-  if (body.budget !== undefined && (typeof body.budget !== 'number' || body.budget < 0)) {
+  if (body.budget !== undefined && body.budget !== null && (typeof body.budget !== 'number' || body.budget < 0)) {
     return 'budget은 0 이상의 숫자여야 합니다.'
   }
   if (body.date !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(body.date as string)) {
