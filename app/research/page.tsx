@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Navigation from '@/components/Layout/Navigation'
@@ -9,7 +9,14 @@ import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
 import ResearchTable from '@/components/Research/ResearchTable'
 import ScheduleTable from '@/components/Schedule/ScheduleTable'
 import FAB from '@/components/UI/FAB'
+import FilterButton from '@/components/Research/FilterButton'
+import FilterPanel from '@/components/Research/FilterPanel'
+import SortButton from '@/components/Research/SortButton'
+import ActiveFilterChips from '@/components/Research/ActiveFilterChips'
 import { useItems } from '@/lib/hooks/useItems'
+import type { FilterState, SortKey, SortDir } from '@/components/Items/ItemList'
+import { getActiveFilterCount } from '@/components/Items/ItemList'
+import type { Category, ReservationStatus, TripPriority } from '@/types'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
@@ -33,6 +40,70 @@ function ResearchPageContent() {
     () => searchParams.get('item')
   )
   const [highlightedIds, setHighlightedIds] = useState<Set<string>>(new Set())
+
+  // 데스크탑 검색/필터/정렬 상태
+  const [query, setQuery] = useState('')
+  const [filterState, setFilterState] = useState<FilterState>({
+    categories: [],
+    tripPriorities: [],
+    reservationStatuses: [],
+    showExcluded: false,
+  })
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false)
+  const [sortKey, setSortKey] = useState<SortKey>('name')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+
+  const activeCount = useMemo(() => getActiveFilterCount(filterState), [filterState])
+
+  const activeChips = useMemo(() => {
+    const chips: { id: string; label: string; onRemove: () => void }[] = []
+    for (const c of filterState.categories) {
+      chips.push({
+        id: `cat-${c}`,
+        label: c,
+        onRemove: () => setFilterState(prev => ({ ...prev, categories: prev.categories.filter(x => x !== c) })),
+      })
+    }
+    for (const p of filterState.tripPriorities) {
+      chips.push({
+        id: `pri-${p}`,
+        label: p,
+        onRemove: () => setFilterState(prev => ({ ...prev, tripPriorities: prev.tripPriorities.filter(x => x !== p) })),
+      })
+    }
+    for (const s of filterState.reservationStatuses) {
+      chips.push({
+        id: `res-${s}`,
+        label: s,
+        onRemove: () =>
+          setFilterState(prev => ({ ...prev, reservationStatuses: prev.reservationStatuses.filter(x => x !== s) })),
+      })
+    }
+    if (filterState.showExcluded) {
+      chips.push({
+        id: 'excluded',
+        label: '제외 포함',
+        onRemove: () => setFilterState(prev => ({ ...prev, showExcluded: false })),
+      })
+    }
+    return chips
+  }, [filterState])
+
+  // 데스크탑 테이블에 넘길 필터된 아이템
+  const filteredItems = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q && activeCount === 0) return items
+    return items.filter(item => {
+      if (!filterState.showExcluded && item.trip_priority === '제외') return false
+      if (filterState.categories.length && !filterState.categories.includes(item.category as Category)) return false
+      if (filterState.tripPriorities.length && !filterState.tripPriorities.includes(item.trip_priority as TripPriority)) return false
+      if (filterState.reservationStatuses.length) {
+        if (!item.reservation_status || !filterState.reservationStatuses.includes(item.reservation_status as ReservationStatus)) return false
+      }
+      if (q && !item.name.toLowerCase().includes(q)) return false
+      return true
+    })
+  }, [items, query, filterState, activeCount])
 
   const selectedItem = items.find(i => i.id === selectedItemId) ?? null
 
@@ -85,9 +156,40 @@ function ResearchPageContent() {
       {/* 헤더 */}
       <div className="px-4 md:px-8 pt-4">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-bold text-gray-900">전체</h1>
+          <h1 className="text-xl font-bold text-gray-900">목록</h1>
           <ViewToggle view={view} onChange={setView} />
         </div>
+
+        {/* 데스크탑 검색/필터/정렬 툴바 — 목록 뷰에서만 표시 */}
+        {view === 'items' && (
+          <div className="hidden md:block mb-4">
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="이름으로 검색..."
+                className="flex-1 min-w-0 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
+              />
+              <div className="relative flex items-center gap-1.5 flex-shrink-0">
+                <FilterButton activeCount={activeCount} onClick={() => setFilterPanelOpen(v => !v)} />
+                <FilterPanel
+                  isOpen={filterPanelOpen}
+                  filterState={filterState}
+                  onChange={setFilterState}
+                  onClose={() => setFilterPanelOpen(false)}
+                />
+                <SortButton sortKey={sortKey} sortDir={sortDir} onChange={(k, d) => { setSortKey(k); setSortDir(d) }} />
+              </div>
+            </div>
+            {activeChips.length > 0 && (
+              <div className="mt-2">
+                <ActiveFilterChips chips={activeChips} />
+              </div>
+            )}
+            <p className="text-xs text-gray-400 mt-2">{filteredItems.length}개 항목</p>
+          </div>
+        )}
       </div>
 
       {isLoading ? (
@@ -98,7 +200,7 @@ function ResearchPageContent() {
         </div>
       ) : view === 'items' ? (
         <>
-          {/* 모바일: 카드 뷰 */}
+          {/* 모바일: 카드 뷰 — ItemList가 자체적으로 검색/필터/정렬 포함 */}
           <div className="md:hidden px-4 pb-28">
             <ItemList
               items={items}
@@ -109,13 +211,16 @@ function ResearchPageContent() {
             />
             <FAB />
           </div>
-          {/* 데스크탑: 테이블 뷰 (넓은 너비 활용) */}
+          {/* 데스크탑: 테이블 뷰 */}
           <div className="hidden md:block px-8 pb-6">
             <ResearchTable
-              items={items}
+              items={filteredItems}
               onUpdateItem={updateItem}
               onCreateItem={createItem}
               onOpenPanel={handleSelectItem}
+              sortKey={sortKey}
+              sortDir={sortDir}
+              hasActiveSearch={query.trim().length > 0 || activeCount > 0}
             />
           </div>
         </>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { TripItem, TripPriority } from '@/types'
 import { TRIP_PRIORITY_META, TRIP_PRIORITY_OPTIONS } from '@/lib/itemOptions'
+import type { SortKey, SortDir } from '@/components/Items/ItemList'
 import NameCell from '@/components/Schedule/cells/NameCell'
 import CategoryCell from '@/components/Schedule/cells/CategoryCell'
 import PriorityCell from '@/components/Schedule/cells/PriorityCell'
@@ -26,6 +27,9 @@ interface ResearchTableProps {
   onUpdateItem: (id: string, changes: Record<string, unknown>) => void
   onCreateItem: (item: Omit<TripItem, 'id' | 'created_at' | 'updated_at'>) => void
   onOpenPanel: (id: string) => void
+  sortKey?: SortKey
+  sortDir?: SortDir
+  hasActiveSearch?: boolean
 }
 
 export default function ResearchTable({
@@ -33,6 +37,9 @@ export default function ResearchTable({
   onUpdateItem,
   onCreateItem,
   onOpenPanel,
+  sortKey = 'name',
+  sortDir = 'asc',
+  hasActiveSearch = false,
 }: ResearchTableProps) {
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
   // 제외 그룹은 기본 접힘
@@ -53,12 +60,18 @@ export default function ResearchTable({
       const group = groups.get(item.trip_priority)
       if (group) group.push(item)
     }
-    // 각 그룹 내 이름순 정렬
+    // 그룹 내 정렬
     PRIORITY_ORDER.forEach(p => {
-      groups.get(p)?.sort((a, b) => a.name.localeCompare(b.name, 'ko'))
+      groups.get(p)?.sort((a, b) => {
+        let cmp = 0
+        if (sortKey === 'budget') cmp = (a.budget ?? 0) - (b.budget ?? 0)
+        else if (sortKey === 'date') cmp = (a.date ?? '').localeCompare(b.date ?? '')
+        else cmp = a.name.localeCompare(b.name, 'ko')
+        return sortDir === 'asc' ? cmp : -cmp
+      })
     })
     return groups
-  }, [items])
+  }, [items, sortKey, sortDir])
 
   // 키보드 내비게이션용 flat 목록
   const sortedItems = useMemo(() => {
@@ -144,31 +157,35 @@ export default function ResearchTable({
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="text-4xl mb-3">🔍</div>
-        <p className="text-sm font-medium text-gray-700 mb-1">아직 등록된 항목이 없어요</p>
-        <p className="text-xs text-gray-400">항목을 추가하면 여기에 표시됩니다</p>
+        <div className="text-4xl mb-3">{hasActiveSearch ? '🔍' : '📍'}</div>
+        <p className="text-sm font-medium text-gray-700 mb-1">
+          {hasActiveSearch ? '검색 결과가 없어요' : '아직 등록된 항목이 없어요'}
+        </p>
+        <p className="text-xs text-gray-400">
+          {hasActiveSearch ? '필터 조건을 바꿔보세요' : '항목을 추가하면 여기에 표시됩니다'}
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="border border-gray-100 rounded-xl overflow-x-auto">
+    <div className="border border-gray-200 rounded-xl overflow-x-auto">
       {/* 컬럼 헤더 */}
-      <div className="flex items-center border-b border-gray-100 bg-white">
-        <div className="flex-1 min-w-0 px-3 py-2">
-          <span className="text-xs font-medium text-gray-400">이름</span>
+      <div className="flex items-center border-b border-gray-200 bg-white">
+        <div className="flex-1 min-w-0 px-3 py-2.5">
+          <span className="text-xs font-semibold text-gray-500">이름</span>
         </div>
-        <div className="w-10 flex-shrink-0 px-2 py-2 text-center">
-          <span className="text-xs font-medium text-gray-400">분류</span>
+        <div className="w-10 flex-shrink-0 px-2 py-2.5 text-center">
+          <span className="text-xs font-semibold text-gray-500">분류</span>
         </div>
-        <div className="w-28 flex-shrink-0 px-2 py-2">
-          <span className="text-xs font-medium text-gray-400">우선순위</span>
+        <div className="w-28 flex-shrink-0 px-2 py-2.5">
+          <span className="text-xs font-semibold text-gray-500">우선순위</span>
         </div>
-        <div className="w-28 flex-shrink-0 px-2 py-2">
-          <span className="text-xs font-medium text-gray-400">예약상태</span>
+        <div className="w-28 flex-shrink-0 px-2 py-2.5">
+          <span className="text-xs font-semibold text-gray-500">예약상태</span>
         </div>
-        <div className="w-24 flex-shrink-0 px-3 py-2 text-right">
-          <span className="text-xs font-medium text-gray-400">예산</span>
+        <div className="w-24 flex-shrink-0 px-3 py-2.5 text-right">
+          <span className="text-xs font-semibold text-gray-500">예산</span>
         </div>
         <div className="w-8 flex-shrink-0" />
       </div>
@@ -182,7 +199,7 @@ export default function ResearchTable({
         return (
           <div key={priority}>
             {/* 그룹 헤더 */}
-            <div className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
+            <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-gray-200 sticky top-0 z-10">
               <button
                 type="button"
                 onClick={() =>
@@ -201,7 +218,7 @@ export default function ResearchTable({
                 >
                   {meta.emoji} {priority}
                 </span>
-                <span className="text-xs text-gray-400">{groupItems.length}개</span>
+                <span className="text-xs text-gray-500">{groupItems.length}개</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className={`w-3.5 h-3.5 text-gray-400 transition-transform flex-shrink-0 ${isCollapsed ? '-rotate-90' : ''}`}
@@ -218,7 +235,7 @@ export default function ResearchTable({
 
               <div className="flex items-center gap-3 flex-shrink-0">
                 {totalBudget > 0 && (
-                  <span className="text-xs text-gray-400 tabular-nums">
+                  <span className="text-xs text-gray-500 tabular-nums">
                     ${totalBudget.toLocaleString()}
                   </span>
                 )}
@@ -295,7 +312,7 @@ export default function ResearchTable({
                       setAddingToGroup(priority)
                       setNewItemName('')
                     }}
-                    className="flex items-center w-full px-3 py-2 text-xs text-gray-300 hover:text-gray-500 hover:bg-gray-50/50 transition-colors text-left gap-1.5"
+                    className="flex items-center w-full px-3 py-2 text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors text-left gap-1.5"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -364,7 +381,7 @@ function ResearchTableRow({
   return (
     <div
       data-research-row="true"
-      className="flex items-center border-b border-gray-50 hover:bg-gray-50/50 group transition-colors"
+      className="flex items-center border-b border-gray-100 hover:bg-gray-50 group transition-colors"
     >
       {/* 이름 */}
       <div className="flex-1 min-w-0 px-3 py-2.5">
