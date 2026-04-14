@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import Navigation from '@/components/Layout/Navigation'
 import ItemList from '@/components/Items/ItemList'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
+import ResearchTableSkeleton from '@/components/UI/ResearchTableSkeleton'
 import ResearchTable from '@/components/Research/ResearchTable'
 import ScheduleTable from '@/components/Schedule/ScheduleTable'
 import FAB from '@/components/UI/FAB'
@@ -188,11 +189,18 @@ function ResearchPageContent() {
       </div>
 
       {isLoading ? (
-        <div className="px-4 md:px-8 space-y-2 max-w-3xl">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <ItemCardSkeleton key={i} />
-          ))}
-        </div>
+        <>
+          {/* 모바일: 카드 스켈레톤 */}
+          <div className="md:hidden px-4 space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <ItemCardSkeleton key={i} />
+            ))}
+          </div>
+          {/* 데스크탑: 테이블 스켈레톤 */}
+          <div className="hidden md:block px-8">
+            <ResearchTableSkeleton />
+          </div>
+        </>
       ) : view === 'items' ? (
         <>
           {/* 모바일: 카드 뷰 — ItemList가 자체적으로 검색/필터/정렬 포함 */}
