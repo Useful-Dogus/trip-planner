@@ -56,9 +56,11 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     time_end: item.time_end ?? '',
     links: item.links ?? [],
   })
+  const [nameError, setNameError] = useState('')
   const [geocoding, setGeocoding] = useState(false)
   const [geocodeError, setGeocodeError] = useState('')
   const memoRef = useRef<HTMLTextAreaElement>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const el = memoRef.current
@@ -88,6 +90,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
   }, [form, item, onDirtyChange])
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
+    if (key === 'name') setNameError('')
     setForm(prev => ({ ...prev, [key]: value }))
   }
 
@@ -113,6 +116,12 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!form.name.trim()) {
+      setNameError('이름을 입력해야 저장할 수 있어요')
+      nameRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      nameRef.current?.focus()
+      return
+    }
     const trimmedAddress = form.address.trim()
     const changes: Record<string, unknown> = {
       name: form.name,
@@ -153,12 +162,21 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
       <div className="flex-1 overflow-y-auto min-h-0 px-5 py-4 space-y-6">
         <section className="space-y-4">
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">기본 정보</h3>
-          <Field label="이름 *">
-            <input type="text" value={form.name} onChange={e => setField('name', e.target.value)} className={inputClass} placeholder="장소 또는 활동 이름" required />
-          </Field>
-          <SelectField label={`${ITEM_FIELD_LABELS.category} *`} value={form.category} onChange={value => setField('category', value as Category)} options={CATEGORY_OPTIONS.map(value => ({ value, label: value }))} />
-          <SelectField label={`${ITEM_FIELD_LABELS.trip_priority} *`} value={form.trip_priority} onChange={value => setField('trip_priority', value as TripPriority)} options={TRIP_PRIORITY_OPTIONS.map(value => ({ value, label: `${value} - ${TRIP_PRIORITY_META[value].description}` }))} />
-          <SelectField label={`${ITEM_FIELD_LABELS.reservation_status} *`} value={form.reservation_status} onChange={value => setField('reservation_status', value as ReservationStatus)} options={RESERVATION_STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${RESERVATION_STATUS_META[value].description}` }))} />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">이름 *</label>
+            <input
+              ref={nameRef}
+              type="text"
+              value={form.name}
+              onChange={e => setField('name', e.target.value)}
+              className={`${inputClass}${nameError ? ' border-red-400 focus:ring-red-200' : ''}`}
+              placeholder="장소 또는 활동 이름"
+            />
+            {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
+          </div>
+          <SelectField label={ITEM_FIELD_LABELS.category} value={form.category} onChange={value => setField('category', value as Category)} options={CATEGORY_OPTIONS.map(value => ({ value, label: value }))} />
+          <SelectField label={ITEM_FIELD_LABELS.trip_priority} value={form.trip_priority} onChange={value => setField('trip_priority', value as TripPriority)} options={TRIP_PRIORITY_OPTIONS.map(value => ({ value, label: `${value} - ${TRIP_PRIORITY_META[value].description}` }))} />
+          <SelectField label={ITEM_FIELD_LABELS.reservation_status} value={form.reservation_status} onChange={value => setField('reservation_status', value as ReservationStatus)} options={RESERVATION_STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${RESERVATION_STATUS_META[value].description}` }))} />
         </section>
 
         <section className="space-y-3">
@@ -251,7 +269,10 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
         </section>
       </div>
 
-      <div className="flex-shrink-0 px-5 py-3 border-t border-gray-100">
+      <div className="flex-shrink-0 px-5 py-3 border-t border-gray-100 space-y-2">
+        {nameError && (
+          <p className="text-xs text-red-500">{nameError}</p>
+        )}
         <div className="flex gap-3">
           <button type="button" onClick={onCancel} className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">
             취소
