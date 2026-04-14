@@ -50,7 +50,7 @@ function ResearchPageContent() {
     showExcluded: false,
   })
   const [filterPanelOpen, setFilterPanelOpen] = useState(false)
-  const [sortKey, setSortKey] = useState<SortKey>('name')
+  const [sortKey, setSortKey] = useState<SortKey>('trip_priority')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
 
   const activeCount = useMemo(() => getActiveFilterCount(filterState), [filterState])
