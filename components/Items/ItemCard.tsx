@@ -82,10 +82,11 @@ interface ItemCardProps {
   item: TripItem
   onSelect?: (id: string) => void
   isActive?: boolean
+  isHighlighted?: boolean
   onUpdateItem?: (id: string, changes: Record<string, unknown>) => void
 }
 
-export default function ItemCard({ item, onSelect, isActive = false, onUpdateItem }: ItemCardProps) {
+export default function ItemCard({ item, onSelect, isActive = false, isHighlighted = false, onUpdateItem }: ItemCardProps) {
   const [editingName, setEditingName] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const scheduleLabel = formatScheduleLabel(item)
@@ -117,10 +118,12 @@ export default function ItemCard({ item, onSelect, isActive = false, onUpdateIte
   return (
     <div
       onClick={() => editingName === null && onSelect?.(item.id)}
-      className={`bg-white rounded-2xl border p-4 transition-all cursor-pointer ${
-        isActive
-          ? 'border-gray-400 shadow-sm ring-1 ring-gray-300 bg-gray-50'
-          : 'border-gray-100 hover:border-gray-200 hover:shadow-sm'
+      className={`rounded-2xl border p-4 transition-all cursor-pointer ${
+        isHighlighted
+          ? 'bg-yellow-50 border-yellow-200 shadow-sm'
+          : isActive
+          ? 'bg-gray-50 border-gray-400 shadow-sm ring-1 ring-gray-300'
+          : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm'
       }`}
     >
       <div className="flex items-start justify-between gap-2">

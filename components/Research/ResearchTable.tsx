@@ -152,7 +152,7 @@ export default function ResearchTable({
   }
 
   return (
-    <div className="border border-gray-100 rounded-xl overflow-hidden">
+    <div className="border border-gray-100 rounded-xl overflow-x-auto">
       {/* 컬럼 헤더 */}
       <div className="flex items-center border-b border-gray-100 bg-white">
         <div className="flex-1 min-w-0 px-3 py-2">

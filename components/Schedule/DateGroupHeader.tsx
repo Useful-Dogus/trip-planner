@@ -5,6 +5,7 @@ interface DateGroupHeaderProps {
   dayOffset: number | null
   totalBudget: number
   isCollapsed: boolean
+  isToday?: boolean
   onToggleCollapse: () => void
   onAddItem: () => void
 }
@@ -23,6 +24,7 @@ export default function DateGroupHeader({
   dayOffset,
   totalBudget,
   isCollapsed,
+  isToday = false,
   onToggleCollapse,
   onAddItem,
 }: DateGroupHeaderProps) {
@@ -38,6 +40,11 @@ export default function DateGroupHeader({
         <span className="text-xs font-semibold text-gray-700">
           {formatDate(date)}
         </span>
+        {isToday && (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
+            오늘
+          </span>
+        )}
         {!isUndated && dayOffset !== null && (
           <span className="text-xs text-gray-400 font-normal">D+{dayOffset}</span>
         )}

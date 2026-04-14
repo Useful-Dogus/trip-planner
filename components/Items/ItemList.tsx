@@ -41,9 +41,10 @@ interface ItemListProps {
   selectedItemId: string | null
   onSelectItem: (id: string) => void
   onUpdateItem: (id: string, changes: Record<string, unknown>) => void
+  highlightedIds?: Set<string>
 }
 
-export default function ItemList({ items, selectedItemId, onSelectItem, onUpdateItem }: ItemListProps) {
+export default function ItemList({ items, selectedItemId, onSelectItem, onUpdateItem, highlightedIds }: ItemListProps) {
   const [filterState, setFilterState] = useState<FilterState>({
     categories: [],
     tripPriorities: [],
@@ -232,6 +233,7 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
               item={entry.item}
               onSelect={onSelectItem}
               isActive={entry.item.id === selectedItemId}
+              isHighlighted={highlightedIds?.has(entry.item.id) ?? false}
               onUpdateItem={onUpdateItem}
             />
           )
