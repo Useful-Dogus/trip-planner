@@ -123,7 +123,7 @@ export default function ItemCard({ item, onSelect, isActive = false, isHighlight
           ? 'bg-yellow-50 border-yellow-300 shadow-sm'
           : isActive
           ? 'bg-gray-50 border-gray-400 shadow-sm ring-1 ring-gray-300'
-          : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
+          : 'bg-white border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300'
       }`}
     >
       <div className="flex items-start justify-between gap-2">

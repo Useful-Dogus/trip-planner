@@ -104,7 +104,7 @@ export default function GmapsImportPage() {
   }
 
   return (
-    <div className="md:pl-44 min-h-screen bg-gray-50">
+    <div className="md:pl-44 min-h-screen bg-white">
       <div className="max-w-2xl mx-auto px-4 py-8 pb-24 md:pb-8">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-gray-900">구글맵 연동</h1>
