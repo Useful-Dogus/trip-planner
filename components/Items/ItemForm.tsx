@@ -57,11 +57,13 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     time_end: initialData?.time_end ?? '',
     links: initialData?.links ?? [],
   })
+  const [nameError, setNameError] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [geocoding, setGeocoding] = useState(false)
   const [geocodeError, setGeocodeError] = useState('')
   const memoRef = useRef<HTMLTextAreaElement>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const el = memoRef.current
@@ -71,6 +73,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   }, [form.memo])
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
+    if (key === 'name') setNameError('')
     setForm(prev => ({ ...prev, [key]: value }))
   }
 
@@ -108,6 +111,12 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!form.name.trim()) {
+      setNameError('이름을 입력해야 저장할 수 있어요')
+      nameRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      nameRef.current?.focus()
+      return
+    }
     setLoading(true)
     setError('')
 
@@ -186,12 +195,20 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
 
         <div>
           <label className={labelClass}>이름 *</label>
-          <input type="text" value={form.name} onChange={e => setField('name', e.target.value)} className={inputClass} placeholder="장소 또는 활동 이름" required />
+          <input
+            ref={nameRef}
+            type="text"
+            value={form.name}
+            onChange={e => setField('name', e.target.value)}
+            className={`${inputClass}${nameError ? ' border-red-400 focus:ring-red-200' : ''}`}
+            placeholder="장소 또는 활동 이름"
+          />
+          {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
         </div>
 
-        <SelectField label={`${ITEM_FIELD_LABELS.category} *`} value={form.category} onChange={value => setField('category', value as Category)} options={CATEGORY_OPTIONS.map(value => ({ value, label: value }))} />
-        <SelectField label={`${ITEM_FIELD_LABELS.trip_priority} *`} value={form.trip_priority} onChange={value => setField('trip_priority', value as TripPriority)} options={TRIP_PRIORITY_OPTIONS.map(value => ({ value, label: `${value} - ${TRIP_PRIORITY_META[value].description}` }))} />
-        <SelectField label={`${ITEM_FIELD_LABELS.reservation_status} *`} value={form.reservation_status} onChange={value => setField('reservation_status', value as ReservationStatus)} options={RESERVATION_STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${RESERVATION_STATUS_META[value].description}` }))} />
+        <SelectField label={ITEM_FIELD_LABELS.category} value={form.category} onChange={value => setField('category', value as Category)} options={CATEGORY_OPTIONS.map(value => ({ value, label: value }))} />
+        <SelectField label={ITEM_FIELD_LABELS.trip_priority} value={form.trip_priority} onChange={value => setField('trip_priority', value as TripPriority)} options={TRIP_PRIORITY_OPTIONS.map(value => ({ value, label: `${value} - ${TRIP_PRIORITY_META[value].description}` }))} />
+        <SelectField label={ITEM_FIELD_LABELS.reservation_status} value={form.reservation_status} onChange={value => setField('reservation_status', value as ReservationStatus)} options={RESERVATION_STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${RESERVATION_STATUS_META[value].description}` }))} />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-3">

@@ -3,8 +3,8 @@
 create table public.items (
   id          text        primary key,
   name        text        not null,
-  category    text        not null,
-  status      text        not null,
+  category    text        not null default '기타',
+  status      text        not null default '검토 필요',
   reservation_status text,
   priority    text,
   address     text,
