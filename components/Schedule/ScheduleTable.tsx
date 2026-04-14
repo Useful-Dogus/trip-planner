@@ -211,7 +211,7 @@ export default function ScheduleTable({
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden">
       {/* 컬럼 헤더 */}
-      <div className="flex items-center gap-0 border-b border-gray-200 bg-gray-50 px-0">
+      <div className="flex items-center gap-0 border-b border-gray-200 bg-white px-0">
         <div className="w-16 flex-shrink-0 px-3 py-2.5">
           <span className="text-xs font-semibold text-gray-500">시간</span>
         </div>
@@ -271,7 +271,7 @@ export default function ScheduleTable({
       {/* 미배정 버킷 (최하단, 있을 때만) */}
       {undatedItems.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 px-3 py-3 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+          <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-gray-200 sticky top-0 z-10">
             <button
               type="button"
               onClick={() => setUndatedCollapsed(prev => !prev)}

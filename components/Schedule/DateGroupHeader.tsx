@@ -31,7 +31,7 @@ export default function DateGroupHeader({
   const isUndated = date === '__undated__'
 
   return (
-    <div className="flex items-center gap-2 px-3 py-3 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+    <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-gray-200 sticky top-0 z-10">
       <button
         type="button"
         onClick={onToggleCollapse}
