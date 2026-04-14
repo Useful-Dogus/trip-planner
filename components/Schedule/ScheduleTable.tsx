@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { TripItem } from '@/types'
+import type { ReservationStatus, TripItem } from '@/types'
+import { CATEGORY_META, RESERVATION_STATUS_META } from '@/lib/itemOptions'
 import { EDITABLE_FIELDS, type EditableField } from './TableRow'
 import TableRow from './TableRow'
 import DateGroupHeader from './DateGroupHeader'
@@ -19,11 +20,134 @@ interface ScheduleTableProps {
 }
 
 const UNDATED_KEY = '__undated__'
+const TABLE_MIN_WIDTH = 'min-w-[720px]'
 
 function daysBetween(a: string, b: string): number {
   const da = new Date(a).getTime()
   const db = new Date(b).getTime()
   return Math.round((db - da) / (1000 * 60 * 60 * 24)) + 1
+}
+
+function formatBudget(value?: number) {
+  if (value === undefined) return ''
+  return `$${value.toLocaleString()}`
+}
+
+function formatTimeRange(item: TripItem) {
+  if (item.time_start && item.time_end) return `${item.time_start} - ${item.time_end}`
+  if (item.time_start) return item.time_start
+  return '시간 없음'
+}
+
+function getStatusMeta(value: ReservationStatus | null | undefined) {
+  if (!value) {
+    return {
+      dotClass: 'bg-gray-200',
+      label: '예약 정보 없음',
+    }
+  }
+
+  const shortLabel: Record<ReservationStatus, string> = {
+    예약완료: '예약완료',
+    '필요(미예약)': '예약필요',
+    불필요: '불필요',
+    '확인 필요': '확인필요',
+  }
+
+  return {
+    dotClass: {
+      예약완료: 'bg-green-500',
+      '필요(미예약)': 'bg-orange-400',
+      불필요: 'bg-gray-300',
+      '확인 필요': 'bg-yellow-400',
+    }[value],
+    label: shortLabel[value],
+  }
+}
+
+function formatDate(dateStr: string): string {
+  if (dateStr === UNDATED_KEY) return '날짜 미정'
+  const [year, month, day] = dateStr.split('-').map(Number)
+  const d = new Date(Date.UTC(year, month - 1, day))
+  const days = ['일', '월', '화', '수', '목', '금', '토']
+  const dayOfWeek = days[d.getUTCDay()]
+  return `${month}월 ${day}일 (${dayOfWeek})`
+}
+
+function MobileScheduleItemCard({
+  item,
+  onOpenPanel,
+}: {
+  item: TripItem
+  onOpenPanel: (id: string) => void
+}) {
+  const status = getStatusMeta(item.reservation_status)
+  const budget = formatBudget(item.budget)
+  const time = formatTimeRange(item)
+  const emoji = CATEGORY_META[item.category]?.emoji ?? '📌'
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpenPanel(item.id)}
+      className="w-full rounded-2xl border border-gray-200 bg-white p-4 text-left shadow-sm transition-all hover:border-gray-300 hover:shadow-md active:scale-[0.99]"
+    >
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-50 text-lg">
+          {emoji}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-gray-900">{item.name}</p>
+              <p className="mt-0.5 text-xs text-gray-500">{item.category}</p>
+            </div>
+            <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-600">
+              <span className={`h-2 w-2 rounded-full ${status.dotClass}`} />
+              {status.label}
+            </span>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between gap-3 text-xs text-gray-500">
+            <span className="tabular-nums">{time}</span>
+            {budget ? <span className="tabular-nums font-medium text-gray-700">{budget}</span> : <span />}
+          </div>
+        </div>
+      </div>
+    </button>
+  )
+}
+
+function MobileNewItemEditor({
+  date,
+  inputRef,
+  value,
+  onChange,
+  onBlur,
+  onKeyDown,
+}: {
+  date: string
+  inputRef: (el: HTMLInputElement | null) => void
+  value: string
+  onChange: (value: string) => void
+  onBlur: () => void
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>, currentValue: string) => void
+}) {
+  return (
+    <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-4">
+      <div className="mb-2 text-xs font-medium text-blue-700">{formatDate(date)}</div>
+      <input
+        ref={inputRef}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onBlur={onBlur}
+        onKeyDown={e => onKeyDown(e, value)}
+        placeholder="이름 입력 후 Enter…"
+        className="w-full bg-transparent border-b border-blue-300 focus:border-blue-500 outline-none text-sm text-gray-900 py-1"
+        style={{ fontSize: 16 }}
+      />
+    </div>
+  )
 }
 
 export default function ScheduleTable({
@@ -84,7 +208,10 @@ export default function ScheduleTable({
 
   function handleNavigate(direction: 'tab' | 'shift-tab' | 'enter' | 'escape', field: EditableField) {
     if (!editingCell) return
-    if (direction === 'escape') { setEditingCell(null); return }
+    if (direction === 'escape') {
+      setEditingCell(null)
+      return
+    }
 
     const itemIdx = sortedItems.findIndex(i => i.id === editingCell.itemId)
     const fieldIdx = EDITABLE_FIELDS.indexOf(field)
@@ -137,11 +264,16 @@ export default function ScheduleTable({
   }
 
   function handleNewItemKeyDown(e: React.KeyboardEvent<HTMLInputElement>, date: string | null) {
-    if (e.key === 'Enter') { e.preventDefault(); handleNewItemBlur(date) }
-    else if (e.key === 'Escape') { setAddingToDate(null); setNewItemName('') }
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleNewItemBlur(date)
+    } else if (e.key === 'Escape') {
+      setAddingToDate(null)
+      setNewItemName('')
+    }
   }
 
-  function renderGroupRows(date: string, groupItems: TripItem[]) {
+  function renderDesktopGroupRows(date: string, groupItems: TripItem[]) {
     return (
       <>
         {groupItems.map(item => (
@@ -158,9 +290,9 @@ export default function ScheduleTable({
           </div>
         ))}
         {addingToDate === date ? (
-          <div className="flex items-center border-b border-gray-50 bg-blue-50/30">
+          <div className="flex min-w-[720px] items-center border-b border-gray-50 bg-blue-50/30">
             <div className="w-16 flex-shrink-0 px-3 py-2.5" />
-            <div className="flex-1 min-w-0 px-3 py-2.5">
+            <div className="min-w-[220px] flex-1 px-3 py-2.5">
               <input
                 ref={newItemInputRef}
                 value={newItemName}
@@ -172,7 +304,7 @@ export default function ScheduleTable({
                 style={{ fontSize: 16 }}
               />
             </div>
-            <div className="w-10 flex-shrink-0" />
+            <div className="w-12 flex-shrink-0" />
             <div className="w-28 flex-shrink-0" />
             <div className="w-24 flex-shrink-0" />
             <div className="w-8 flex-shrink-0" />
@@ -180,8 +312,11 @@ export default function ScheduleTable({
         ) : (
           <button
             type="button"
-            onClick={() => { setAddingToDate(date); setNewItemName('') }}
-            className="flex items-center w-full px-3 py-2 text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors text-left gap-1.5"
+            onClick={() => {
+              setAddingToDate(date)
+              setNewItemName('')
+            }}
+            className="flex min-w-[720px] items-center w-full px-3 py-2 text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors text-left gap-1.5"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -190,6 +325,40 @@ export default function ScheduleTable({
           </button>
         )}
       </>
+    )
+  }
+
+  function renderMobileGroupRows(date: string, groupItems: TripItem[]) {
+    return (
+      <div className="space-y-3 px-3 py-3">
+        {groupItems.map(item => (
+          <MobileScheduleItemCard key={item.id} item={item} onOpenPanel={onOpenPanel} />
+        ))}
+        {addingToDate === date ? (
+          <MobileNewItemEditor
+            date={date}
+            inputRef={newItemInputRef}
+            value={newItemName}
+            onChange={setNewItemName}
+            onBlur={() => handleNewItemBlur(date)}
+            onKeyDown={handleNewItemKeyDown}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setAddingToDate(date)
+              setNewItemName('')
+            }}
+            className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-700"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            항목 추가
+          </button>
+        )}
+      </div>
     )
   }
 
@@ -209,99 +378,188 @@ export default function ScheduleTable({
     .sort(([a], [b]) => a.localeCompare(b))
 
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden">
-      {/* 컬럼 헤더 */}
-      <div className="flex items-center gap-0 border-b border-gray-200 bg-white px-0">
-        <div className="w-16 flex-shrink-0 px-3 py-2.5">
-          <span className="text-xs font-semibold text-gray-500">시간</span>
-        </div>
-        <div className="flex-1 min-w-0 px-3 py-2.5">
-          <span className="text-xs font-semibold text-gray-500">이름</span>
-        </div>
-        <div className="w-10 flex-shrink-0 px-2 py-2.5 text-center">
-          <span className="text-xs font-semibold text-gray-500">분류</span>
-        </div>
-        <div className="w-28 flex-shrink-0 px-2 py-2.5">
-          <span className="text-xs font-semibold text-gray-500">예약상태</span>
-        </div>
-        <div className="w-24 flex-shrink-0 px-3 py-2.5 text-right">
-          <span className="text-xs font-semibold text-gray-500">예산</span>
-        </div>
-        <div className="w-8 flex-shrink-0" />
+    <div className="space-y-4">
+      <div className="md:hidden space-y-4">
+        {datedEntries.map(([date, groupItems]) => {
+          const totalBudget = groupItems.reduce((sum, i) => sum + (i.budget ?? 0), 0)
+          const isCollapsed = collapsedDates.has(date)
+          const dayOffset = getDayOffset(date)
+          const isToday = date === todayKey
+
+          return (
+            <div key={date} ref={isToday ? todayRef : undefined} className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+              <DateGroupHeader
+                date={date}
+                dayOffset={dayOffset}
+                totalBudget={totalBudget}
+                isCollapsed={isCollapsed}
+                isToday={isToday}
+                onToggleCollapse={() =>
+                  setCollapsedDates(prev => {
+                    const next = new Set(prev)
+                    if (next.has(date)) next.delete(date)
+                    else next.add(date)
+                    return next
+                  })
+                }
+                onAddItem={() => {
+                  setCollapsedDates(prev => {
+                    const next = new Set(prev)
+                    next.delete(date)
+                    return next
+                  })
+                  setAddingToDate(date)
+                  setNewItemName('')
+                }}
+              />
+              {!isCollapsed && renderMobileGroupRows(date, groupItems)}
+            </div>
+          )
+        })}
+
+        {undatedItems.length > 0 && (
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-gray-200 sticky top-0 z-10">
+              <button
+                type="button"
+                onClick={() => setUndatedCollapsed(prev => !prev)}
+                className="flex items-center gap-2 flex-1 min-w-0 text-left"
+              >
+                <span className="text-sm font-semibold text-gray-800">날짜 미정</span>
+                <span className="text-xs text-gray-500">{undatedItems.length}개</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`w-3.5 h-3.5 text-gray-400 transition-transform flex-shrink-0 ${undatedCollapsed ? '-rotate-90' : ''}`}
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setUndatedCollapsed(false)
+                  setAddingToDate(UNDATED_KEY)
+                  setNewItemName('')
+                }}
+                className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                추가
+              </button>
+            </div>
+            {!undatedCollapsed && renderMobileGroupRows(UNDATED_KEY, undatedItems)}
+          </div>
+        )}
       </div>
 
-      {/* 날짜 있는 그룹 */}
-      {datedEntries.map(([date, groupItems]) => {
-        const totalBudget = groupItems.reduce((sum, i) => sum + (i.budget ?? 0), 0)
-        const isCollapsed = collapsedDates.has(date)
-        const dayOffset = getDayOffset(date)
-        const isToday = date === todayKey
+      <div className="hidden md:block">
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+          <div className="overflow-x-auto">
+            <div className={TABLE_MIN_WIDTH}>
+              {/* 컬럼 헤더 */}
+              <div className="flex items-center gap-0 border-b border-gray-200 bg-white px-0">
+                <div className="w-16 flex-shrink-0 px-3 py-2.5">
+                  <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">시간</span>
+                </div>
+                <div className="min-w-[220px] flex-1 px-3 py-2.5">
+                  <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">이름</span>
+                </div>
+                <div className="w-12 flex-shrink-0 px-2 py-2.5 text-center">
+                  <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">분류</span>
+                </div>
+                <div className="w-28 flex-shrink-0 px-2 py-2.5">
+                  <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">예약상태</span>
+                </div>
+                <div className="w-24 flex-shrink-0 px-3 py-2.5 text-right">
+                  <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">예산</span>
+                </div>
+                <div className="w-8 flex-shrink-0" />
+              </div>
 
-        return (
-          <div key={date} ref={isToday ? todayRef : undefined}>
-            <DateGroupHeader
-              date={date}
-              dayOffset={dayOffset}
-              totalBudget={totalBudget}
-              isCollapsed={isCollapsed}
-              isToday={isToday}
-              onToggleCollapse={() =>
-                setCollapsedDates(prev => {
-                  const next = new Set(prev)
-                  if (next.has(date)) next.delete(date)
-                  else next.add(date)
-                  return next
-                })
-              }
-              onAddItem={() => {
-                setCollapsedDates(prev => {
-                  const next = new Set(prev)
-                  next.delete(date)
-                  return next
-                })
-                setAddingToDate(date)
-                setNewItemName('')
-              }}
-            />
-            {!isCollapsed && renderGroupRows(date, groupItems)}
-          </div>
-        )
-      })}
+              {/* 날짜 있는 그룹 */}
+              {datedEntries.map(([date, groupItems]) => {
+                const totalBudget = groupItems.reduce((sum, i) => sum + (i.budget ?? 0), 0)
+                const isCollapsed = collapsedDates.has(date)
+                const dayOffset = getDayOffset(date)
+                const isToday = date === todayKey
 
-      {/* 미배정 버킷 (최하단, 있을 때만) */}
-      {undatedItems.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-gray-200 sticky top-0 z-10">
-            <button
-              type="button"
-              onClick={() => setUndatedCollapsed(prev => !prev)}
-              className="flex items-center gap-2 flex-1 min-w-0 text-left"
-            >
-              <span className="text-sm font-semibold text-gray-800">날짜 미정</span>
-              <span className="text-xs text-gray-500">{undatedItems.length}개</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`w-3.5 h-3.5 text-gray-400 transition-transform flex-shrink-0 ${undatedCollapsed ? '-rotate-90' : ''}`}
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={() => { setUndatedCollapsed(false); setAddingToDate(UNDATED_KEY); setNewItemName('') }}
-              className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-              추가
-            </button>
+                return (
+                  <div key={date} ref={isToday ? todayRef : undefined}>
+                    <DateGroupHeader
+                      date={date}
+                      dayOffset={dayOffset}
+                      totalBudget={totalBudget}
+                      isCollapsed={isCollapsed}
+                      isToday={isToday}
+                      onToggleCollapse={() =>
+                        setCollapsedDates(prev => {
+                          const next = new Set(prev)
+                          if (next.has(date)) next.delete(date)
+                          else next.add(date)
+                          return next
+                        })
+                      }
+                      onAddItem={() => {
+                        setCollapsedDates(prev => {
+                          const next = new Set(prev)
+                          next.delete(date)
+                          return next
+                        })
+                        setAddingToDate(date)
+                        setNewItemName('')
+                      }}
+                    />
+                    {!isCollapsed && renderDesktopGroupRows(date, groupItems)}
+                  </div>
+                )
+              })}
+
+              {/* 미배정 버킷 (최하단, 있을 때만) */}
+              {undatedItems.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-gray-200 sticky top-0 z-10">
+                    <button
+                      type="button"
+                      onClick={() => setUndatedCollapsed(prev => !prev)}
+                      className="flex items-center gap-2 flex-1 min-w-0 text-left"
+                    >
+                      <span className="text-sm font-semibold text-gray-800">날짜 미정</span>
+                      <span className="text-xs text-gray-500">{undatedItems.length}개</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`w-3.5 h-3.5 text-gray-400 transition-transform flex-shrink-0 ${undatedCollapsed ? '-rotate-90' : ''}`}
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUndatedCollapsed(false)
+                        setAddingToDate(UNDATED_KEY)
+                        setNewItemName('')
+                      }}
+                      className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                      </svg>
+                      추가
+                    </button>
+                  </div>
+                  {!undatedCollapsed && renderDesktopGroupRows(UNDATED_KEY, undatedItems)}
+                </div>
+              )}
+            </div>
           </div>
-          {!undatedCollapsed && renderGroupRows(UNDATED_KEY, undatedItems)}
         </div>
-      )}
+      </div>
     </div>
   )
 }

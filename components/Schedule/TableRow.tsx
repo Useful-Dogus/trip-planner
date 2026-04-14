@@ -55,7 +55,7 @@ export default function TableRow({
   }
 
   return (
-    <div className="flex items-center gap-0 border-b border-gray-100 hover:bg-gray-50 group transition-colors">
+    <div className="flex min-w-[720px] items-center gap-0 border-b border-gray-100 hover:bg-gray-50 group transition-colors">
       {/* 시간 */}
       <div className="w-16 flex-shrink-0 px-3 py-2.5">
         <TimeCell
@@ -77,7 +77,7 @@ export default function TableRow({
       </div>
 
       {/* 이름 */}
-      <div className="flex-1 min-w-0 px-3 py-2.5">
+      <div className="min-w-[220px] flex-1 px-3 py-2.5">
         <NameCell
           value={item.name}
           isEditing={editingField === 'name'}
@@ -97,7 +97,7 @@ export default function TableRow({
       </div>
 
       {/* 카테고리 */}
-      <div className="w-10 flex-shrink-0 flex items-center justify-center py-2.5">
+      <div className="w-12 flex-shrink-0 flex items-center justify-center py-2.5">
         <CategoryCell
           value={item.category}
           isEditing={editingField === 'category'}
