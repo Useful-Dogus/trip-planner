@@ -181,7 +181,7 @@ export default function ScheduleTable({
           <button
             type="button"
             onClick={() => { setAddingToDate(date); setNewItemName('') }}
-            className="flex items-center w-full px-3 py-2 text-xs text-gray-300 hover:text-gray-500 hover:bg-gray-50/50 transition-colors text-left gap-1.5"
+            className="flex items-center w-full px-3 py-2 text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors text-left gap-1.5"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -209,61 +209,26 @@ export default function ScheduleTable({
     .sort(([a], [b]) => a.localeCompare(b))
 
   return (
-    <div className="border border-gray-100 rounded-xl overflow-hidden">
+    <div className="border border-gray-200 rounded-xl overflow-hidden">
       {/* 컬럼 헤더 */}
-      <div className="flex items-center gap-0 border-b border-gray-100 bg-white px-0">
-        <div className="w-16 flex-shrink-0 px-3 py-2">
-          <span className="text-xs font-medium text-gray-400">시간</span>
+      <div className="flex items-center gap-0 border-b border-gray-200 bg-gray-50 px-0">
+        <div className="w-16 flex-shrink-0 px-3 py-2.5">
+          <span className="text-xs font-semibold text-gray-500">시간</span>
         </div>
-        <div className="flex-1 min-w-0 px-3 py-2">
-          <span className="text-xs font-medium text-gray-400">이름</span>
+        <div className="flex-1 min-w-0 px-3 py-2.5">
+          <span className="text-xs font-semibold text-gray-500">이름</span>
         </div>
-        <div className="w-10 flex-shrink-0 px-2 py-2 text-center">
-          <span className="text-xs font-medium text-gray-400">분류</span>
+        <div className="w-10 flex-shrink-0 px-2 py-2.5 text-center">
+          <span className="text-xs font-semibold text-gray-500">분류</span>
         </div>
-        <div className="w-28 flex-shrink-0 px-2 py-2">
-          <span className="text-xs font-medium text-gray-400">예약상태</span>
+        <div className="w-28 flex-shrink-0 px-2 py-2.5">
+          <span className="text-xs font-semibold text-gray-500">예약상태</span>
         </div>
-        <div className="w-24 flex-shrink-0 px-3 py-2 text-right">
-          <span className="text-xs font-medium text-gray-400">예산</span>
+        <div className="w-24 flex-shrink-0 px-3 py-2.5 text-right">
+          <span className="text-xs font-semibold text-gray-500">예산</span>
         </div>
         <div className="w-8 flex-shrink-0" />
       </div>
-
-      {/* 미배정 버킷 (최상단, 있을 때만) */}
-      {undatedItems.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-50 border-b border-amber-100 sticky top-0 z-10">
-            <button
-              type="button"
-              onClick={() => setUndatedCollapsed(prev => !prev)}
-              className="flex items-center gap-2 flex-1 min-w-0 text-left"
-            >
-              <span className="text-xs font-semibold text-amber-700">미배정</span>
-              <span className="text-xs text-amber-500">{undatedItems.length}개</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`w-3.5 h-3.5 text-amber-400 transition-transform flex-shrink-0 ${undatedCollapsed ? '-rotate-90' : ''}`}
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={() => { setUndatedCollapsed(false); setAddingToDate(UNDATED_KEY); setNewItemName('') }}
-              className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-600 transition-colors flex-shrink-0"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-              추가
-            </button>
-          </div>
-          {!undatedCollapsed && renderGroupRows(UNDATED_KEY, undatedItems)}
-        </div>
-      )}
 
       {/* 날짜 있는 그룹 */}
       {datedEntries.map(([date, groupItems]) => {
@@ -302,6 +267,41 @@ export default function ScheduleTable({
           </div>
         )
       })}
+
+      {/* 미배정 버킷 (최하단, 있을 때만) */}
+      {undatedItems.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 px-3 py-3 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+            <button
+              type="button"
+              onClick={() => setUndatedCollapsed(prev => !prev)}
+              className="flex items-center gap-2 flex-1 min-w-0 text-left"
+            >
+              <span className="text-sm font-semibold text-gray-800">날짜 미정</span>
+              <span className="text-xs text-gray-500">{undatedItems.length}개</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={`w-3.5 h-3.5 text-gray-400 transition-transform flex-shrink-0 ${undatedCollapsed ? '-rotate-90' : ''}`}
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setUndatedCollapsed(false); setAddingToDate(UNDATED_KEY); setNewItemName('') }}
+              className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+              추가
+            </button>
+          </div>
+          {!undatedCollapsed && renderGroupRows(UNDATED_KEY, undatedItems)}
+        </div>
+      )}
     </div>
   )
 }

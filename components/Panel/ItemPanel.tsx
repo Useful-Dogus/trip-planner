@@ -154,7 +154,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
           isOpen ? 'translate-y-0 md:translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-y-0 md:translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
           <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-gray-200 rounded-full md:hidden" />
           <span className="text-sm font-semibold text-gray-900">{mode === 'edit' ? '편집' : '상세 정보'}</span>
           <div className="flex items-center gap-2">
@@ -322,7 +322,7 @@ function ItemDetailView({
 }
 
 function SectionTitle({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <h3 className={`text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 ${className}`}>{children}</h3>
+  return <h3 className={`text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ${className}`}>{children}</h3>
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {

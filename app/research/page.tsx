@@ -7,10 +7,13 @@ import Navigation from '@/components/Layout/Navigation'
 import ItemList from '@/components/Items/ItemList'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
 import ResearchTable from '@/components/Research/ResearchTable'
+import ScheduleTable from '@/components/Schedule/ScheduleTable'
 import FAB from '@/components/UI/FAB'
 import { useItems } from '@/lib/hooks/useItems'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
+
+type ViewMode = 'items' | 'schedule'
 
 export default function ResearchPage() {
   return (
@@ -24,6 +27,7 @@ function ResearchPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { items, isLoading, updateItem, createItem } = useItems()
+  const [view, setView] = useState<ViewMode>('items')
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(
     () => searchParams.get('item')
@@ -78,20 +82,24 @@ function ResearchPageContent() {
 
   return (
     <div className="md:pl-44">
-      <div className="max-w-3xl mx-auto px-4 pt-4">
-        <h1 className="text-xl font-bold text-gray-900 mb-4">전체</h1>
+      {/* 헤더 */}
+      <div className="px-4 md:px-8 pt-4">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-bold text-gray-900">전체</h1>
+          <ViewToggle view={view} onChange={setView} />
+        </div>
       </div>
 
       {isLoading ? (
-        <div className="max-w-3xl mx-auto px-4 space-y-2">
+        <div className="px-4 md:px-8 space-y-2 max-w-3xl">
           {Array.from({ length: 5 }).map((_, i) => (
             <ItemCardSkeleton key={i} />
           ))}
         </div>
-      ) : (
+      ) : view === 'items' ? (
         <>
-          {/* 모바일: 카드 뷰 고정 */}
-          <div className="md:hidden max-w-3xl mx-auto px-4 pb-28">
+          {/* 모바일: 카드 뷰 */}
+          <div className="md:hidden px-4 pb-28">
             <ItemList
               items={items}
               selectedItemId={selectedItemId}
@@ -101,9 +109,8 @@ function ResearchPageContent() {
             />
             <FAB />
           </div>
-
-          {/* 데스크탑: 테이블 뷰 고정 */}
-          <div className="hidden md:block max-w-3xl mx-auto px-4 pb-6">
+          {/* 데스크탑: 테이블 뷰 (넓은 너비 활용) */}
+          <div className="hidden md:block px-8 pb-6">
             <ResearchTable
               items={items}
               onUpdateItem={updateItem}
@@ -112,6 +119,16 @@ function ResearchPageContent() {
             />
           </div>
         </>
+      ) : (
+        /* 일정 뷰: 모바일/데스크탑 공통 */
+        <div className="px-4 md:px-8 pb-24 md:pb-6">
+          <ScheduleTable
+            items={items}
+            onUpdateItem={updateItem}
+            onCreateItem={createItem}
+            onOpenPanel={handleSelectItem}
+          />
+        </div>
       )}
 
       <Navigation />
@@ -123,6 +140,29 @@ function ResearchPageContent() {
         onSave={() => {}}
         onDelete={handleClosePanel}
       />
+    </div>
+  )
+}
+
+function ViewToggle({ view, onChange }: { view: ViewMode; onChange: (v: ViewMode) => void }) {
+  return (
+    <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+      <button
+        onClick={() => onChange('items')}
+        className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+          view === 'items' ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'
+        }`}
+      >
+        목록
+      </button>
+      <button
+        onClick={() => onChange('schedule')}
+        className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+          view === 'schedule' ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'
+        }`}
+      >
+        일정
+      </button>
     </div>
   )
 }

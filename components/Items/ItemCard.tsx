@@ -120,10 +120,10 @@ export default function ItemCard({ item, onSelect, isActive = false, isHighlight
       onClick={() => editingName === null && onSelect?.(item.id)}
       className={`rounded-2xl border p-4 transition-all cursor-pointer ${
         isHighlighted
-          ? 'bg-yellow-50 border-yellow-200 shadow-sm'
+          ? 'bg-yellow-50 border-yellow-300 shadow-sm'
           : isActive
           ? 'bg-gray-50 border-gray-400 shadow-sm ring-1 ring-gray-300'
-          : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm'
+          : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -151,7 +151,7 @@ export default function ItemCard({ item, onSelect, isActive = false, isHighlight
                 {item.name}
               </span>
             )}
-            {item.address && <span className="text-xs text-gray-400 truncate block">{item.address}</span>}
+            {item.address && <span className="text-xs text-gray-500 truncate block">{item.address}</span>}
           </div>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
@@ -164,7 +164,7 @@ export default function ItemCard({ item, onSelect, isActive = false, isHighlight
       </div>
 
       {(scheduleLabel || item.budget !== undefined) && (
-        <div className="mt-2.5 flex items-center gap-2 text-xs text-gray-400 pl-[22px] flex-wrap">
+        <div className="mt-2.5 flex items-center gap-2 text-xs text-gray-500 pl-[22px] flex-wrap">
           {scheduleLabel && <span>{scheduleLabel}</span>}
           {item.budget !== undefined && <span className="font-medium text-gray-500">${item.budget.toLocaleString()}</span>}
         </div>

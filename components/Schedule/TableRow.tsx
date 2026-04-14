@@ -55,7 +55,7 @@ export default function TableRow({
   }
 
   return (
-    <div className="flex items-center gap-0 border-b border-gray-50 hover:bg-gray-50/50 group transition-colors">
+    <div className="flex items-center gap-0 border-b border-gray-100 hover:bg-gray-50 group transition-colors">
       {/* 시간 */}
       <div className="w-16 flex-shrink-0 px-3 py-2.5">
         <TimeCell
