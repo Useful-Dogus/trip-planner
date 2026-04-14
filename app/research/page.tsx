@@ -5,21 +5,23 @@ import dynamic from 'next/dynamic'
 import Navigation from '@/components/Layout/Navigation'
 import ItemList from '@/components/Items/ItemList'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
+import ResearchTable from '@/components/Research/ResearchTable'
 import { useItems } from '@/lib/hooks/useItems'
 
 const ResearchMap = dynamic(() => import('@/components/Map/ResearchMap'), { ssr: false })
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
+type Tab = 'list' | 'table' | 'map'
+
 export default function ResearchPage() {
-  const { items, isLoading, updateItem } = useItems()
-  const [tab, setTab] = useState<'list' | 'map'>('list')
+  const { items, isLoading, updateItem, createItem } = useItems()
+  const [tab, setTab] = useState<Tab>('list')
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
 
   const selectedItem = items.find(i => i.id === selectedItemId) ?? null
 
   return (
     <div className="md:pl-44">
-      {/* Header: 항상 제한된 너비 */}
       <div className="max-w-3xl mx-auto px-4 pt-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-gray-900">리서치</h1>
@@ -27,7 +29,6 @@ export default function ResearchPage() {
         </div>
       </div>
 
-      {/* 콘텐츠: 목록은 제한 너비, 지도는 전체 너비 */}
       {isLoading ? (
         <div className="max-w-3xl mx-auto px-4 space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -41,6 +42,15 @@ export default function ResearchPage() {
             selectedItemId={selectedItemId}
             onSelectItem={id => setSelectedItemId(prev => (prev === id ? null : id))}
             onUpdateItem={updateItem}
+          />
+        </div>
+      ) : tab === 'table' ? (
+        <div className="max-w-3xl mx-auto px-4 pb-24 md:pb-6">
+          <ResearchTable
+            items={items}
+            onUpdateItem={updateItem}
+            onCreateItem={createItem}
+            onOpenPanel={id => setSelectedItemId(prev => (prev === id ? null : id))}
           />
         </div>
       ) : (
@@ -65,24 +75,23 @@ export default function ResearchPage() {
   )
 }
 
-function TabSwitcher({
-  tab,
-  onChange,
-}: {
-  tab: 'list' | 'map'
-  onChange: (t: 'list' | 'map') => void
-}) {
+function TabSwitcher({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
+  const tabs: { value: Tab; label: string }[] = [
+    { value: 'list', label: '목록' },
+    { value: 'table', label: '테이블' },
+    { value: 'map', label: '지도' },
+  ]
   return (
     <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-      {(['list', 'map'] as const).map(t => (
+      {tabs.map(({ value, label }) => (
         <button
-          key={t}
-          onClick={() => onChange(t)}
-          className={`px-4 py-1.5 text-sm font-medium transition-colors ${
-            tab === t ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'
+          key={value}
+          onClick={() => onChange(value)}
+          className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+            tab === value ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'
           }`}
         >
-          {t === 'list' ? '목록' : '지도'}
+          {label}
         </button>
       ))}
     </div>
