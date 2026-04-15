@@ -125,7 +125,13 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
       if (reservationStatuses.length) {
         if (!item.reservation_status || !reservationStatuses.includes(item.reservation_status)) return false
       }
-      if (q && !item.name.toLowerCase().includes(q)) return false
+      if (q) {
+        const haystack = [item.name, item.address, item.memo]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+        if (!haystack.includes(q)) return false
+      }
       return true
     })
   }, [items, query, filterState])
@@ -199,7 +205,7 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
           type="text"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="이름으로 검색..."
+          placeholder="이름·주소·메모로 검색..."
           className="flex-1 min-w-0 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
         />
         <div className="relative flex items-center gap-1.5 flex-shrink-0">
