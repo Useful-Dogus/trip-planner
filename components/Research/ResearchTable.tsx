@@ -133,7 +133,8 @@ export default function ResearchTable({
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if ((e.target as HTMLElement).closest('[data-research-row]')) return
+      const target = e.target as HTMLElement
+      if (target.closest('[data-portal]') || target.closest('[data-research-row]')) return
       setEditingCell(null)
     }
     document.addEventListener('mousedown', handleClick)

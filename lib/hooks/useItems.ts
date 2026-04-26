@@ -15,15 +15,7 @@ const fetcher = (url: string) =>
 export type SyncStatus = 'fresh' | 'stale' | 'offline' | 'error'
 
 function applyItemChanges(item: TripItem, changes: Record<string, unknown>): TripItem {
-  const next: Record<string, unknown> = { ...item }
-  Object.entries(changes).forEach(([key, value]) => {
-    if (value === null) {
-      delete next[key]
-      return
-    }
-    next[key] = value
-  })
-  return normalizeTripItem(next as unknown as TripItem).item
+  return normalizeTripItem({ ...item, ...changes } as TripItem).item
 }
 
 export function useItems() {

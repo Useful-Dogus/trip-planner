@@ -87,6 +87,7 @@ export default function StatusCell({
         createPortal(
           <div
             ref={dropdownRef}
+            data-portal="true"
             className="fixed z-[1200] rounded-xl border border-gray-200 bg-white shadow-lg p-1 w-44"
             style={{ top: position.top, left: position.left }}
           >
