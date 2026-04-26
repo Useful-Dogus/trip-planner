@@ -241,7 +241,10 @@ export default function ScheduleTable({
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if ((e.target as HTMLElement).closest('[data-schedule-row]')) return
+      const target = e.target as HTMLElement
+      // data-portal 요소(포털 드롭다운)와 data-schedule-row 내부 클릭은 무시한다.
+      // 포털은 DOM 트리상 data-schedule-row 밖에 있지만 편집 셀을 닫아선 안 된다.
+      if (target.closest('[data-portal]') || target.closest('[data-schedule-row]')) return
       setEditingCell(null)
     }
     document.addEventListener('mousedown', handleClick)

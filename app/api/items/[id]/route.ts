@@ -80,12 +80,6 @@ function validatePartial(body: Record<string, unknown>): string | null {
   ) {
     return 'time_end는 HH:MM 형식이어야 합니다.'
   }
-  if (body.time_start !== undefined && body.time_start !== null && !body.date) {
-    return 'time_start를 입력하려면 시작 날짜가 필요합니다.'
-  }
-  if (body.time_end !== undefined && body.time_end !== null && !body.end_date) {
-    return 'time_end를 입력하려면 종료 날짜가 필요합니다.'
-  }
   return null
 }
 
@@ -117,6 +111,13 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
     id: items[idx].id,
     created_at: items[idx].created_at,
     updated_at: new Date().toISOString(),
+  }
+
+  if (updated.time_start && !updated.date) {
+    return NextResponse.json({ error: 'time_start를 입력하려면 시작 날짜가 필요합니다.' }, { status: 400 })
+  }
+  if (updated.time_end && !updated.end_date) {
+    return NextResponse.json({ error: 'time_end를 입력하려면 종료 날짜가 필요합니다.' }, { status: 400 })
   }
 
   items[idx] = updated

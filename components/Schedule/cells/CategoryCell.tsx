@@ -69,6 +69,7 @@ export default function CategoryCell({
         createPortal(
           <div
             ref={dropdownRef}
+            data-portal="true"
             className="fixed z-[1200] rounded-xl border border-gray-200 bg-white shadow-lg p-2"
             style={{ top: position.top, left: position.left }}
           >
