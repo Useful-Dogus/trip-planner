@@ -1,3 +1,193 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================
+ * 시맨틱 디자인 토큰
+ * - 색은 RGB triple 로 정의해 Tailwind 의 rgb(var(--x) / <alpha-value>) 와 호환
+ * - 다크 모드는 prefers-color-scheme 기반 자동 적용 (토글 없음)
+ * ========================================================== */
+@layer base {
+  :root {
+    /* surface */
+    --bg: 255 255 255;
+    --bg-subtle: 248 250 252;        /* slate-50 */
+    --bg-elevated: 255 255 255;
+    --bg-overlay: 15 23 42;          /* slate-900 (overlay 색, opacity 는 호출부에서) */
+
+    /* text */
+    --fg: 15 23 42;                  /* slate-900 */
+    --fg-muted: 71 85 105;           /* slate-600 */
+    --fg-subtle: 148 163 184;        /* slate-400 */
+    --fg-on-accent: 255 255 255;
+
+    /* line */
+    --border: 226 232 240;           /* slate-200 */
+    --border-strong: 203 213 225;    /* slate-300 */
+
+    /* accent — Teal */
+    --accent: 13 148 136;            /* teal-600 */
+    --accent-hover: 15 118 110;      /* teal-700 */
+    --accent-subtle: 240 253 250;    /* teal-50 */
+
+    /* status */
+    --success-bg: 240 253 244;
+    --success-fg: 22 101 52;
+    --success-border: 187 247 208;
+    --warning-bg: 254 252 232;
+    --warning-fg: 133 77 14;
+    --warning-border: 254 240 138;
+    --critical-bg: 254 242 242;
+    --critical-fg: 153 27 27;
+    --critical-border: 254 202 202;
+    --info-bg: 239 246 255;
+    --info-fg: 30 64 175;
+    --info-border: 191 219 254;
+
+    /* shadow base color (slate-900) */
+    --shadow: 15 23 42;
+
+    /* category — light mode hex (인라인 스타일 호환) */
+    --cat-transit: #94a3b8;
+    --cat-stay: #0ea5e9;
+    --cat-sight: #f97316;
+    --cat-food: #ef4444;
+    --cat-cafe: #a16207;
+    --cat-shop: #ec4899;
+    --cat-culture: #8b5cf6;
+    --cat-show: #10b981;
+    --cat-activity: #f59e0b;
+    --cat-leisure: #22c55e;
+    --cat-other: #cbd5e1;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* 층 구조: base → elevated 한 단계씩 밝게 (Apple/Fluent 권장) */
+      --bg: 11 16 32;                /* deep navy */
+      --bg-subtle: 19 26 46;
+      --bg-elevated: 26 34 58;
+      --bg-overlay: 0 0 0;
+
+      --fg: 241 245 249;             /* slate-100 */
+      --fg-muted: 148 163 184;       /* slate-400 */
+      --fg-subtle: 100 116 139;      /* slate-500 */
+      --fg-on-accent: 11 16 32;
+
+      --border: 30 41 59;            /* slate-800 */
+      --border-strong: 51 65 85;     /* slate-700 */
+
+      /* accent: 다크에서 채도 -10%, 명도 +15% (Fluent 권장) */
+      --accent: 45 212 191;          /* teal-400 */
+      --accent-hover: 94 234 212;    /* teal-300 */
+      --accent-subtle: 19 78 74;     /* teal-900 */
+
+      --success-bg: 6 78 59;
+      --success-fg: 187 247 208;
+      --success-border: 21 128 61;
+      --warning-bg: 113 63 18;
+      --warning-fg: 254 240 138;
+      --warning-border: 161 98 7;
+      --critical-bg: 127 29 29;
+      --critical-fg: 254 202 202;
+      --critical-border: 185 28 28;
+      --info-bg: 30 58 138;
+      --info-fg: 191 219 254;
+      --info-border: 37 99 235;
+
+      --shadow: 0 0 0;
+
+      /* category 다크 톤 (채도 살짝 낮춤) */
+      --cat-transit: #b6c3d2;
+      --cat-stay: #38bdf8;
+      --cat-sight: #fb923c;
+      --cat-food: #f87171;
+      --cat-cafe: #d97706;
+      --cat-shop: #f472b6;
+      --cat-culture: #a78bfa;
+      --cat-show: #34d399;
+      --cat-activity: #fbbf24;
+      --cat-leisure: #4ade80;
+      --cat-other: #cbd5e1;
+    }
+  }
+
+  html {
+    color-scheme: light dark;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+    font-feature-settings: 'ss01', 'ss02', 'cv11';
+  }
+
+  /* 표·시간·금액 등 숫자 정렬 */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 글로벌 포커스 스타일: keyboard 사용자에게만 가시 */
+  :focus {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* placeholder 톤 */
+  ::placeholder {
+    color: rgb(var(--fg-subtle));
+    opacity: 1;
+  }
+
+  /* 셀렉션 */
+  ::selection {
+    background-color: rgb(var(--accent) / 0.18);
+    color: rgb(var(--fg));
+  }
+
+  /* 기본 link 톤 정리 (각 컴포넌트에서 override) */
+  a {
+    color: inherit;
+  }
+}
+
+@layer utilities {
+  /* sheet/dialog 등이 사용하는 backdrop blur 헬퍼 */
+  .bg-overlay {
+    background-color: rgb(var(--bg-overlay) / 0.40);
+  }
+
+  /* skeleton shimmer */
+  .skeleton {
+    background-image: linear-gradient(
+      90deg,
+      rgb(var(--bg-subtle)) 0%,
+      rgb(var(--border)) 50%,
+      rgb(var(--bg-subtle)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+}
+
+/* ============================================================
+ * Reduced motion
+ * - 시스템 환경에서 모션 감소 요청 시 transform 슬라이드 → fade 또는 즉시
+ * ========================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
