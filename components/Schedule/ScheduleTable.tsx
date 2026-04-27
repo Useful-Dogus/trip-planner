@@ -161,6 +161,7 @@ export default function ScheduleTable({
   const [undatedCollapsed, setUndatedCollapsed] = useState(false)
   const [addingToDate, setAddingToDate] = useState<string | null>(null)
   const [newItemName, setNewItemName] = useState('')
+  const cancelNewItemRef = useRef(false)
   const newItemInputRef = useCallback((el: HTMLInputElement | null) => {
     if (el) setTimeout(() => el.focus(), 0)
   }, [])
@@ -252,6 +253,10 @@ export default function ScheduleTable({
   }, [])
 
   function handleNewItemBlur(date: string | null) {
+    if (cancelNewItemRef.current) {
+      cancelNewItemRef.current = false
+      return
+    }
     const name = newItemName.trim()
     if (name) {
       onCreateItem({
@@ -271,6 +276,7 @@ export default function ScheduleTable({
       e.preventDefault()
       handleNewItemBlur(date)
     } else if (e.key === 'Escape') {
+      cancelNewItemRef.current = true
       setAddingToDate(null)
       setNewItemName('')
     }
@@ -344,7 +350,7 @@ export default function ScheduleTable({
             value={newItemName}
             onChange={setNewItemName}
             onBlur={() => handleNewItemBlur(date)}
-            onKeyDown={handleNewItemKeyDown}
+            onKeyDown={e => handleNewItemKeyDown(e, date)}
           />
         ) : (
           <button
