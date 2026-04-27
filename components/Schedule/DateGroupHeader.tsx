@@ -1,15 +1,11 @@
 'use client'
 
-import type { Category } from '@/types'
-import CategoryStackBar from './CategoryStackBar'
-
 interface DateGroupHeaderProps {
   date: string
   dayOffset: number | null
   totalBudget: number
   isCollapsed: boolean
   isToday?: boolean
-  categoryBreakdown?: { category: Category; count: number }[]
   onToggleCollapse: () => void
   onAddItem: () => void
 }
@@ -29,12 +25,10 @@ export default function DateGroupHeader({
   totalBudget,
   isCollapsed,
   isToday = false,
-  categoryBreakdown,
   onToggleCollapse,
   onAddItem,
 }: DateGroupHeaderProps) {
   const isUndated = date === '__undated__'
-  const showBar = !isUndated && categoryBreakdown && categoryBreakdown.length > 0
 
   return (
     <div className="bg-bg-elevated border-b border-border sticky top-0 z-10">
@@ -96,11 +90,6 @@ export default function DateGroupHeader({
         </button>
       </div>
       </div>
-      {showBar && (
-        <div className="px-3 pb-2">
-          <CategoryStackBar breakdown={categoryBreakdown!} />
-        </div>
-      )}
     </div>
   )
 }
