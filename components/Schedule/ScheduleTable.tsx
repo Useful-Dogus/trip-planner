@@ -112,7 +112,7 @@ function MobileScheduleItemCard({
       className="w-full rounded-2xl border border-border bg-bg-elevated p-4 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md active:scale-[0.99]"
     >
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-50 text-lg">
+        <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-bg-subtle text-lg">
           {emoji}
         </span>
         <div className="min-w-0 flex-1">
@@ -121,7 +121,7 @@ function MobileScheduleItemCard({
               <p className="truncate text-sm font-semibold text-fg">{item.name}</p>
               <p className="mt-0.5 text-xs text-fg-muted">{item.category}</p>
             </div>
-            <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-border bg-gray-50 px-2 py-0.5 text-xs text-fg-muted">
+            <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-border bg-bg-subtle px-2 py-0.5 text-xs text-fg-muted">
               <span className={`h-2 w-2 rounded-full ${status.dotClass}`} />
               {status.label}
             </span>
@@ -162,7 +162,7 @@ function MobileNewItemEditor({
         onBlur={onBlur}
         onKeyDown={e => onKeyDown(e, value)}
         placeholder="이름 입력 후 Enter…"
-        className="w-full bg-transparent border-b border-blue-300 focus:border-blue-500 outline-none text-sm text-fg py-1"
+        className="w-full bg-transparent border-b border-border-strong focus:border-accent outline-none text-sm text-fg py-1"
         style={{ fontSize: 16 }}
       />
     </div>
@@ -325,7 +325,7 @@ export default function ScheduleTable({
           )
         })}
         {addingToDate === date ? (
-          <div className="flex min-w-[720px] items-center border-b border-gray-50 bg-info-bg/30">
+          <div className="flex min-w-[720px] items-center border-b border-border bg-info-bg/30">
             <div className="w-16 flex-shrink-0 px-3 py-2.5" />
             <div className="min-w-[220px] flex-1 px-3 py-2.5">
               <input
@@ -335,7 +335,7 @@ export default function ScheduleTable({
                 onBlur={() => handleNewItemBlur(date)}
                 onKeyDown={e => handleNewItemKeyDown(e, date)}
                 placeholder="이름 입력 후 Enter…"
-                className="w-full bg-transparent border-b border-blue-300 focus:border-blue-500 outline-none text-sm text-fg py-0.5"
+                className="w-full bg-transparent border-b border-border-strong focus:border-accent outline-none text-sm text-fg py-0.5"
                 style={{ fontSize: 16 }}
               />
             </div>
@@ -392,7 +392,7 @@ export default function ScheduleTable({
               setAddingToDate(date)
               setNewItemName('')
             }}
-            className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border bg-gray-50 px-4 py-3 text-sm text-fg-muted transition-colors hover:border-border-strong hover:text-fg"
+            className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border bg-bg-subtle px-4 py-3 text-sm text-fg-muted transition-colors hover:border-border-strong hover:text-fg"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />

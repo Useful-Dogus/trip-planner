@@ -32,7 +32,7 @@ export default function UrlInput({ onSubmit, loading, error }: UrlInputProps) {
           type="url"
           placeholder="https://maps.app.goo.gl/..."
           disabled={loading}
-          className="flex-1 px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus-visible:outline-accent focus:border-transparent disabled:bg-gray-50 disabled:text-fg-subtle"
+          className="flex-1 px-3 py-2 text-sm border border-border rounded-lg bg-bg-elevated text-fg focus:outline-none focus:ring-2 focus-visible:outline-accent focus:border-transparent disabled:bg-bg-subtle disabled:text-fg-subtle"
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
@@ -41,7 +41,7 @@ export default function UrlInput({ onSubmit, loading, error }: UrlInputProps) {
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          className="px-4 py-2 text-sm font-medium bg-accent text-accent-fg rounded-lg hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
         >
           {loading ? '불러오는 중...' : '불러오기'}
         </button>

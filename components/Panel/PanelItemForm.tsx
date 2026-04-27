@@ -169,7 +169,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
               type="text"
               value={form.name}
               onChange={e => setField('name', e.target.value)}
-              className={`${inputClass}${nameError ? ' border-red-400 focus:ring-red-200' : ''}`}
+              className={`${inputClass}${nameError ? ' border-critical-fg focus:ring-critical-border' : ''}`}
               placeholder="장소 또는 활동 이름"
             />
             {nameError && <p className="text-xs text-critical-fg mt-1">{nameError}</p>}
@@ -241,7 +241,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
             <input type="text" value={form.address} onChange={e => setField('address', e.target.value)} onBlur={handleAddressBlur} className={inputClass} placeholder="주소 입력 후 포커스를 벗어나면 좌표 자동 입력" />
           </Field>
           {geocoding && <p className="text-xs text-fg-subtle -mt-2">좌표 검색 중...</p>}
-          {!geocoding && geocodeError && <p className="text-xs text-amber-500 -mt-2">{geocodeError}</p>}
+          {!geocoding && geocodeError && <p className="text-xs text-warning-fg -mt-2">{geocodeError}</p>}
           <div className="grid grid-cols-2 gap-3">
             <Field label="위도 (lat)">
               <input type="number" step="any" value={form.lat} onChange={e => setField('lat', e.target.value)} className={inputClass} />
@@ -277,7 +277,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
           <button type="button" onClick={onCancel} className="px-4 py-2.5 rounded-lg text-sm font-medium text-fg-muted border border-border hover:bg-bg-subtle transition-colors">
             취소
           </button>
-          <button type="submit" className="flex-1 bg-accent text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-colors">
+          <button type="submit" className="flex-1 bg-accent text-accent-fg rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-colors">
             저장
           </button>
         </div>

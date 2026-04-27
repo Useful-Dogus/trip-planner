@@ -162,7 +162,7 @@ export default function GmapsImportPage() {
           <div className="bg-bg-elevated rounded-xl border border-border p-8 text-center">
             <div className="w-12 h-12 rounded-full bg-success-bg flex items-center justify-center mx-auto mb-4">
               <svg
-                className="w-6 h-6 text-green-600"
+                className="w-6 h-6 text-success-fg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

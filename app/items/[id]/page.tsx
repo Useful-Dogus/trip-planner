@@ -25,7 +25,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
           </Link>
           <Link
             href={`/items/${item.id}/edit`}
-            className="px-3 py-1.5 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors"
+            className="px-3 py-1.5 text-sm font-medium bg-accent text-accent-fg rounded-lg hover:bg-accent-hover transition-colors"
           >
             편집
           </Link>
@@ -40,7 +40,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
         <div className="space-y-5">
           {/* 일정 & 예산 */}
           {(scheduleRows.length > 0 || item.budget !== undefined) && (
-            <section className="bg-gray-50 rounded-xl p-4 space-y-1.5">
+            <section className="bg-bg-subtle rounded-xl p-4 space-y-1.5">
               {scheduleRows.map(row => (
                 <Row key={row.label} label={row.label} value={row.value} />
               ))}
