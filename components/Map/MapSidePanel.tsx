@@ -82,46 +82,76 @@ export default function MapSidePanel({
     return days.find(d => d.date === selectedDate) ?? null
   }, [days, selectedDate])
 
+  const mode: 'candidates' | 'day' = selectedDate === null ? 'candidates' : 'day'
+
+  function handleModeChange(next: 'candidates' | 'day') {
+    if (next === 'candidates') {
+      onSelectDate(null)
+    } else if (selectedDate === null && days.length > 0) {
+      onSelectDate(days[0].date)
+    }
+  }
+
   return (
     <aside className="flex h-full flex-col bg-white">
-      {/* Scope tabs */}
-      <nav
-        className="flex flex-shrink-0 gap-1 overflow-x-auto border-b border-gray-200 bg-gray-50/50 px-2 py-2"
-        style={{ scrollbarWidth: 'thin' }}
-      >
+      {/* Mode toggle (segmented) */}
+      <div className="flex flex-shrink-0 border-b border-gray-200 bg-gray-50/50 p-1.5">
         <button
           type="button"
-          onClick={() => onSelectDate(null)}
-          className={`flex flex-shrink-0 items-baseline gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-            selectedDate === null
-              ? 'bg-gray-900 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+          onClick={() => handleModeChange('candidates')}
+          className={`flex flex-1 items-baseline justify-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+            mode === 'candidates'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
           }`}
         >
           후보
           <span className="text-[10px] tabular-nums opacity-70">{candidates.length}</span>
         </button>
-        {days.map(day => {
-          const active = day.date === selectedDate
-          const { tab } = formatDateLabel(day.date)
-          return (
-            <button
-              key={day.date}
-              type="button"
-              onClick={() => onSelectDate(day.date)}
-              className={`flex flex-shrink-0 items-baseline gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                active ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-              title={`${tab} · ${day.stopCount}곳`}
-            >
-              <span className="text-[10px] font-semibold tracking-wider opacity-70">
-                D{day.dayOffset + 1}
-              </span>
-              <span className="tabular-nums">{tab}</span>
-            </button>
-          )
-        })}
-      </nav>
+        <button
+          type="button"
+          onClick={() => handleModeChange('day')}
+          disabled={days.length === 0}
+          className={`flex flex-1 items-baseline justify-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+            mode === 'day'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50'
+          }`}
+        >
+          일정
+          {days.length > 0 && (
+            <span className="text-[10px] tabular-nums opacity-70">{days.length}일</span>
+          )}
+        </button>
+      </div>
+
+      {/* Day grid (only in day mode) */}
+      {mode === 'day' && days.length > 0 && (
+        <div className="flex flex-shrink-0 flex-wrap gap-1.5 border-b border-gray-200 px-3 py-2">
+          {days.map(day => {
+            const active = day.date === selectedDate
+            const { tab } = formatDateLabel(day.date)
+            return (
+              <button
+                key={day.date}
+                type="button"
+                onClick={() => onSelectDate(day.date)}
+                className={`flex items-baseline gap-1 rounded-md border px-2 py-1 text-xs font-medium transition-colors ${
+                  active
+                    ? 'border-gray-900 bg-gray-900 text-white'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'
+                }`}
+                title={`${tab} · ${day.stopCount}곳`}
+              >
+                <span className="text-[10px] font-semibold tracking-wider opacity-70">
+                  D{day.dayOffset + 1}
+                </span>
+                <span className="tabular-nums">{tab}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {selectedDate === null ? (
         <CandidatesView
