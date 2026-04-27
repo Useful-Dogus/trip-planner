@@ -56,18 +56,18 @@ export const CHIP_BASE_TONE = 'bg-white border border-gray-200'
 export const CHIP_TONE = `${CHIP_BASE_TONE} text-gray-700`
 export const PLACEHOLDER_TONE = `${CHIP_BASE_TONE} text-gray-400`
 
-export const CATEGORY_META: Record<Category, { emoji: string }> = {
-  교통: { emoji: '🚌' },
-  숙박: { emoji: '🏨' },
-  명소: { emoji: '🏛️' },
-  식당: { emoji: '🍽️' },
-  카페: { emoji: '☕' },
-  쇼핑: { emoji: '🛍️' },
-  문화시설: { emoji: '🎨' },
-  '공연·스포츠': { emoji: '🎭' },
-  액티비티: { emoji: '🎯' },
-  휴양: { emoji: '🌴' },
-  기타: { emoji: '🔖' },
+export const CATEGORY_META: Record<Category, { emoji: string; color: string }> = {
+  교통: { emoji: '🚌', color: '#94a3b8' },
+  숙박: { emoji: '🏨', color: '#0ea5e9' },
+  명소: { emoji: '🏛️', color: '#f97316' },
+  식당: { emoji: '🍽️', color: '#ef4444' },
+  카페: { emoji: '☕', color: '#a16207' },
+  쇼핑: { emoji: '🛍️', color: '#ec4899' },
+  문화시설: { emoji: '🎨', color: '#8b5cf6' },
+  '공연·스포츠': { emoji: '🎭', color: '#10b981' },
+  액티비티: { emoji: '🎯', color: '#f59e0b' },
+  휴양: { emoji: '🌴', color: '#22c55e' },
+  기타: { emoji: '🔖', color: '#cbd5e1' },
 }
 
 export const TRIP_PRIORITY_META: Record<TripPriority, { description: string; order: number; emoji: string; style: BadgeStyle }> = {

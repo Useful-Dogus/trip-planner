@@ -1,11 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { ReservationStatus, TripItem } from '@/types'
-import { CATEGORY_META, RESERVATION_STATUS_META } from '@/lib/itemOptions'
+import { useCallback, useEffect, useMemo, useRef, useState, Fragment } from 'react'
+import type { Category, ReservationStatus, TripItem } from '@/types'
+import { CATEGORY_META, CATEGORY_OPTIONS, RESERVATION_STATUS_META } from '@/lib/itemOptions'
+import { haversineKm } from '@/lib/distance'
 import { EDITABLE_FIELDS, type EditableField } from './TableRow'
 import TableRow from './TableRow'
 import DateGroupHeader from './DateGroupHeader'
+import DistanceSeparator from './DistanceSeparator'
 
 interface EditingCell {
   itemId: string
@@ -63,6 +65,23 @@ function getStatusMeta(value: ReservationStatus | null | undefined) {
     }[value],
     label: shortLabel[value],
   }
+}
+
+function buildCategoryBreakdown(items: TripItem[]): { category: Category; count: number }[] {
+  const counts = new Map<Category, number>()
+  for (const it of items) {
+    counts.set(it.category, (counts.get(it.category) ?? 0) + 1)
+  }
+  return CATEGORY_OPTIONS
+    .filter(c => counts.has(c))
+    .map(c => ({ category: c, count: counts.get(c)! }))
+}
+
+function distanceBetween(a: TripItem, b: TripItem): number | null {
+  if (a.lat == null || a.lng == null || b.lat == null || b.lng == null) return null
+  const km = haversineKm({ lat: a.lat, lng: a.lng }, { lat: b.lat, lng: b.lng })
+  if (km < 0.05) return null
+  return km
 }
 
 function formatDate(dateStr: string): string {
@@ -285,19 +304,26 @@ export default function ScheduleTable({
   function renderDesktopGroupRows(date: string, groupItems: TripItem[]) {
     return (
       <>
-        {groupItems.map(item => (
-          <div key={item.id} data-schedule-row="true">
-            <TableRow
-              item={item}
-              editingField={editingCell?.itemId === item.id ? editingCell.field : null}
-              onCellActivate={field => setEditingCell({ itemId: item.id, field })}
-              onCellSave={(field, value) => onUpdateItem(item.id, { [field]: value })}
-              onCellDeactivate={() => setEditingCell(null)}
-              onNavigate={handleNavigate}
-              onOpenPanel={onOpenPanel}
-            />
-          </div>
-        ))}
+        {groupItems.map((item, idx) => {
+          const prev = idx > 0 ? groupItems[idx - 1] : null
+          const km = prev ? distanceBetween(prev, item) : null
+          return (
+            <Fragment key={item.id}>
+              {km != null && <DistanceSeparator km={km} variant="desktop" />}
+              <div data-schedule-row="true">
+                <TableRow
+                  item={item}
+                  editingField={editingCell?.itemId === item.id ? editingCell.field : null}
+                  onCellActivate={field => setEditingCell({ itemId: item.id, field })}
+                  onCellSave={(field, value) => onUpdateItem(item.id, { [field]: value })}
+                  onCellDeactivate={() => setEditingCell(null)}
+                  onNavigate={handleNavigate}
+                  onOpenPanel={onOpenPanel}
+                />
+              </div>
+            </Fragment>
+          )
+        })}
         {addingToDate === date ? (
           <div className="flex min-w-[720px] items-center border-b border-gray-50 bg-blue-50/30">
             <div className="w-16 flex-shrink-0 px-3 py-2.5" />
@@ -339,10 +365,17 @@ export default function ScheduleTable({
 
   function renderMobileGroupRows(date: string, groupItems: TripItem[]) {
     return (
-      <div className="space-y-3 px-3 py-3">
-        {groupItems.map(item => (
-          <MobileScheduleItemCard key={item.id} item={item} onOpenPanel={onOpenPanel} />
-        ))}
+      <div className="space-y-2 px-3 py-3">
+        {groupItems.map((item, idx) => {
+          const prev = idx > 0 ? groupItems[idx - 1] : null
+          const km = prev ? distanceBetween(prev, item) : null
+          return (
+            <Fragment key={item.id}>
+              {km != null && <DistanceSeparator km={km} variant="mobile" />}
+              <MobileScheduleItemCard item={item} onOpenPanel={onOpenPanel} />
+            </Fragment>
+          )
+        })}
         {addingToDate === date ? (
           <MobileNewItemEditor
             date={date}
@@ -394,6 +427,7 @@ export default function ScheduleTable({
           const isCollapsed = collapsedDates.has(date)
           const dayOffset = getDayOffset(date)
           const isToday = date === todayKey
+          const categoryBreakdown = buildCategoryBreakdown(groupItems)
 
           return (
             <div key={date} ref={isToday ? todayRef : undefined} className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -403,6 +437,7 @@ export default function ScheduleTable({
                 totalBudget={totalBudget}
                 isCollapsed={isCollapsed}
                 isToday={isToday}
+                categoryBreakdown={categoryBreakdown}
                 onToggleCollapse={() =>
                   setCollapsedDates(prev => {
                     const next = new Set(prev)
@@ -495,6 +530,7 @@ export default function ScheduleTable({
                 const isCollapsed = collapsedDates.has(date)
                 const dayOffset = getDayOffset(date)
                 const isToday = date === todayKey
+                const categoryBreakdown = buildCategoryBreakdown(groupItems)
 
                 return (
                   <div key={date} ref={isToday ? todayRef : undefined}>
@@ -504,6 +540,7 @@ export default function ScheduleTable({
                       totalBudget={totalBudget}
                       isCollapsed={isCollapsed}
                       isToday={isToday}
+                      categoryBreakdown={categoryBreakdown}
                       onToggleCollapse={() =>
                         setCollapsedDates(prev => {
                           const next = new Set(prev)
