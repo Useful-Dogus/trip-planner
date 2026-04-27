@@ -8,10 +8,16 @@ import {
 } from '@/lib/itemOptions'
 import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 import ReservationStatusBadge from '@/components/UI/ReservationStatusBadge'
+import { cn } from '@/lib/cn'
 
 function PlaceholderChip({ label }: { label: string }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${PLACEHOLDER_TONE}`}>
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border',
+        PLACEHOLDER_TONE,
+      )}
+    >
       {label}
     </span>
   )
@@ -21,8 +27,14 @@ function CategoryChip({ category }: { category: TripItem['category'] | undefined
   if (!category) return <PlaceholderChip label={PLACEHOLDER_LABELS.category} />
   const emoji = CATEGORY_META[category]?.emoji
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${CHIP_TONE}`}>
-      {emoji} {category}
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium border',
+        CHIP_TONE,
+      )}
+    >
+      <span aria-hidden="true">{emoji}</span>
+      {category}
     </span>
   )
 }
@@ -43,9 +55,11 @@ export default function ItemMetadataChips({
     {
       key: 'trip_priority',
       label: ITEM_FIELD_LABELS.trip_priority,
-      node: item.trip_priority
-        ? <TripPriorityBadge tripPriority={item.trip_priority} />
-        : <PlaceholderChip label={PLACEHOLDER_LABELS.trip_priority} />,
+      node: item.trip_priority ? (
+        <TripPriorityBadge tripPriority={item.trip_priority} />
+      ) : (
+        <PlaceholderChip label={PLACEHOLDER_LABELS.trip_priority} />
+      ),
     },
     {
       key: 'reservation_status',
@@ -59,10 +73,12 @@ export default function ItemMetadataChips({
   ]
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {chips.map(chip => (
-        <div key={chip.key} className="flex items-center gap-1.5">
-          {showLabels && <span className="text-[11px] font-medium text-gray-400">{chip.label}</span>}
+    <div className="flex flex-wrap gap-1.5">
+      {chips.map((chip) => (
+        <div key={chip.key} className="flex items-center gap-1">
+          {showLabels && (
+            <span className="text-[11px] font-medium text-fg-subtle">{chip.label}</span>
+          )}
           {chip.node}
         </div>
       ))}

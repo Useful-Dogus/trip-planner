@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { WifiOff } from 'lucide-react'
 
 export default function OfflineBanner() {
   const [offline, setOffline] = useState(false)
@@ -20,8 +21,13 @@ export default function OfflineBanner() {
   if (!offline) return null
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[1200] bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-800">
-      오프라인 상태입니다. 캐시된 데이터를 표시 중입니다.
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed top-0 inset-x-0 z-[1200] bg-warning-bg border-b border-warning-border px-4 py-2 flex items-center justify-center gap-2 text-xs text-warning-fg"
+    >
+      <WifiOff className="size-3.5" aria-hidden="true" />
+      <span>오프라인 상태입니다. 캐시된 데이터를 보고 있어요.</span>
     </div>
   )
 }

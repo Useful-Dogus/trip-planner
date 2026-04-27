@@ -1,143 +1,122 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
+import { List, Map, CalendarDays, Download, LogOut } from 'lucide-react'
+import { cn } from '@/lib/cn'
 
-const navItems = [
-  {
-    href: '/research',
-    label: '목록',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <path d="M9 9a2 2 0 114 0 2 2 0 01-4 0z" />
-        <path
-          fillRule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a4 4 0 00-3.446 6.032l-2.261 2.26a1 1 0 101.414 1.415l2.261-2.261A4 4 0 1011 5z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: '/map',
-    label: '지도',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <path
-          fillRule="evenodd"
-          d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
+interface NavItem {
+  href: string
+  label: string
+  icon: typeof List
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { href: '/research', label: '목록', icon: List },
+  { href: '/map', label: '지도', icon: Map },
+  { href: '/schedule', label: '일정', icon: CalendarDays },
 ]
+
+async function handleLogout() {
+  await fetch('/api/auth/logout', { method: 'POST' })
+  window.location.href = '/login'
+}
 
 export default function Navigation() {
   const pathname = usePathname()
-  const router = useRouter()
-
-  async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    window.location.href = '/login'
-  }
-
-  function isActive(href: string) {
-    return pathname.startsWith(href)
-  }
+  const isActive = (href: string) => pathname.startsWith(href)
 
   return (
     <>
       {/* Mobile: bottom fixed nav */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-gray-100 z-50"
+        className={cn(
+          'md:hidden fixed bottom-0 inset-x-0 z-50',
+          'bg-bg-elevated/90 backdrop-blur border-t border-border',
+        )}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        aria-label="기본 네비게이션"
       >
-        <div className="flex">
-          {navItems.map(({ href, label, icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium transition-colors ${
-                isActive(href) ? 'text-gray-900' : 'text-gray-400'
-              }`}
-            >
-              {icon}
-              {label}
-            </Link>
-          ))}
-        </div>
+        <ul className="flex">
+          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+            const active = isActive(href)
+            return (
+              <li key={href} className="flex-1">
+                <Link
+                  href={href}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-11',
+                    'text-[11px] font-medium transition-colors duration-150',
+                    'focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-accent rounded',
+                    active ? 'text-accent' : 'text-fg-subtle hover:text-fg-muted',
+                  )}
+                >
+                  <Icon className="size-5" aria-hidden="true" />
+                  <span>{label}</span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
       </nav>
 
       {/* Desktop: left sidebar */}
-      <aside className="hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:h-full md:w-44 bg-white border-r border-gray-100 p-4 z-50">
+      <aside
+        className="hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:h-full md:w-44 z-50 bg-bg-elevated border-r border-border p-4"
+        aria-label="기본 네비게이션"
+      >
         <div className="mb-6 px-3">
-          <p className="text-sm font-bold text-gray-900">NYC Trip</p>
-          <p className="text-xs text-gray-400 mt-0.5">2026년 7월</p>
+          <p className="text-sm font-bold text-fg">NYC Trip</p>
+          <p className="text-xs text-fg-subtle mt-0.5">2026년 7월</p>
         </div>
-        <div className="flex-1 space-y-0.5">
-          {navItems.map(({ href, label, icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive(href)
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-              }`}
-            >
-              {icon}
-              {label}
-            </Link>
-          ))}
-        </div>
-        <div className="border-t border-gray-100 pt-3 mt-2 space-y-0.5">
-          {/* 지도연동 보조 버튼 */}
+        <ul className="flex-1 space-y-0.5">
+          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+            const active = isActive(href)
+            return (
+              <li key={href}>
+                <Link
+                  href={href}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium',
+                    'transition-colors duration-150',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+                    active
+                      ? 'bg-accent text-accent-fg'
+                      : 'text-fg-muted hover:bg-bg-subtle hover:text-fg',
+                  )}
+                >
+                  <Icon className="size-4 shrink-0" aria-hidden="true" />
+                  <span>{label}</span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+        <div className="border-t border-border pt-3 mt-2 space-y-0.5">
           <Link
             href="/gmaps-import"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+            className={cn(
+              'flex items-center gap-2 px-3 py-2 text-sm rounded-lg',
+              'text-fg-subtle hover:text-fg hover:bg-bg-subtle transition-colors duration-150',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+            )}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-4 h-4"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-            지도 연동
+            <Download className="size-4 shrink-0" aria-hidden="true" />
+            <span>지도 연동</span>
           </Link>
           <button
+            type="button"
             onClick={handleLogout}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-gray-600 text-left rounded-lg hover:bg-gray-50 transition-colors w-full"
+            className={cn(
+              'flex items-center gap-2 px-3 py-2 text-sm rounded-lg w-full text-left',
+              'text-fg-subtle hover:text-fg hover:bg-bg-subtle transition-colors duration-150',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+            )}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-4 h-4"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"
-                clipRule="evenodd"
-              />
-            </svg>
-            로그아웃
+            <LogOut className="size-4 shrink-0" aria-hidden="true" />
+            <span>로그아웃</span>
           </button>
         </div>
       </aside>
