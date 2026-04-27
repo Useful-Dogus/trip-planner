@@ -5,9 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Navigation from '@/components/Layout/Navigation'
 import { useItems } from '@/lib/hooks/useItems'
-import DayTabs, { type DaySummary } from '@/components/Schedule/DayTabs'
-import DayTimeline from '@/components/Schedule/DayTimeline'
-import MapCandidatePanel from '@/components/Map/MapCandidatePanel'
+import MapSidePanel, { type DaySummary } from '@/components/Map/MapSidePanel'
 import { CATEGORY_OPTIONS } from '@/lib/itemOptions'
 import type { Category, TripItem } from '@/types'
 
@@ -77,24 +75,11 @@ function MapPageContent() {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(
     () => searchParams.get('item'),
   )
+  // null = 후보 모드 (기본). 날짜 문자열이면 해당 day 모드.
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   const selectedItem = items.find(i => i.id === selectedItemId) ?? null
   const days = useMemo(() => buildDaySummaries(items), [items])
-
-  // 첫 렌더 시 첫 day 자동 선택
-  useEffect(() => {
-    if (selectedDate === null && days.length > 0) {
-      setSelectedDate(days[0].date)
-    }
-  }, [days, selectedDate])
-
-  const dayItems = useMemo(() => {
-    if (!selectedDate) return [] as TripItem[]
-    return items
-      .filter(i => i.trip_priority === '확정' && occursOnDate(i, selectedDate))
-      .sort((a, b) => (a.time_start ?? '99:99').localeCompare(b.time_start ?? '99:99'))
-  }, [items, selectedDate])
 
   // invalid item ID 처리
   useEffect(() => {
@@ -123,42 +108,33 @@ function MapPageContent() {
     router.replace(params.toString() ? `/map?${params.toString()}` : '/map', { scroll: false })
   }
 
+  const sidePanel = (
+    <MapSidePanel
+      items={items}
+      days={days}
+      selectedDate={selectedDate}
+      selectedItemId={selectedItemId}
+      onSelectDate={setSelectedDate}
+      onSelectItem={handleSelectItem}
+    />
+  )
+
   return (
     <div className="md:pl-44">
-      {/* Desktop layout: left candidates | center map | bottom day strip */}
-      <div className="hidden md:flex h-screen flex-col">
-        <div className="flex min-h-0 flex-1">
-          <div className="w-[300px] flex-shrink-0 border-r border-gray-200">
-            <MapCandidatePanel
-              items={items}
-              selectedItemId={selectedItemId}
-              onSelectItem={handleSelectItem}
-            />
-          </div>
-          <div className="relative min-w-0 flex-1">
-            <TripPlannerMap
-              items={items}
-              selectedDate={selectedDate}
-              selectedItemId={selectedItemId}
-              onSelectItem={handleSelectItem}
-            />
-          </div>
+      {/* Desktop: side panel | map */}
+      <div className="hidden md:flex h-screen">
+        <div className="w-[320px] flex-shrink-0 border-r border-gray-200">{sidePanel}</div>
+        <div className="relative min-w-0 flex-1">
+          <TripPlannerMap
+            items={items}
+            selectedDate={selectedDate}
+            selectedItemId={selectedItemId}
+            onSelectItem={handleSelectItem}
+          />
         </div>
-        {days.length > 0 && (
-          <div className="flex-shrink-0 border-t border-gray-200 bg-white">
-            <DayTabs days={days} selectedDate={selectedDate} onSelect={setSelectedDate} />
-            <div className="border-t border-gray-100">
-              <DayTimeline
-                items={dayItems}
-                selectedItemId={selectedItemId}
-                onSelectItem={handleSelectItem}
-              />
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Mobile layout: map fullscreen + bottom day tabs (timeline scrolls) */}
+      {/* Mobile: map fullscreen + bottom drawer with same panel */}
       <div className="md:hidden flex h-[calc(100vh-56px)] flex-col">
         <div className="relative min-h-0 flex-1">
           <TripPlannerMap
@@ -168,20 +144,9 @@ function MapPageContent() {
             onSelectItem={handleSelectItem}
           />
         </div>
-        {days.length > 0 && (
-          <div className="flex-shrink-0 border-t border-gray-200 bg-white">
-            <DayTabs days={days} selectedDate={selectedDate} onSelect={setSelectedDate} />
-            {dayItems.length > 0 && (
-              <div className="border-t border-gray-100">
-                <DayTimeline
-                  items={dayItems}
-                  selectedItemId={selectedItemId}
-                  onSelectItem={handleSelectItem}
-                />
-              </div>
-            )}
-          </div>
-        )}
+        <div className="flex-shrink-0 border-t border-gray-200" style={{ height: '40vh' }}>
+          {sidePanel}
+        </div>
       </div>
 
       <Navigation />
