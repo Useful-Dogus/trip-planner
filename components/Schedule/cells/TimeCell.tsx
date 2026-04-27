@@ -55,7 +55,7 @@ export default function TimeCell({ value, isEditing, onClick, onBlur, onKeyDown 
         onBlur={handleBlur}
         onKeyDown={e => onKeyDown(e, draft)}
         placeholder="HH:MM"
-        className="w-16 bg-transparent border-b border-gray-300 focus:border-gray-900 outline-none text-sm text-gray-900 py-0.5"
+        className="w-16 bg-transparent border-b border-border-strong focus:border-accent outline-none text-sm text-fg py-0.5"
         style={{ fontSize: 16 }}
       />
     )
@@ -63,10 +63,10 @@ export default function TimeCell({ value, isEditing, onClick, onBlur, onKeyDown 
 
   return (
     <span
-      className="text-sm text-gray-500 cursor-pointer tabular-nums select-none whitespace-nowrap"
+      className="text-sm text-fg-muted cursor-pointer tabular-nums select-none whitespace-nowrap"
       onClick={onClick}
     >
-      {value || <span className="text-gray-300">--:--</span>}
+      {value || <span className="text-fg-subtle">--:--</span>}
     </span>
   )
 }

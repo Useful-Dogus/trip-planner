@@ -85,7 +85,7 @@ export default function StatusCell({
         {value ? (
           <>
             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${STATUS_DOT[value]}`} />
-            <span className="text-xs text-gray-600 whitespace-nowrap">{STATUS_LABEL[value]}</span>
+            <span className="text-xs text-fg-muted whitespace-nowrap">{STATUS_LABEL[value]}</span>
           </>
         ) : (
           <span className="w-2 h-2 rounded-full bg-gray-200 flex-shrink-0" />
@@ -98,7 +98,7 @@ export default function StatusCell({
           <div
             ref={dropdownRef}
             data-portal="true"
-            className="fixed z-[1200] rounded-xl border border-gray-200 bg-white shadow-lg p-1 w-44"
+            className="fixed z-[1200] rounded-xl border border-border bg-white shadow-lg p-1 w-44"
             style={{ top: position.top, left: position.left }}
           >
             {RESERVATION_STATUS_OPTIONS.map(status => {
@@ -108,7 +108,7 @@ export default function StatusCell({
                   key={status}
                   type="button"
                   onClick={() => onSelect(status)}
-                  className={`flex items-center gap-2 w-full rounded-lg px-3 py-2 text-left hover:bg-gray-50 transition-colors ${
+                  className={`flex items-center gap-2 w-full rounded-lg px-3 py-2 text-left hover:bg-bg-subtle transition-colors ${
                     status === value ? 'bg-gray-50' : ''
                   }`}
                 >
@@ -116,8 +116,8 @@ export default function StatusCell({
                     className={`w-2 h-2 rounded-full flex-shrink-0 ${STATUS_DOT[status]}`}
                   />
                   <div>
-                    <div className="text-sm font-medium text-gray-800">{status}</div>
-                    <div className="text-xs text-gray-400">{meta.description}</div>
+                    <div className="text-sm font-medium text-fg">{status}</div>
+                    <div className="text-xs text-fg-subtle">{meta.description}</div>
                   </div>
                 </button>
               )
@@ -125,10 +125,10 @@ export default function StatusCell({
             <button
               type="button"
               onClick={() => onSelect(null)}
-              className="flex items-center gap-2 w-full rounded-lg px-3 py-2 text-left hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 w-full rounded-lg px-3 py-2 text-left hover:bg-bg-subtle transition-colors"
             >
               <span className="w-2 h-2 rounded-full bg-gray-200 flex-shrink-0" />
-              <span className="text-sm text-gray-400">없음</span>
+              <span className="text-sm text-fg-subtle">없음</span>
             </button>
           </div>,
           document.body

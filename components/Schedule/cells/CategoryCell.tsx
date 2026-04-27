@@ -80,7 +80,7 @@ export default function CategoryCell({
           <div
             ref={dropdownRef}
             data-portal="true"
-            className="fixed z-[1200] rounded-xl border border-gray-200 bg-white shadow-lg p-2"
+            className="fixed z-[1200] rounded-xl border border-border bg-white shadow-lg p-2"
             style={{ top: position.top, left: position.left }}
           >
             <div className="grid grid-cols-4 gap-1">
@@ -92,12 +92,12 @@ export default function CategoryCell({
                     onSelect(cat)
                   }}
                   title={cat}
-                  className={`flex flex-col items-center gap-0.5 p-2 rounded-lg hover:bg-gray-50 transition-colors text-xs ${
-                    cat === value ? 'bg-gray-100 ring-1 ring-gray-300' : ''
+                  className={`flex flex-col items-center gap-0.5 p-2 rounded-lg hover:bg-bg-subtle transition-colors text-xs ${
+                    cat === value ? 'bg-bg-subtle ring-1 ring-border-strong' : ''
                   }`}
                 >
                   <span className="text-base">{CATEGORY_META[cat].emoji}</span>
-                  <span className="text-gray-500 whitespace-nowrap">{cat}</span>
+                  <span className="text-fg-muted whitespace-nowrap">{cat}</span>
                 </button>
               ))}
             </div>

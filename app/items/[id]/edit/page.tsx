@@ -16,11 +16,11 @@ export default async function EditItemPage({ params }: { params: { id: string } 
         <div className="flex items-center gap-3 mb-6">
           <Link
             href={`/items/${item.id}`}
-            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-sm text-fg-subtle hover:text-fg-muted transition-colors"
           >
             ← 상세보기
           </Link>
-          <h1 className="text-xl font-bold text-gray-900">항목 수정</h1>
+          <h1 className="text-xl font-bold text-fg">항목 수정</h1>
         </div>
         <ItemForm mode="edit" initialData={item} itemId={item.id} />
       </div>

@@ -13,7 +13,7 @@ export default function CategoryStackBar({ breakdown }: CategoryStackBarProps) {
 
   return (
     <div
-      className="flex h-1.5 w-full overflow-hidden rounded-full bg-gray-100"
+      className="flex h-1.5 w-full overflow-hidden rounded-full bg-bg-subtle"
       role="img"
       aria-label={breakdown.map(b => `${b.category} ${b.count}`).join(', ')}
     >

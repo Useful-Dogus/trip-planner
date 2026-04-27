@@ -49,7 +49,7 @@ export default function NameCell({
         }}
         onBlur={() => onBlur(draft)}
         onKeyDown={e => onKeyDown(e, draft)}
-        className="w-full bg-transparent border-b border-gray-300 focus:border-gray-900 outline-none text-sm text-gray-900 py-0.5 min-w-0"
+        className="w-full bg-transparent border-b border-border-strong focus:border-accent outline-none text-sm text-fg py-0.5 min-w-0"
         placeholder="이름 입력"
         style={{ fontSize: 16 }}
       />
@@ -58,10 +58,10 @@ export default function NameCell({
 
   return (
     <span
-      className="text-sm text-gray-900 cursor-pointer block truncate select-none"
+      className="text-sm text-fg cursor-pointer block truncate select-none"
       onClick={onClick}
     >
-      {value || <span className="text-gray-300 italic text-xs">이름 없음</span>}
+      {value || <span className="text-fg-subtle italic text-xs">이름 없음</span>}
     </span>
   )
 }

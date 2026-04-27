@@ -161,16 +161,16 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
           isOpen ? 'translate-y-0 md:translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-y-0 md:translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
           <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-gray-200 rounded-full md:hidden" />
-          <span className="text-sm font-semibold text-gray-900">{mode === 'edit' ? '편집' : '상세 정보'}</span>
+          <span className="text-sm font-semibold text-fg">{mode === 'edit' ? '편집' : '상세 정보'}</span>
           <div className="flex items-center gap-2">
             {mode === 'edit' && displayItem && (
               <button onClick={() => handleDelete(displayItem.id)} aria-label="항목 삭제" className="px-3 py-1.5 text-xs font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
                 삭제
               </button>
             )}
-            <button onClick={tryClose} aria-label="패널 닫기" className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100">
+            <button onClick={tryClose} aria-label="패널 닫기" className="p-1.5 text-fg-subtle hover:text-fg-muted transition-colors rounded-lg hover:bg-bg-subtle">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
@@ -205,10 +205,10 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
 
         {confirmingClose && (
           <div className="absolute bottom-0 left-0 right-0 bg-white border-t-2 border-amber-100 px-5 pt-4 pb-6 z-10">
-            <p className="text-sm font-medium text-gray-800 mb-3">변경사항이 있습니다. 저장하지 않고 나가시겠습니까?</p>
+            <p className="text-sm font-medium text-fg mb-3">변경사항이 있습니다. 저장하지 않고 나가시겠습니까?</p>
             <div className="flex gap-3">
-              <button onClick={handleDiscardAndClose} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 transition-colors">나가기</button>
-              <button onClick={() => setConfirmingClose(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">계속 편집</button>
+              <button onClick={handleDiscardAndClose} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-accent hover:bg-accent-hover transition-colors">나가기</button>
+              <button onClick={() => setConfirmingClose(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-fg-muted border border-border hover:bg-bg-subtle transition-colors">계속 편집</button>
             </div>
           </div>
         )}
@@ -382,13 +382,13 @@ function ItemDetailView({
           if (e.key === 'Enter') { e.preventDefault(); commit(field) }
           if (e.key === 'Escape') cancel(field)
         }}
-        className={`border-b border-gray-400 outline-none bg-transparent ${opts?.className ?? 'text-sm text-gray-900 w-full'}`}
+        className={`border-b border-border-strong outline-none bg-transparent ${opts?.className ?? 'text-sm text-fg w-full'}`}
       />
     )
   }
 
-  const inputClass = 'border-b border-gray-400 outline-none bg-transparent text-sm text-gray-900 w-full'
-  const emptyClass = 'text-sm text-gray-400 cursor-text'
+  const inputClass = 'border-b border-border-strong outline-none bg-transparent text-sm text-fg w-full'
+  const emptyClass = 'text-sm text-fg-subtle cursor-text'
 
   return (
     <div className="px-5 py-4 space-y-5 pb-8 overflow-y-auto">
@@ -406,11 +406,11 @@ function ItemDetailView({
               if (e.key === 'Enter') commit('name')
               if (e.key === 'Escape') cancel('name')
             }}
-            className="text-xl font-bold text-gray-900 w-full border-b-2 border-gray-400 outline-none bg-transparent mb-2"
+            className="text-xl font-bold text-fg w-full border-b-2 border-border-strong outline-none bg-transparent mb-2"
           />
         ) : (
           <h2
-            className="text-xl font-bold text-gray-900 mb-2 cursor-text"
+            className="text-xl font-bold text-fg mb-2 cursor-text"
             onClick={() => activate('name')}
           >
             {item.name}
@@ -462,28 +462,28 @@ function ItemDetailView({
         <InlineRow label="시작 날짜">
           {editing === 'date'
             ? inlineInput('date', { type: 'date', min: TRIP_DATE_MIN, max: TRIP_DATE_MAX })
-            : <span className={vals.date ? 'text-sm text-gray-900 cursor-text' : emptyClass} onClick={() => activate('date')}>{vals.date || '날짜 선택'}</span>
+            : <span className={vals.date ? 'text-sm text-fg cursor-text' : emptyClass} onClick={() => activate('date')}>{vals.date || '날짜 선택'}</span>
           }
         </InlineRow>
 
         <InlineRow label="시작 시간">
           {editing === 'time_start'
             ? inlineInput('time_start', { type: 'time' })
-            : <span className={vals.time_start ? 'text-sm text-gray-900 cursor-text' : emptyClass} onClick={() => vals.date && activate('time_start')}>{vals.time_start || (vals.date ? '시간 선택' : '—')}</span>
+            : <span className={vals.time_start ? 'text-sm text-fg cursor-text' : emptyClass} onClick={() => vals.date && activate('time_start')}>{vals.time_start || (vals.date ? '시간 선택' : '—')}</span>
           }
         </InlineRow>
 
         <InlineRow label="종료 날짜">
           {editing === 'end_date'
             ? inlineInput('end_date', { type: 'date', min: TRIP_DATE_MIN, max: TRIP_DATE_MAX })
-            : <span className={vals.end_date ? 'text-sm text-gray-900 cursor-text' : emptyClass} onClick={() => activate('end_date')}>{vals.end_date || '날짜 선택'}</span>
+            : <span className={vals.end_date ? 'text-sm text-fg cursor-text' : emptyClass} onClick={() => activate('end_date')}>{vals.end_date || '날짜 선택'}</span>
           }
         </InlineRow>
 
         <InlineRow label="종료 시간">
           {editing === 'time_end'
             ? inlineInput('time_end', { type: 'time' })
-            : <span className={vals.time_end ? 'text-sm text-gray-900 cursor-text' : emptyClass} onClick={() => vals.end_date && activate('time_end')}>{vals.time_end || (vals.end_date ? '시간 선택' : '—')}</span>
+            : <span className={vals.time_end ? 'text-sm text-fg cursor-text' : emptyClass} onClick={() => vals.end_date && activate('time_end')}>{vals.time_end || (vals.end_date ? '시간 선택' : '—')}</span>
           }
         </InlineRow>
 
@@ -503,7 +503,7 @@ function ItemDetailView({
                 className={`${inputClass} text-right w-28`}
                 placeholder="0"
               />
-            : <span className={vals.budget ? 'text-sm font-medium text-gray-900 cursor-text' : emptyClass} onClick={() => activate('budget')}>
+            : <span className={vals.budget ? 'text-sm font-medium text-fg cursor-text' : emptyClass} onClick={() => activate('budget')}>
                 {vals.budget ? `$${parseInt(vals.budget).toLocaleString()}` : '입력'}
               </span>
           }
@@ -528,15 +528,15 @@ function ItemDetailView({
               placeholder="주소 입력 후 포커스를 벗어나면 좌표 자동 입력"
             />
           : <p
-              className={vals.address ? 'text-sm text-gray-700 cursor-text' : emptyClass}
+              className={vals.address ? 'text-sm text-fg cursor-text' : emptyClass}
               onClick={() => activate('address')}
             >
               {vals.address || '주소 추가'}
             </p>
         }
-        {geocoding && <p className="text-xs text-gray-400 mt-1">좌표 검색 중...</p>}
+        {geocoding && <p className="text-xs text-fg-subtle mt-1">좌표 검색 중...</p>}
         {!geocoding && item.lat !== undefined && item.lng !== undefined && (
-          <p className="text-xs text-gray-400 mt-1">{item.lat}, {item.lng}</p>
+          <p className="text-xs text-fg-subtle mt-1">{item.lat}, {item.lng}</p>
         )}
       </section>
 
@@ -579,7 +579,7 @@ function ItemDetailView({
                     <button
                       type="button"
                       onClick={() => { const next = links.filter((_, idx) => idx !== i); saveLinks(next); setEditingLinkIdx(null) }}
-                      className="text-gray-300 hover:text-red-400 text-xl leading-none transition-colors flex-shrink-0"
+                      className="text-fg-subtle hover:text-red-400 text-xl leading-none transition-colors flex-shrink-0"
                     >×</button>
                   </div>
                 </div>
@@ -601,7 +601,7 @@ function ItemDetailView({
                   <button
                     type="button"
                     onClick={() => setEditingLinkIdx(i)}
-                    className="text-gray-300 hover:text-gray-500 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100 md:block hidden"
+                    className="text-fg-subtle hover:text-fg-muted transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100 md:block hidden"
                     title="링크 편집"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -612,7 +612,7 @@ function ItemDetailView({
                   <button
                     type="button"
                     onClick={() => setEditingLinkIdx(i)}
-                    className="text-gray-300 hover:text-gray-500 transition-colors flex-shrink-0 md:hidden"
+                    className="text-fg-subtle hover:text-fg-muted transition-colors flex-shrink-0 md:hidden"
                     title="링크 편집"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -630,7 +630,7 @@ function ItemDetailView({
               setLinks(next)
               setEditingLinkIdx(next.length - 1)
             }}
-            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-sm text-fg-subtle hover:text-fg-muted transition-colors"
           >
             + 링크 추가
           </button>
@@ -650,12 +650,12 @@ function ItemDetailView({
               onKeyDown={e => {
                 if (e.key === 'Escape') cancel('memo')
               }}
-              className="text-sm text-gray-700 w-full border-b border-gray-400 outline-none bg-transparent resize-none overflow-hidden"
+              className="text-sm text-fg w-full border-b border-border-strong outline-none bg-transparent resize-none overflow-hidden"
               rows={3}
               placeholder="자유롭게 메모..."
             />
           : <p
-              className={vals.memo ? 'text-sm text-gray-700 whitespace-pre-wrap cursor-text' : emptyClass}
+              className={vals.memo ? 'text-sm text-fg whitespace-pre-wrap cursor-text' : emptyClass}
               onClick={() => activate('memo')}
             >
               {vals.memo || '메모 추가'}
@@ -679,13 +679,13 @@ function ItemDetailView({
 // ─── 공통 UI ──────────────────────────────────────────────────────────────────
 
 function SectionTitle({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <h3 className={`text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 ${className}`}>{children}</h3>
+  return <h3 className={`text-xs font-semibold text-fg-muted uppercase tracking-wider mb-2 ${className}`}>{children}</h3>
 }
 
 function InlineRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <span className="text-xs text-gray-500 flex-shrink-0">{label}</span>
+      <span className="text-xs text-fg-muted flex-shrink-0">{label}</span>
       <div className="flex-1 text-right">{children}</div>
     </div>
   )
@@ -760,10 +760,10 @@ function MetadataDropdownChip({
       {isOpen && position && createPortal(
         <div
           ref={dropdownRef}
-          className="fixed z-[1200] rounded-xl border border-gray-200 bg-white shadow-lg p-1"
+          className="fixed z-[1200] rounded-xl border border-border bg-white shadow-lg p-1"
           style={{ top: position.top, left: position.left, width: position.width }}
         >
-          <div className="px-3 py-2 text-[11px] font-medium text-gray-400">{label}</div>
+          <div className="px-3 py-2 text-[11px] font-medium text-fg-subtle">{label}</div>
           {options.map(option => {
             const key = option ?? 'empty'
             const description = option && descriptions?.[option]?.description
@@ -772,10 +772,10 @@ function MetadataDropdownChip({
                 key={key}
                 type="button"
                 onClick={() => onSelect(option)}
-                className="block w-full rounded-lg px-3 py-2 text-left hover:bg-gray-50 transition-colors"
+                className="block w-full rounded-lg px-3 py-2 text-left hover:bg-bg-subtle transition-colors"
               >
-                <div className="text-sm font-medium text-gray-800">{option ?? placeholderLabel ?? '없음'}</div>
-                {description && <div className="mt-0.5 text-xs text-gray-400">{description}</div>}
+                <div className="text-sm font-medium text-fg">{option ?? placeholderLabel ?? '없음'}</div>
+                {description && <div className="mt-0.5 text-xs text-fg-subtle">{description}</div>}
               </button>
             )
           })}

@@ -19,13 +19,13 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
         <div className="flex items-center justify-between mb-6">
           <Link
             href="/research"
-            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-sm text-fg-subtle hover:text-fg-muted transition-colors"
           >
             ← 목록
           </Link>
           <Link
             href={`/items/${item.id}/edit`}
-            className="px-3 py-1.5 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+            className="px-3 py-1.5 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors"
           >
             편집
           </Link>
@@ -33,7 +33,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
 
         {/* 이름 + 배지 */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{item.name}</h1>
+          <h1 className="text-2xl font-bold text-fg mb-2">{item.name}</h1>
           <ItemMetadataChips item={item} />
         </div>
 
@@ -54,9 +54,9 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
           {item.address && (
             <section>
               <SectionTitle>위치</SectionTitle>
-              <p className="text-sm text-gray-700">{item.address}</p>
+              <p className="text-sm text-fg">{item.address}</p>
               {item.lat !== undefined && item.lng !== undefined && (
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-fg-subtle mt-1">
                   {item.lat}, {item.lng}
                 </p>
               )}
@@ -96,7 +96,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
           {item.memo && (
             <section>
               <SectionTitle>메모</SectionTitle>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.memo}</p>
+              <p className="text-sm text-fg whitespace-pre-wrap">{item.memo}</p>
             </section>
           )}
         </div>
@@ -108,7 +108,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+    <h2 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider mb-2">
       {children}
     </h2>
   )
@@ -117,8 +117,8 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-xs text-gray-500">{label}</span>
-      <span className="text-sm font-medium text-gray-900">{value}</span>
+      <span className="text-xs text-fg-muted">{label}</span>
+      <span className="text-sm font-medium text-fg">{value}</span>
     </div>
   )
 }

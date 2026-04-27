@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<ImportCandidate['status'], string> = {
 const STATUS_COLOR: Record<ImportCandidate['status'], string> = {
   new: 'bg-green-100 text-green-700',
   similar: 'bg-yellow-100 text-yellow-700',
-  duplicate: 'bg-gray-100 text-gray-500',
+  duplicate: 'bg-bg-subtle text-fg-muted',
 }
 
 export default function CandidateList({
@@ -52,17 +52,17 @@ export default function CandidateList({
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <h2 className="text-base font-semibold text-gray-900">
+          <h2 className="text-base font-semibold text-fg">
             장소 목록 검토
           </h2>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-fg-muted">
             {candidates.length}개 중 {selectedCount}개 선택
           </span>
         </div>
         <button
           onClick={onImport}
           disabled={importing || selectedCount === 0}
-          className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {importing ? '추가 중...' : `${selectedCount}개 추가`}
         </button>
@@ -70,12 +70,12 @@ export default function CandidateList({
 
       {/* 전체 선택 */}
       {allSelectable.length > 0 && (
-        <label className="flex items-center gap-2 mb-2 text-sm text-gray-600 cursor-pointer select-none">
+        <label className="flex items-center gap-2 mb-2 text-sm text-fg-muted cursor-pointer select-none">
           <input
             type="checkbox"
             checked={allSelected}
             onChange={e => toggleAll(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+            className="w-4 h-4 rounded border-border-strong text-fg focus-visible:outline-accent"
           />
           전체 선택
         </label>
@@ -88,10 +88,10 @@ export default function CandidateList({
             key={`${candidate.place.name}-${i}`}
             className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
               candidate.status === 'duplicate'
-                ? 'border-gray-100 bg-gray-50 opacity-60'
+                ? 'border-border bg-gray-50 opacity-60'
                 : candidate.selected
-                ? 'border-gray-200 bg-white'
-                : 'border-gray-100 bg-gray-50'
+                ? 'border-border bg-white'
+                : 'border-border bg-gray-50'
             }`}
           >
             <input
@@ -99,14 +99,14 @@ export default function CandidateList({
               checked={candidate.selected}
               disabled={candidate.status === 'duplicate'}
               onChange={() => toggleItem(i)}
-              className="mt-0.5 w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="mt-0.5 w-4 h-4 rounded border-border-strong text-fg focus-visible:outline-accent disabled:opacity-40 disabled:cursor-not-allowed"
             />
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span
                   className={`text-sm font-medium ${
-                    candidate.status === 'duplicate' ? 'text-gray-400' : 'text-gray-900'
+                    candidate.status === 'duplicate' ? 'text-fg-subtle' : 'text-fg'
                   }`}
                 >
                   {candidate.place.name}
@@ -116,13 +116,13 @@ export default function CandidateList({
                 >
                   {STATUS_LABEL[candidate.status]}
                 </span>
-                <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                <span className="text-xs text-fg-subtle bg-bg-subtle px-1.5 py-0.5 rounded">
                   {candidate.mappedCategory}
                 </span>
               </div>
 
               {candidate.place.address && (
-                <p className="text-xs text-gray-400 mt-0.5 truncate">
+                <p className="text-xs text-fg-subtle mt-0.5 truncate">
                   {candidate.place.address}
                 </p>
               )}

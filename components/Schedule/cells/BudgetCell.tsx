@@ -49,7 +49,7 @@ export default function BudgetCell({ value, isEditing, onClick, onBlur, onKeyDow
         onKeyDown={e => onKeyDown(e, draft)}
         placeholder="0"
         inputMode="numeric"
-        className="w-20 bg-transparent border-b border-gray-300 focus:border-gray-900 outline-none text-sm text-right text-gray-900 py-0.5"
+        className="w-20 bg-transparent border-b border-border-strong focus:border-accent outline-none text-sm text-right text-fg py-0.5"
         style={{ fontSize: 16 }}
       />
     )
@@ -57,7 +57,7 @@ export default function BudgetCell({ value, isEditing, onClick, onBlur, onKeyDow
 
   return (
     <span
-      className="text-sm text-gray-600 cursor-pointer tabular-nums select-none text-right block"
+      className="text-sm text-fg-muted cursor-pointer tabular-nums select-none text-right block"
       onClick={onClick}
     >
       {value !== undefined ? (

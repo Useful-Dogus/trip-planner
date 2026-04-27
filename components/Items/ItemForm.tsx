@@ -185,13 +185,13 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     }
   }
 
-  const inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white'
-  const labelClass = 'block text-sm font-medium text-gray-700 mb-1'
+  const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-border-strong bg-white'
+  const labelClass = 'block text-sm font-medium text-fg mb-1'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 pb-36 md:pb-8">
       <section className="space-y-4">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">기본 정보</h2>
+        <h2 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">기본 정보</h2>
 
         <div>
           <label className={labelClass}>이름 *</label>
@@ -266,11 +266,11 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">위치</h2>
+        <h2 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">위치</h2>
         <div>
           <label className={labelClass}>주소</label>
           <input type="text" value={form.address} onChange={e => setField('address', e.target.value)} onBlur={handleAddressBlur} className={inputClass} placeholder="주소 입력 후 포커스를 벗어나면 좌표 자동 입력" />
-          {geocoding && <p className="text-xs text-gray-400 mt-1">좌표 검색 중...</p>}
+          {geocoding && <p className="text-xs text-fg-subtle mt-1">좌표 검색 중...</p>}
           {!geocoding && geocodeError && <p className="text-xs text-amber-500 mt-1">{geocodeError}</p>}
         </div>
 
@@ -287,23 +287,23 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">링크</h2>
+        <h2 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">링크</h2>
         {form.links.map((link, i) => (
           <div key={i} className="flex gap-2 items-start">
             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
               <input type="text" value={link.label} onChange={e => updateLink(i, 'label', e.target.value)} className={inputClass} placeholder="이름 (예: 공식 사이트)" />
               <input type="url" value={link.url} onChange={e => updateLink(i, 'url', e.target.value)} className={inputClass} placeholder="https://..." />
             </div>
-            <button type="button" onClick={() => removeLink(i)} className="mt-1.5 text-gray-300 hover:text-red-400 text-xl leading-none transition-colors">×</button>
+            <button type="button" onClick={() => removeLink(i)} className="mt-1.5 text-fg-subtle hover:text-red-400 text-xl leading-none transition-colors">×</button>
           </div>
         ))}
-        <button type="button" onClick={addLink} className="w-full text-sm text-gray-400 hover:text-gray-600 border border-dashed border-gray-300 rounded-lg px-4 py-2 transition-colors">
+        <button type="button" onClick={addLink} className="w-full text-sm text-fg-subtle hover:text-fg-muted border border-dashed border-border-strong rounded-lg px-4 py-2 transition-colors">
           + 링크 추가
         </button>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">메모</h2>
+        <h2 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">메모</h2>
         <textarea ref={memoRef} value={form.memo} onChange={e => setField('memo', e.target.value)} className={`${inputClass} resize-none overflow-hidden`} rows={4} placeholder="자유롭게 메모..." />
       </section>
 
@@ -319,10 +319,10 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
               삭제
             </button>
           )}
-          <button type="button" onClick={() => router.back()} className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">
+          <button type="button" onClick={() => router.back()} className="px-4 py-2.5 rounded-lg text-sm font-medium text-fg-muted border border-border hover:bg-bg-subtle transition-colors">
             취소
           </button>
-          <button type="submit" disabled={loading} className="flex-1 bg-gray-900 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">
+          <button type="submit" disabled={loading} className="flex-1 bg-accent text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-colors">
             {loading ? '저장 중...' : '저장'}
           </button>
         </div>
@@ -344,8 +344,8 @@ function SelectField({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white">
+      <label className="block text-sm font-medium text-fg mb-1">{label}</label>
+      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-border-strong bg-white">
         {options.map(option => (
           <option key={option.value || 'empty'} value={option.value}>
             {option.label}
