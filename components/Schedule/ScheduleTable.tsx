@@ -1,8 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState, Fragment } from 'react'
-import type { Category, ReservationStatus, TripItem } from '@/types'
-import { CATEGORY_META, CATEGORY_OPTIONS, RESERVATION_STATUS_META } from '@/lib/itemOptions'
+import type { ReservationStatus, TripItem } from '@/types'
+import { CATEGORY_META, RESERVATION_STATUS_META } from '@/lib/itemOptions'
 import { haversineKm } from '@/lib/distance'
 import { EDITABLE_FIELDS, type EditableField } from './TableRow'
 import TableRow from './TableRow'
@@ -65,16 +65,6 @@ function getStatusMeta(value: ReservationStatus | null | undefined) {
     }[value],
     label: shortLabel[value],
   }
-}
-
-function buildCategoryBreakdown(items: TripItem[]): { category: Category; count: number }[] {
-  const counts = new Map<Category, number>()
-  for (const it of items) {
-    counts.set(it.category, (counts.get(it.category) ?? 0) + 1)
-  }
-  return CATEGORY_OPTIONS
-    .filter(c => counts.has(c))
-    .map(c => ({ category: c, count: counts.get(c)! }))
 }
 
 function distanceBetween(a: TripItem, b: TripItem): number | null {
@@ -427,7 +417,6 @@ export default function ScheduleTable({
           const isCollapsed = collapsedDates.has(date)
           const dayOffset = getDayOffset(date)
           const isToday = date === todayKey
-          const categoryBreakdown = buildCategoryBreakdown(groupItems)
 
           return (
             <div key={date} ref={isToday ? todayRef : undefined} className="overflow-hidden rounded-xl border border-border bg-bg-elevated shadow-sm">
@@ -437,7 +426,6 @@ export default function ScheduleTable({
                 totalBudget={totalBudget}
                 isCollapsed={isCollapsed}
                 isToday={isToday}
-                categoryBreakdown={categoryBreakdown}
                 onToggleCollapse={() =>
                   setCollapsedDates(prev => {
                     const next = new Set(prev)
@@ -530,7 +518,6 @@ export default function ScheduleTable({
                 const isCollapsed = collapsedDates.has(date)
                 const dayOffset = getDayOffset(date)
                 const isToday = date === todayKey
-                const categoryBreakdown = buildCategoryBreakdown(groupItems)
 
                 return (
                   <div key={date} ref={isToday ? todayRef : undefined}>
@@ -540,7 +527,6 @@ export default function ScheduleTable({
                       totalBudget={totalBudget}
                       isCollapsed={isCollapsed}
                       isToday={isToday}
-                      categoryBreakdown={categoryBreakdown}
                       onToggleCollapse={() =>
                         setCollapsedDates(prev => {
                           const next = new Set(prev)
