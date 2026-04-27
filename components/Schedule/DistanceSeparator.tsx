@@ -1,0 +1,34 @@
+'use client'
+
+import { formatDistance } from '@/lib/distance'
+
+interface DistanceSeparatorProps {
+  km: number
+  variant: 'desktop' | 'mobile'
+}
+
+export default function DistanceSeparator({ km, variant }: DistanceSeparatorProps) {
+  if (variant === 'desktop') {
+    return (
+      <div
+        aria-hidden="true"
+        className="flex min-w-[720px] items-center px-3 py-1 text-[11px] text-gray-400"
+      >
+        <div className="flex w-16 flex-shrink-0 items-center justify-center">
+          <span className="h-3 w-px bg-gray-200" />
+        </div>
+        <div className="flex min-w-[220px] flex-1 items-center gap-2">
+          <span className="h-px w-3 bg-gray-200" />
+          <span className="tabular-nums">{formatDistance(km)}</span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div aria-hidden="true" className="flex items-center gap-2 pl-12 pr-2">
+      <span className="h-3 w-px bg-gray-200" />
+      <span className="text-[11px] tabular-nums text-gray-400">{formatDistance(km)}</span>
+    </div>
+  )
+}
