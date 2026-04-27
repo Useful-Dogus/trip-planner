@@ -107,15 +107,15 @@ export default function GmapsImportPage() {
     <div className="md:pl-44 min-h-screen bg-white">
       <div className="max-w-2xl mx-auto px-4 py-8 pb-24 md:pb-8">
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-gray-900">구글맵 연동</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-xl font-bold text-fg">구글맵 연동</h1>
+          <p className="text-sm text-fg-muted mt-1">
             구글맵 공개 리스트에서 장소를 가져와 추가합니다.
           </p>
         </div>
 
         {/* idle / loading */}
         {(state === 'idle' || state === 'loading') && (
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl border border-border p-6">
             <UrlInput
               onSubmit={handleUrlSubmit}
               loading={state === 'loading'}
@@ -126,7 +126,7 @@ export default function GmapsImportPage() {
 
         {/* review */}
         {state === 'review' && (
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl border border-border p-6">
             <CandidateList
               candidates={candidates}
               onChange={setCandidates}
@@ -138,7 +138,7 @@ export default function GmapsImportPage() {
             )}
             <button
               onClick={handleReset}
-              className="mt-4 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+              className="mt-4 text-sm text-fg-subtle hover:text-fg-muted transition-colors"
             >
               다른 URL 입력
             </button>
@@ -147,7 +147,7 @@ export default function GmapsImportPage() {
 
         {/* importing */}
         {state === 'importing' && (
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl border border-border p-6">
             <CandidateList
               candidates={candidates}
               onChange={setCandidates}
@@ -159,7 +159,7 @@ export default function GmapsImportPage() {
 
         {/* done: 이동 중 표시 */}
         {state === 'done' && (
-          <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
+          <div className="bg-white rounded-xl border border-border p-8 text-center">
             <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
               <svg
                 className="w-6 h-6 text-green-600"
@@ -171,10 +171,10 @@ export default function GmapsImportPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="text-base font-semibold text-gray-900 mb-1">
+            <p className="text-base font-semibold text-fg mb-1">
               {insertedCount}개 장소가 추가되었습니다.
             </p>
-            <p className="text-sm text-gray-500">전체 탭으로 이동 중…</p>
+            <p className="text-sm text-fg-muted">전체 탭으로 이동 중…</p>
           </div>
         )}
       </div>

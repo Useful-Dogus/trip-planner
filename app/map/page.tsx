@@ -9,7 +9,9 @@ import MapSidePanel, { type DaySummary } from '@/components/Map/MapSidePanel'
 import { CATEGORY_OPTIONS } from '@/lib/itemOptions'
 import type { Category, TripItem } from '@/types'
 
-const TripPlannerMap = dynamic(() => import('@/components/Map/TripPlannerMap'), { ssr: false })
+const TripPlannerMap = dynamic(() => import('@/components/Map/TripPlannerMap'), {
+  ssr: false,
+})
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
 export default function MapPage() {
@@ -29,7 +31,6 @@ function occursOnDate(item: TripItem, date: string): boolean {
   if (!item.date) return false
   if (item.date === date) return true
   // end_date 까지 확장하는 건 종일/다일 일정(time_start 없음)에만 적용.
-  // 자정을 넘기는 단일 일정이 종료일 리스트에 끼어들지 않도록.
   if (item.end_date && !item.time_start) {
     return item.date <= date && date <= item.end_date
   }
@@ -37,10 +38,9 @@ function occursOnDate(item: TripItem, date: string): boolean {
 }
 
 function buildDaySummaries(items: TripItem[]): DaySummary[] {
-  const confirmed = items.filter(i => i.trip_priority === '확정' && i.date)
+  const confirmed = items.filter((i) => i.trip_priority === '확정' && i.date)
   const dateSet = new Set<string>()
   for (const i of confirmed) {
-    // 시작일은 항상 포함. end_date 까지 확장은 종일/다일 일정에만.
     dateSet.add(i.date!)
     if (i.end_date && !i.time_start) {
       let cur = nextDate(i.date!)
@@ -54,13 +54,13 @@ function buildDaySummaries(items: TripItem[]): DaySummary[] {
   if (sortedDates.length === 0) return []
 
   const tripStart = sortedDates[0]
-  return sortedDates.map(date => {
-    const dayItems = confirmed.filter(i => occursOnDate(i, date))
+  return sortedDates.map((date) => {
+    const dayItems = confirmed.filter((i) => occursOnDate(i, date))
     const counts = new Map<Category, number>()
     for (const it of dayItems) {
       counts.set(it.category, (counts.get(it.category) ?? 0) + 1)
     }
-    const breakdown = CATEGORY_OPTIONS.filter(c => counts.has(c)).map(c => ({
+    const breakdown = CATEGORY_OPTIONS.filter((c) => counts.has(c)).map((c) => ({
       category: c,
       count: counts.get(c)!,
     }))
@@ -80,23 +80,23 @@ function MapPageContent() {
   const searchParams = useSearchParams()
   const { items, isLoading } = useItems()
 
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(
-    () => searchParams.get('item'),
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
+    searchParams.get('item'),
   )
-  // null = 후보 모드 (기본). 날짜 문자열이면 해당 day 모드.
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
-  const selectedItem = items.find(i => i.id === selectedItemId) ?? null
+  const selectedItem = items.find((i) => i.id === selectedItemId) ?? null
   const days = useMemo(() => buildDaySummaries(items), [items])
 
-  // invalid item ID 처리
   useEffect(() => {
     if (isLoading || !selectedItemId) return
-    if (!items.find(i => i.id === selectedItemId)) {
+    if (!items.find((i) => i.id === selectedItemId)) {
       setSelectedItemId(null)
       const params = new URLSearchParams(searchParams.toString())
       params.delete('item')
-      router.replace(params.toString() ? `/map?${params.toString()}` : '/map', { scroll: false })
+      router.replace(params.toString() ? `/map?${params.toString()}` : '/map', {
+        scroll: false,
+      })
     }
   }, [items, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -106,14 +106,18 @@ function MapPageContent() {
     const params = new URLSearchParams(searchParams.toString())
     if (next) params.set('item', next)
     else params.delete('item')
-    router.replace(params.toString() ? `/map?${params.toString()}` : '/map', { scroll: false })
+    router.replace(params.toString() ? `/map?${params.toString()}` : '/map', {
+      scroll: false,
+    })
   }
 
   function handleClosePanel() {
     setSelectedItemId(null)
     const params = new URLSearchParams(searchParams.toString())
     params.delete('item')
-    router.replace(params.toString() ? `/map?${params.toString()}` : '/map', { scroll: false })
+    router.replace(params.toString() ? `/map?${params.toString()}` : '/map', {
+      scroll: false,
+    })
   }
 
   const sidePanel = (
@@ -128,10 +132,12 @@ function MapPageContent() {
   )
 
   return (
-    <div className="md:pl-44">
+    <div className="md:pl-44 bg-bg text-fg">
       {/* Desktop: side panel | map */}
       <div className="hidden md:flex h-screen">
-        <div className="w-[320px] flex-shrink-0 border-r border-gray-200">{sidePanel}</div>
+        <div className="w-[360px] flex-shrink-0 border-r border-border bg-bg-elevated">
+          {sidePanel}
+        </div>
         <div className="relative min-w-0 flex-1">
           <TripPlannerMap
             items={items}
@@ -152,7 +158,10 @@ function MapPageContent() {
             onSelectItem={handleSelectItem}
           />
         </div>
-        <div className="flex-shrink-0 border-t border-gray-200" style={{ height: '40vh' }}>
+        <div
+          className="flex-shrink-0 border-t border-border bg-bg-elevated"
+          style={{ height: '40vh' }}
+        >
           {sidePanel}
         </div>
       </div>

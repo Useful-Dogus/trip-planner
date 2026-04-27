@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Search, MapPin, SearchX } from 'lucide-react'
 import type { Category, ReservationStatus, TripItem, TripPriority } from '@/types'
 import ItemCard from './ItemCard'
 import GroupCard from './GroupCard'
@@ -9,9 +10,10 @@ import FilterButton from '@/components/Research/FilterButton'
 import FilterPanel from '@/components/Research/FilterPanel'
 import SortButton from '@/components/Research/SortButton'
 import ActiveFilterChips from '@/components/Research/ActiveFilterChips'
-import {
-  TRIP_PRIORITY_META,
-} from '@/lib/itemOptions'
+import EmptyState from '@/components/UI/EmptyState'
+import Button from '@/components/UI/Button'
+import { Input } from '@/components/UI/Input'
+import { TRIP_PRIORITY_META } from '@/lib/itemOptions'
 
 export type SortKey = 'name' | 'date' | 'budget' | 'trip_priority'
 export type SortDir = 'asc' | 'desc'
@@ -34,7 +36,13 @@ export function getActiveFilterCount(state: FilterState): number {
 
 type RenderEntry =
   | { type: 'single'; item: TripItem; sortKey: string | number }
-  | { type: 'group'; name: string; visibleItems: TripItem[]; totalCount: number; sortKey: string | number }
+  | {
+      type: 'group'
+      name: string
+      visibleItems: TripItem[]
+      totalCount: number
+      sortKey: string | number
+    }
 
 interface ItemListProps {
   items: TripItem[]
@@ -44,7 +52,14 @@ interface ItemListProps {
   highlightedIds?: Set<string>
 }
 
-export default function ItemList({ items, selectedItemId, onSelectItem, onUpdateItem, highlightedIds }: ItemListProps) {
+export default function ItemList({
+  items,
+  selectedItemId,
+  onSelectItem,
+  onUpdateItem,
+  highlightedIds,
+}: ItemListProps) {
+  const router = useRouter()
   const [filterState, setFilterState] = useState<FilterState>({
     categories: [],
     tripPriorities: [],
@@ -64,28 +79,41 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
       chips.push({
         id: `cat-${c}`,
         label: c,
-        onRemove: () => setFilterState(prev => ({ ...prev, categories: prev.categories.filter(x => x !== c) })),
+        onRemove: () =>
+          setFilterState((prev) => ({
+            ...prev,
+            categories: prev.categories.filter((x) => x !== c),
+          })),
       })
     }
     for (const p of filterState.tripPriorities) {
       chips.push({
         id: `pri-${p}`,
         label: p,
-        onRemove: () => setFilterState(prev => ({ ...prev, tripPriorities: prev.tripPriorities.filter(x => x !== p) })),
+        onRemove: () =>
+          setFilterState((prev) => ({
+            ...prev,
+            tripPriorities: prev.tripPriorities.filter((x) => x !== p),
+          })),
       })
     }
     for (const s of filterState.reservationStatuses) {
       chips.push({
         id: `res-${s}`,
         label: s,
-        onRemove: () => setFilterState(prev => ({ ...prev, reservationStatuses: prev.reservationStatuses.filter(x => x !== s) })),
+        onRemove: () =>
+          setFilterState((prev) => ({
+            ...prev,
+            reservationStatuses: prev.reservationStatuses.filter((x) => x !== s),
+          })),
       })
     }
     if (filterState.showExcluded) {
       chips.push({
         id: 'excluded',
         label: '제외 포함',
-        onRemove: () => setFilterState(prev => ({ ...prev, showExcluded: false })),
+        onRemove: () =>
+          setFilterState((prev) => ({ ...prev, showExcluded: false })),
       })
     }
     return chips
@@ -94,7 +122,12 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
   const hasActiveFilter = activeCount > 0 || query.trim().length > 0
 
   function clearFilters() {
-    setFilterState({ categories: [], tripPriorities: [], reservationStatuses: [], showExcluded: false })
+    setFilterState({
+      categories: [],
+      tripPriorities: [],
+      reservationStatuses: [],
+      showExcluded: false,
+    })
     setQuery('')
   }
 
@@ -103,7 +136,6 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
     setSortDir(dir)
   }
 
-  // 전체 아이템 기준 그룹 맵 (필터 전)
   const allGroups = useMemo(() => {
     const map = new Map<string, TripItem[]>()
     for (const item of items) {
@@ -114,16 +146,20 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
     return map
   }, [items])
 
-  // 필터 적용
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     const { categories, tripPriorities, reservationStatuses, showExcluded } = filterState
-    return items.filter(item => {
+    return items.filter((item) => {
       if (!showExcluded && item.trip_priority === '제외') return false
       if (categories.length && !categories.includes(item.category)) return false
-      if (tripPriorities.length && !tripPriorities.includes(item.trip_priority)) return false
+      if (tripPriorities.length && !tripPriorities.includes(item.trip_priority))
+        return false
       if (reservationStatuses.length) {
-        if (!item.reservation_status || !reservationStatuses.includes(item.reservation_status)) return false
+        if (
+          !item.reservation_status ||
+          !reservationStatuses.includes(item.reservation_status)
+        )
+          return false
       }
       if (q) {
         const haystack = [item.name, item.address, item.memo]
@@ -136,11 +172,9 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
     })
   }, [items, query, filterState])
 
-  // 렌더 엔트리 생성 + 정렬
   const renderEntries = useMemo(() => {
-    const filteredIdSet = new Set(filtered.map(i => i.id))
+    const filteredIdSet = new Set(filtered.map((i) => i.id))
     const seen = new Set<string>()
-
     const entries: RenderEntry[] = []
 
     for (const item of filtered) {
@@ -151,27 +185,36 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
         if (seen.has(key)) continue
         seen.add(key)
 
-        const visibleItems = groupAll.filter(i => filteredIdSet.has(i.id))
+        const visibleItems = groupAll.filter((i) => filteredIdSet.has(i.id))
         if (visibleItems.length === 0) continue
 
         let sk: string | number = key
         if (sortKey === 'date') {
-          const dates = visibleItems.map(i => i.date ?? '').filter(Boolean)
+          const dates = visibleItems.map((i) => i.date ?? '').filter(Boolean)
           sk = dates.length ? dates.reduce((a, b) => (a < b ? a : b)) : ''
         } else if (sortKey === 'budget') {
-          const budgets = visibleItems.map(i => i.budget ?? 0)
+          const budgets = visibleItems.map((i) => i.budget ?? 0)
           sk = budgets.length ? Math.min(...budgets) : 0
         } else if (sortKey === 'trip_priority') {
-          const orders = visibleItems.map(i => TRIP_PRIORITY_META[i.trip_priority].order)
+          const orders = visibleItems.map(
+            (i) => TRIP_PRIORITY_META[i.trip_priority].order,
+          )
           sk = orders.length ? Math.max(...orders) : 0
         }
 
-        entries.push({ type: 'group', name: item.name, visibleItems, totalCount: groupAll.length, sortKey: sk })
+        entries.push({
+          type: 'group',
+          name: item.name,
+          visibleItems,
+          totalCount: groupAll.length,
+          sortKey: sk,
+        })
       } else {
         let sk: string | number = key
         if (sortKey === 'date') sk = item.date ?? ''
         else if (sortKey === 'budget') sk = item.budget ?? 0
-        else if (sortKey === 'trip_priority') sk = TRIP_PRIORITY_META[item.trip_priority].order
+        else if (sortKey === 'trip_priority')
+          sk = TRIP_PRIORITY_META[item.trip_priority].order
 
         entries.push({ type: 'single', item, sortKey: sk })
       }
@@ -193,36 +236,45 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
   }, [filtered, allGroups, sortKey, sortDir])
 
   const totalDisplayCount = useMemo(
-    () => renderEntries.reduce((acc, e) => acc + (e.type === 'group' ? e.visibleItems.length : 1), 0),
-    [renderEntries]
+    () =>
+      renderEntries.reduce(
+        (acc, e) => acc + (e.type === 'group' ? e.visibleItems.length : 1),
+        0,
+      ),
+    [renderEntries],
   )
 
   return (
     <div className="space-y-3">
-      {/* 검색 + 툴바 */}
       <div className="flex items-center gap-2">
-        <input
-          type="text"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder="이름·주소·메모로 검색..."
-          className="flex-1 min-w-0 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
-        />
+        <div className="flex-1 min-w-0">
+          <Input
+            type="search"
+            hideLabel
+            label="검색"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="이름·주소·메모로 검색"
+            leading={<Search className="size-4" aria-hidden="true" />}
+          />
+        </div>
         <div className="relative flex items-center gap-1.5 flex-shrink-0">
-          <FilterButton activeCount={activeCount} onClick={() => setFilterPanelOpen(true)} />
+          <FilterButton
+            activeCount={activeCount}
+            onClick={() => setFilterPanelOpen(true)}
+          />
           <SortButton sortKey={sortKey} sortDir={sortDir} onChange={handleSortChange} />
         </div>
       </div>
 
-      {/* 활성 필터 요약 칩 */}
       <ActiveFilterChips chips={activeChips} />
 
-      {/* 아이템 수 */}
-      <p className="text-xs text-gray-400">{totalDisplayCount}개 항목</p>
+      <p className="text-xs text-fg-subtle tabular" aria-live="polite">
+        {totalDisplayCount}개 항목
+      </p>
 
-      {/* 목록 */}
       <div className="space-y-2">
-        {renderEntries.map(entry =>
+        {renderEntries.map((entry) =>
           entry.type === 'group' ? (
             <GroupCard
               key={entry.name}
@@ -242,33 +294,36 @@ export default function ItemList({ items, selectedItemId, onSelectItem, onUpdate
               isHighlighted={highlightedIds?.has(entry.item.id) ?? false}
               onUpdateItem={onUpdateItem}
             />
-          )
+          ),
         )}
         {renderEntries.length === 0 && items.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="text-4xl mb-3">📍</div>
-            <p className="text-sm font-medium text-gray-700 mb-1">아직 항목이 없어요</p>
-            <p className="text-xs text-gray-400 mb-4">가고 싶은 장소를 추가해보세요</p>
-            <Link href="/items/new" className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">
-              첫 항목 추가하기
-            </Link>
-          </div>
+          <EmptyState
+            icon={<MapPin className="size-10" aria-hidden="true" />}
+            title="아직 장소가 없어요"
+            description="가고 싶은 장소를 추가하면 여기에 모입니다."
+            action={
+              <Button onClick={() => router.push('/items/new')}>
+                첫 장소 추가하기
+              </Button>
+            }
+          />
         )}
         {renderEntries.length === 0 && items.length > 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="text-4xl mb-3">🔍</div>
-            <p className="text-sm font-medium text-gray-700 mb-1">검색 결과가 없어요</p>
-            <p className="text-xs text-gray-400 mb-4">필터 조건을 바꿔보세요</p>
-            {hasActiveFilter && (
-              <button onClick={clearFilters} className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
-                필터 초기화
-              </button>
-            )}
-          </div>
+          <EmptyState
+            icon={<SearchX className="size-10" aria-hidden="true" />}
+            title="검색 결과가 없어요"
+            description="다른 키워드를 입력하거나 필터를 줄여보세요."
+            action={
+              hasActiveFilter ? (
+                <Button variant="secondary" onClick={clearFilters}>
+                  필터 초기화
+                </Button>
+              ) : undefined
+            }
+          />
         )}
       </div>
 
-      {/* 필터 패널 (모바일 바텀시트 + 데스크탑 드롭다운) */}
       <FilterPanel
         isOpen={filterPanelOpen}
         filterState={filterState}

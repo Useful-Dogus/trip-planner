@@ -37,14 +37,14 @@ export default function DateGroupHeader({
   const showBar = !isUndated && categoryBreakdown && categoryBreakdown.length > 0
 
   return (
-    <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div className="bg-white border-b border-border sticky top-0 z-10">
       <div className="flex items-center gap-2 px-3 py-3">
       <button
         type="button"
         onClick={onToggleCollapse}
         className="flex items-center gap-2 flex-1 min-w-0 text-left group"
       >
-        <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">
+        <span className="text-sm font-semibold text-fg whitespace-nowrap">
           {formatDate(date)}
         </span>
         {isToday && (
@@ -53,11 +53,11 @@ export default function DateGroupHeader({
           </span>
         )}
         {!isUndated && dayOffset !== null && (
-          <span className="text-xs text-gray-500 font-normal whitespace-nowrap">D+{dayOffset}</span>
+          <span className="text-xs text-fg-muted font-normal whitespace-nowrap">D+{dayOffset}</span>
         )}
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className={`w-3.5 h-3.5 text-gray-400 transition-transform flex-shrink-0 ${isCollapsed ? '-rotate-90' : ''}`}
+          className={`w-3.5 h-3.5 text-fg-subtle transition-transform flex-shrink-0 ${isCollapsed ? '-rotate-90' : ''}`}
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -71,14 +71,14 @@ export default function DateGroupHeader({
 
       <div className="flex items-center gap-3 flex-shrink-0">
         {totalBudget > 0 && (
-          <span className="text-xs text-gray-500 tabular-nums">
+          <span className="text-xs text-fg-muted tabular-nums">
             ${totalBudget.toLocaleString()}
           </span>
         )}
         <button
           type="button"
           onClick={onAddItem}
-          className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-700 transition-colors"
+          className="flex items-center gap-1 text-xs text-fg-subtle hover:text-fg transition-colors"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

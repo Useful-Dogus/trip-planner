@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { ArrowUpDown, Check, ArrowUp, ArrowDown } from 'lucide-react'
 import type { SortKey, SortDir } from '@/components/Items/ItemList'
+import { cn } from '@/lib/cn'
 
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: 'name', label: '이름' },
@@ -27,10 +29,18 @@ export default function SortButton({ sortKey, sortDir, onChange }: SortButtonPro
         setOpen(false)
       }
     }
-    const timer = setTimeout(() => document.addEventListener('mousedown', handleClick), 50)
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    const timer = setTimeout(
+      () => document.addEventListener('mousedown', handleClick),
+      50,
+    )
+    document.addEventListener('keydown', handleKey)
     return () => {
       clearTimeout(timer)
       document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
     }
   }, [open])
 
@@ -43,39 +53,68 @@ export default function SortButton({ sortKey, sortDir, onChange }: SortButtonPro
     setOpen(false)
   }
 
-  const currentLabel = SORT_OPTIONS.find(o => o.key === sortKey)?.label ?? '이름'
+  const currentLabel = SORT_OPTIONS.find((o) => o.key === sortKey)?.label ?? '이름'
 
   return (
     <div ref={containerRef} className="relative">
       <button
-        onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1 px-3 py-2 text-sm font-medium border border-gray-200 rounded-lg bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`정렬: ${currentLabel} ${sortDir === 'asc' ? '오름차순' : '내림차순'}`}
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          'inline-flex items-center gap-1.5 h-10 px-3 text-sm font-medium border rounded-lg',
+          'bg-bg-elevated text-fg border-border hover:bg-bg-subtle',
+          'transition-colors duration-150 ease-out-soft',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+        )}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
-        </svg>
+        <ArrowUpDown className="size-4" aria-hidden="true" />
         <span className="hidden sm:inline">{currentLabel}</span>
-        <span>{sortDir === 'asc' ? '↑' : '↓'}</span>
+        {sortDir === 'asc' ? (
+          <ArrowUp className="size-3" aria-hidden="true" />
+        ) : (
+          <ArrowDown className="size-3" aria-hidden="true" />
+        )}
       </button>
 
       {open && (
-        <div className="absolute top-full right-0 mt-1 z-50 w-36 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-          {SORT_OPTIONS.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => handleSelect(key)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 text-sm transition-colors ${
-                key === sortKey
-                  ? 'bg-gray-50 text-gray-900 font-medium'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <span>{label}</span>
-              {key === sortKey && (
-                <span className="text-xs text-gray-400">{sortDir === 'asc' ? '↑' : '↓'}</span>
-              )}
-            </button>
-          ))}
+        <div
+          role="menu"
+          className="absolute top-full right-0 mt-1 z-50 w-40 bg-bg-elevated border border-border rounded-lg shadow-e16 overflow-hidden animate-fade-in"
+        >
+          {SORT_OPTIONS.map(({ key, label }) => {
+            const active = key === sortKey
+            return (
+              <button
+                key={key}
+                role="menuitemradio"
+                aria-checked={active}
+                type="button"
+                onClick={() => handleSelect(key)}
+                className={cn(
+                  'w-full flex items-center justify-between px-3 py-2.5 text-sm',
+                  'transition-colors duration-150',
+                  'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent',
+                  active
+                    ? 'bg-accent-subtle text-fg font-medium'
+                    : 'text-fg-muted hover:bg-bg-subtle',
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  {active && <Check className="size-3.5 text-accent" aria-hidden="true" />}
+                  {!active && <span className="size-3.5" aria-hidden="true" />}
+                  {label}
+                </span>
+                {active && (
+                  <span className="text-xs text-fg-muted tabular">
+                    {sortDir === 'asc' ? '↑' : '↓'}
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
       )}
     </div>

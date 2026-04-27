@@ -16,12 +16,12 @@ export default function UrlInput({ onSubmit, loading, error }: UrlInputProps) {
 
   return (
     <div className="max-w-lg">
-      <h2 className="text-base font-semibold text-gray-900 mb-1">구글맵 리스트 URL 입력</h2>
-      <p className="text-sm text-gray-500 mb-4">
+      <h2 className="text-base font-semibold text-fg mb-1">구글맵 리스트 URL 입력</h2>
+      <p className="text-sm text-fg-muted mb-4">
         구글맵에서 공개 리스트를 만들고 공유 URL을 붙여넣으세요.
         <br />
         지원 형식:{' '}
-        <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">
+        <code className="text-xs bg-bg-subtle px-1 py-0.5 rounded">
           maps.app.goo.gl/...
         </code>
       </p>
@@ -32,7 +32,7 @@ export default function UrlInput({ onSubmit, loading, error }: UrlInputProps) {
           type="url"
           placeholder="https://maps.app.goo.gl/..."
           disabled={loading}
-          className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+          className="flex-1 px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus-visible:outline-accent focus:border-transparent disabled:bg-gray-50 disabled:text-fg-subtle"
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
@@ -41,7 +41,7 @@ export default function UrlInput({ onSubmit, loading, error }: UrlInputProps) {
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
         >
           {loading ? '불러오는 중...' : '불러오기'}
         </button>

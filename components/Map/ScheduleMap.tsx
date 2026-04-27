@@ -72,8 +72,8 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
               onClick={() => setSelectedDate(date)}
               className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium border shadow-sm transition-colors ${
                 selectedDate === date
-                  ? 'bg-gray-900 text-white border-gray-900'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                  ? 'bg-accent text-white border-accent'
+                  : 'bg-white text-fg border-border hover:border-border-strong'
               }`}
             >
               {date}
@@ -108,12 +108,12 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
           >
             <Popup>
               <div className="space-y-1 min-w-[140px]">
-                <p className="font-semibold text-gray-900 text-sm">
+                <p className="font-semibold text-fg text-sm">
                   {idx + 1}. {item.name}
                 </p>
-                {item.time_start && <p className="text-xs text-gray-500">{item.time_start}</p>}
+                {item.time_start && <p className="text-xs text-fg-muted">{item.time_start}</p>}
                 {item.budget !== undefined && (
-                  <p className="text-xs text-gray-500">${item.budget}</p>
+                  <p className="text-xs text-fg-muted">${item.budget}</p>
                 )}
                 <TripPriorityBadge tripPriority={item.trip_priority} />
               </div>

@@ -109,7 +109,7 @@ function MobileScheduleItemCard({
     <button
       type="button"
       onClick={() => onOpenPanel(item.id)}
-      className="w-full rounded-2xl border border-gray-200 bg-white p-4 text-left shadow-sm transition-all hover:border-gray-300 hover:shadow-md active:scale-[0.99]"
+      className="w-full rounded-2xl border border-border bg-white p-4 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md active:scale-[0.99]"
     >
       <div className="flex items-start gap-3">
         <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-50 text-lg">
@@ -118,18 +118,18 @@ function MobileScheduleItemCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-gray-900">{item.name}</p>
-              <p className="mt-0.5 text-xs text-gray-500">{item.category}</p>
+              <p className="truncate text-sm font-semibold text-fg">{item.name}</p>
+              <p className="mt-0.5 text-xs text-fg-muted">{item.category}</p>
             </div>
-            <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-600">
+            <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-border bg-gray-50 px-2 py-0.5 text-xs text-fg-muted">
               <span className={`h-2 w-2 rounded-full ${status.dotClass}`} />
               {status.label}
             </span>
           </div>
 
-          <div className="mt-3 flex items-center justify-between gap-3 text-xs text-gray-500">
+          <div className="mt-3 flex items-center justify-between gap-3 text-xs text-fg-muted">
             <span className="tabular-nums">{time}</span>
-            {budget ? <span className="tabular-nums font-medium text-gray-700">{budget}</span> : <span />}
+            {budget ? <span className="tabular-nums font-medium text-fg">{budget}</span> : <span />}
           </div>
         </div>
       </div>
@@ -162,7 +162,7 @@ function MobileNewItemEditor({
         onBlur={onBlur}
         onKeyDown={e => onKeyDown(e, value)}
         placeholder="이름 입력 후 Enter…"
-        className="w-full bg-transparent border-b border-blue-300 focus:border-blue-500 outline-none text-sm text-gray-900 py-1"
+        className="w-full bg-transparent border-b border-blue-300 focus:border-blue-500 outline-none text-sm text-fg py-1"
         style={{ fontSize: 16 }}
       />
     </div>
@@ -335,7 +335,7 @@ export default function ScheduleTable({
                 onBlur={() => handleNewItemBlur(date)}
                 onKeyDown={e => handleNewItemKeyDown(e, date)}
                 placeholder="이름 입력 후 Enter…"
-                className="w-full bg-transparent border-b border-blue-300 focus:border-blue-500 outline-none text-sm text-gray-900 py-0.5"
+                className="w-full bg-transparent border-b border-blue-300 focus:border-blue-500 outline-none text-sm text-fg py-0.5"
                 style={{ fontSize: 16 }}
               />
             </div>
@@ -351,7 +351,7 @@ export default function ScheduleTable({
               setAddingToDate(date)
               setNewItemName('')
             }}
-            className="flex min-w-[720px] items-center w-full px-3 py-2 text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors text-left gap-1.5"
+            className="flex min-w-[720px] items-center w-full px-3 py-2 text-xs text-fg-subtle hover:text-fg-muted hover:bg-bg-subtle transition-colors text-left gap-1.5"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -392,7 +392,7 @@ export default function ScheduleTable({
               setAddingToDate(date)
               setNewItemName('')
             }}
-            className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-700"
+            className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border bg-gray-50 px-4 py-3 text-sm text-fg-muted transition-colors hover:border-border-strong hover:text-fg"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -408,8 +408,8 @@ export default function ScheduleTable({
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="text-4xl mb-3">🗓️</div>
-        <p className="text-sm font-medium text-gray-700 mb-1">아직 등록된 항목이 없어요</p>
-        <p className="text-xs text-gray-400">전체 탭에서 장소를 추가하면<br />여기에 날짜별로 표시됩니다</p>
+        <p className="text-sm font-medium text-fg mb-1">아직 등록된 항목이 없어요</p>
+        <p className="text-xs text-fg-subtle">전체 탭에서 장소를 추가하면<br />여기에 날짜별로 표시됩니다</p>
       </div>
     )
   }
@@ -430,7 +430,7 @@ export default function ScheduleTable({
           const categoryBreakdown = buildCategoryBreakdown(groupItems)
 
           return (
-            <div key={date} ref={isToday ? todayRef : undefined} className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div key={date} ref={isToday ? todayRef : undefined} className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
               <DateGroupHeader
                 date={date}
                 dayOffset={dayOffset}
@@ -462,18 +462,18 @@ export default function ScheduleTable({
         })}
 
         {undatedItems.length > 0 && (
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+            <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-border sticky top-0 z-10">
               <button
                 type="button"
                 onClick={() => setUndatedCollapsed(prev => !prev)}
                 className="flex items-center gap-2 flex-1 min-w-0 text-left"
               >
-                <span className="text-sm font-semibold text-gray-800">날짜 미정</span>
-                <span className="text-xs text-gray-500">{undatedItems.length}개</span>
+                <span className="text-sm font-semibold text-fg">날짜 미정</span>
+                <span className="text-xs text-fg-muted">{undatedItems.length}개</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className={`w-3.5 h-3.5 text-gray-400 transition-transform flex-shrink-0 ${undatedCollapsed ? '-rotate-90' : ''}`}
+                  className={`w-3.5 h-3.5 text-fg-subtle transition-transform flex-shrink-0 ${undatedCollapsed ? '-rotate-90' : ''}`}
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -487,7 +487,7 @@ export default function ScheduleTable({
                   setAddingToDate(UNDATED_KEY)
                   setNewItemName('')
                 }}
-                className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                className="flex items-center gap-1 text-xs text-fg-subtle hover:text-fg-muted transition-colors flex-shrink-0"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -501,25 +501,25 @@ export default function ScheduleTable({
       </div>
 
       <div className="hidden md:block">
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="overflow-hidden rounded-xl border border-border bg-white">
           <div className="overflow-x-auto">
             <div className={TABLE_MIN_WIDTH}>
               {/* 컬럼 헤더 */}
-              <div className="flex items-center gap-0 border-b border-gray-200 bg-white px-0">
+              <div className="flex items-center gap-0 border-b border-border bg-white px-0">
                 <div className="w-16 flex-shrink-0 px-3 py-2.5">
-                  <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">시간</span>
+                  <span className="text-xs font-semibold text-fg-muted whitespace-nowrap">시간</span>
                 </div>
                 <div className="min-w-[220px] flex-1 px-3 py-2.5">
-                  <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">이름</span>
+                  <span className="text-xs font-semibold text-fg-muted whitespace-nowrap">이름</span>
                 </div>
                 <div className="w-12 flex-shrink-0 px-2 py-2.5 text-center">
-                  <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">분류</span>
+                  <span className="text-xs font-semibold text-fg-muted whitespace-nowrap">분류</span>
                 </div>
                 <div className="w-28 flex-shrink-0 px-2 py-2.5">
-                  <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">예약상태</span>
+                  <span className="text-xs font-semibold text-fg-muted whitespace-nowrap">예약상태</span>
                 </div>
                 <div className="w-24 flex-shrink-0 px-3 py-2.5 text-right">
-                  <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">예산</span>
+                  <span className="text-xs font-semibold text-fg-muted whitespace-nowrap">예산</span>
                 </div>
                 <div className="w-8 flex-shrink-0" />
               </div>
@@ -567,17 +567,17 @@ export default function ScheduleTable({
               {/* 미배정 버킷 (최하단, 있을 때만) */}
               {undatedItems.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-gray-200 sticky top-0 z-10">
+                  <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-border sticky top-0 z-10">
                     <button
                       type="button"
                       onClick={() => setUndatedCollapsed(prev => !prev)}
                       className="flex items-center gap-2 flex-1 min-w-0 text-left"
                     >
-                      <span className="text-sm font-semibold text-gray-800">날짜 미정</span>
-                      <span className="text-xs text-gray-500">{undatedItems.length}개</span>
+                      <span className="text-sm font-semibold text-fg">날짜 미정</span>
+                      <span className="text-xs text-fg-muted">{undatedItems.length}개</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`w-3.5 h-3.5 text-gray-400 transition-transform flex-shrink-0 ${undatedCollapsed ? '-rotate-90' : ''}`}
+                        className={`w-3.5 h-3.5 text-fg-subtle transition-transform flex-shrink-0 ${undatedCollapsed ? '-rotate-90' : ''}`}
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -591,7 +591,7 @@ export default function ScheduleTable({
                         setAddingToDate(UNDATED_KEY)
                         setNewItemName('')
                       }}
-                      className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                      className="flex items-center gap-1 text-xs text-fg-subtle hover:text-fg-muted transition-colors flex-shrink-0"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />

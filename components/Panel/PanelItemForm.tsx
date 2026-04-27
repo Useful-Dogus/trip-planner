@@ -155,15 +155,15 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     setField('links', form.links.filter((_, idx) => idx !== i))
   }
 
-  const inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white'
+  const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-white'
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto min-h-0 px-5 py-4 space-y-6">
         <section className="space-y-4">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">기본 정보</h3>
+          <h3 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">기본 정보</h3>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">이름 *</label>
+            <label className="block text-sm font-medium text-fg mb-1">이름 *</label>
             <input
               ref={nameRef}
               type="text"
@@ -180,12 +180,12 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
         </section>
 
         <section className="space-y-3">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">메모</h3>
+          <h3 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">메모</h3>
           <textarea ref={memoRef} value={form.memo} onChange={e => setField('memo', e.target.value)} className={`${inputClass} resize-none overflow-hidden`} rows={4} placeholder="자유롭게 메모..." />
         </section>
 
         <section className="space-y-4">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">일정</h3>
+          <h3 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">일정</h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-3">
               <Field label="시작 날짜">
@@ -236,11 +236,11 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
         </section>
 
         <section className="space-y-4">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">위치</h3>
+          <h3 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">위치</h3>
           <Field label="주소">
             <input type="text" value={form.address} onChange={e => setField('address', e.target.value)} onBlur={handleAddressBlur} className={inputClass} placeholder="주소 입력 후 포커스를 벗어나면 좌표 자동 입력" />
           </Field>
-          {geocoding && <p className="text-xs text-gray-400 -mt-2">좌표 검색 중...</p>}
+          {geocoding && <p className="text-xs text-fg-subtle -mt-2">좌표 검색 중...</p>}
           {!geocoding && geocodeError && <p className="text-xs text-amber-500 -mt-2">{geocodeError}</p>}
           <div className="grid grid-cols-2 gap-3">
             <Field label="위도 (lat)">
@@ -253,31 +253,31 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
         </section>
 
         <section className="space-y-3">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">링크</h3>
+          <h3 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">링크</h3>
           {form.links.map((link, i) => (
             <div key={i} className="flex gap-2 items-start">
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
                 <input type="text" value={link.label} onChange={e => updateLink(i, 'label', e.target.value)} className={inputClass} placeholder="이름 (예: 공식 사이트)" />
                 <input type="url" value={link.url} onChange={e => updateLink(i, 'url', e.target.value)} className={inputClass} placeholder="https://..." />
               </div>
-              <button type="button" onClick={() => removeLink(i)} className="mt-1.5 text-gray-300 hover:text-red-400 text-xl leading-none transition-colors">×</button>
+              <button type="button" onClick={() => removeLink(i)} className="mt-1.5 text-fg-subtle hover:text-red-400 text-xl leading-none transition-colors">×</button>
             </div>
           ))}
-          <button type="button" onClick={addLink} className="w-full text-sm text-gray-400 hover:text-gray-600 border border-dashed border-gray-300 rounded-lg px-4 py-2 transition-colors">
+          <button type="button" onClick={addLink} className="w-full text-sm text-fg-subtle hover:text-fg-muted border border-dashed border-border-strong rounded-lg px-4 py-2 transition-colors">
             + 링크 추가
           </button>
         </section>
       </div>
 
-      <div className="flex-shrink-0 px-5 py-3 border-t border-gray-100 space-y-2">
+      <div className="flex-shrink-0 px-5 py-3 border-t border-border space-y-2">
         {nameError && (
           <p className="text-xs text-red-500">{nameError}</p>
         )}
         <div className="flex gap-3">
-          <button type="button" onClick={onCancel} className="px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors">
+          <button type="button" onClick={onCancel} className="px-4 py-2.5 rounded-lg text-sm font-medium text-fg-muted border border-border hover:bg-bg-subtle transition-colors">
             취소
           </button>
-          <button type="submit" className="flex-1 bg-gray-900 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">
+          <button type="submit" className="flex-1 bg-accent text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-accent-hover transition-colors">
             저장
           </button>
         </div>
@@ -289,7 +289,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-medium text-fg mb-1">{label}</label>
       {children}
     </div>
   )
@@ -308,7 +308,7 @@ function SelectField({
 }) {
   return (
     <Field label={label}>
-      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white">
+      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-white">
         {options.map(option => (
           <option key={option.value || 'empty'} value={option.value}>
             {option.label}

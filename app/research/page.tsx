@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import { Search } from 'lucide-react'
 import Navigation from '@/components/Layout/Navigation'
 import ItemList from '@/components/Items/ItemList'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
@@ -13,10 +14,12 @@ import FAB from '@/components/UI/FAB'
 import FilterButton from '@/components/Research/FilterButton'
 import FilterPanel from '@/components/Research/FilterPanel'
 import ActiveFilterChips from '@/components/Research/ActiveFilterChips'
+import { Input } from '@/components/UI/Input'
 import { useItems } from '@/lib/hooks/useItems'
 import type { FilterState } from '@/components/Items/ItemList'
 import { getActiveFilterCount } from '@/components/Items/ItemList'
 import type { Category, ReservationStatus, TripPriority } from '@/types'
+import { cn } from '@/lib/cn'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
@@ -36,12 +39,11 @@ function ResearchPageContent() {
   const { items, isLoading, updateItem, createItem } = useItems()
   const [view, setView] = useState<ViewMode>('items')
 
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(
-    () => searchParams.get('item')
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
+    searchParams.get('item'),
   )
   const [highlightedIds, setHighlightedIds] = useState<Set<string>>(new Set())
 
-  // 데스크탑 검색/필터/정렬 상태
   const [query, setQuery] = useState('')
   const [filterState, setFilterState] = useState<FilterState>({
     categories: [],
@@ -58,14 +60,22 @@ function ResearchPageContent() {
       chips.push({
         id: `cat-${c}`,
         label: c,
-        onRemove: () => setFilterState(prev => ({ ...prev, categories: prev.categories.filter(x => x !== c) })),
+        onRemove: () =>
+          setFilterState((prev) => ({
+            ...prev,
+            categories: prev.categories.filter((x) => x !== c),
+          })),
       })
     }
     for (const p of filterState.tripPriorities) {
       chips.push({
         id: `pri-${p}`,
         label: p,
-        onRemove: () => setFilterState(prev => ({ ...prev, tripPriorities: prev.tripPriorities.filter(x => x !== p) })),
+        onRemove: () =>
+          setFilterState((prev) => ({
+            ...prev,
+            tripPriorities: prev.tripPriorities.filter((x) => x !== p),
+          })),
       })
     }
     for (const s of filterState.reservationStatuses) {
@@ -73,29 +83,45 @@ function ResearchPageContent() {
         id: `res-${s}`,
         label: s,
         onRemove: () =>
-          setFilterState(prev => ({ ...prev, reservationStatuses: prev.reservationStatuses.filter(x => x !== s) })),
+          setFilterState((prev) => ({
+            ...prev,
+            reservationStatuses: prev.reservationStatuses.filter((x) => x !== s),
+          })),
       })
     }
     if (filterState.showExcluded) {
       chips.push({
         id: 'excluded',
         label: '제외 포함',
-        onRemove: () => setFilterState(prev => ({ ...prev, showExcluded: false })),
+        onRemove: () => setFilterState((prev) => ({ ...prev, showExcluded: false })),
       })
     }
     return chips
   }, [filterState])
 
-  // 데스크탑 테이블에 넘길 필터된 아이템
   const filteredItems = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q && activeCount === 0) return items
-    return items.filter(item => {
+    return items.filter((item) => {
       if (!filterState.showExcluded && item.trip_priority === '제외') return false
-      if (filterState.categories.length && !filterState.categories.includes(item.category as Category)) return false
-      if (filterState.tripPriorities.length && !filterState.tripPriorities.includes(item.trip_priority as TripPriority)) return false
+      if (
+        filterState.categories.length &&
+        !filterState.categories.includes(item.category as Category)
+      )
+        return false
+      if (
+        filterState.tripPriorities.length &&
+        !filterState.tripPriorities.includes(item.trip_priority as TripPriority)
+      )
+        return false
       if (filterState.reservationStatuses.length) {
-        if (!item.reservation_status || !filterState.reservationStatuses.includes(item.reservation_status as ReservationStatus)) return false
+        if (
+          !item.reservation_status ||
+          !filterState.reservationStatuses.includes(
+            item.reservation_status as ReservationStatus,
+          )
+        )
+          return false
       }
       if (q) {
         const haystack = [item.name, item.address, item.memo]
@@ -108,9 +134,8 @@ function ResearchPageContent() {
     })
   }, [items, query, filterState, activeCount])
 
-  const selectedItem = items.find(i => i.id === selectedItemId) ?? null
+  const selectedItem = items.find((i) => i.id === selectedItemId) ?? null
 
-  // 임포트 완료 하이라이트 처리 (마운트 시 1회)
   useEffect(() => {
     const imported = searchParams.get('imported')
     if (!imported) return
@@ -127,14 +152,16 @@ function ResearchPageContent() {
     return () => clearTimeout(timer)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // invalid item ID 처리
   useEffect(() => {
     if (isLoading || !selectedItemId) return
-    if (!items.find(i => i.id === selectedItemId)) {
+    if (!items.find((i) => i.id === selectedItemId)) {
       setSelectedItemId(null)
       const params = new URLSearchParams(searchParams.toString())
       params.delete('item')
-      router.replace(params.toString() ? `/research?${params.toString()}` : '/research', { scroll: false })
+      router.replace(
+        params.toString() ? `/research?${params.toString()}` : '/research',
+        { scroll: false },
+      )
     }
   }, [items, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -144,38 +171,50 @@ function ResearchPageContent() {
     const params = new URLSearchParams(searchParams.toString())
     if (next) params.set('item', next)
     else params.delete('item')
-    router.replace(params.toString() ? `/research?${params.toString()}` : '/research', { scroll: false })
+    router.replace(
+      params.toString() ? `/research?${params.toString()}` : '/research',
+      { scroll: false },
+    )
   }
 
   function handleClosePanel() {
     setSelectedItemId(null)
     const params = new URLSearchParams(searchParams.toString())
     params.delete('item')
-    router.replace(params.toString() ? `/research?${params.toString()}` : '/research', { scroll: false })
+    router.replace(
+      params.toString() ? `/research?${params.toString()}` : '/research',
+      { scroll: false },
+    )
   }
 
   return (
-    <div className="md:pl-44">
+    <div className="md:pl-44 bg-bg text-fg min-h-screen">
       {/* 헤더 */}
-      <div className="px-4 md:px-8 pt-4">
+      <header className="px-4 md:px-8 pt-4">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-bold text-gray-900">목록</h1>
+          <h1 className="text-xl font-bold text-fg">목록</h1>
           <ViewToggle view={view} onChange={setView} />
         </div>
 
-        {/* 데스크탑 검색/필터/정렬 툴바 — 목록 뷰에서만 표시 */}
         {view === 'items' && (
           <div className="hidden md:block mb-4">
             <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="이름·주소·메모로 검색..."
-                className="flex-1 min-w-0 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 bg-white"
-              />
+              <div className="flex-1 min-w-0">
+                <Input
+                  type="search"
+                  hideLabel
+                  label="검색"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="이름·주소·메모로 검색"
+                  leading={<Search className="size-4" aria-hidden="true" />}
+                />
+              </div>
               <div className="relative flex items-center gap-1.5 flex-shrink-0">
-                <FilterButton activeCount={activeCount} onClick={() => setFilterPanelOpen(v => !v)} />
+                <FilterButton
+                  activeCount={activeCount}
+                  onClick={() => setFilterPanelOpen((v) => !v)}
+                />
                 <FilterPanel
                   isOpen={filterPanelOpen}
                   filterState={filterState}
@@ -189,27 +228,29 @@ function ResearchPageContent() {
                 <ActiveFilterChips chips={activeChips} />
               </div>
             )}
-            <p className="text-xs text-gray-400 mt-2">{filteredItems.length}개 항목</p>
+            <p
+              className="text-xs text-fg-subtle mt-2 tabular"
+              aria-live="polite"
+            >
+              {filteredItems.length}개 항목
+            </p>
           </div>
         )}
-      </div>
+      </header>
 
       {isLoading ? (
         <>
-          {/* 모바일: 카드 스켈레톤 */}
           <div className="md:hidden px-4 space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <ItemCardSkeleton key={i} />
             ))}
           </div>
-          {/* 데스크탑: 테이블 스켈레톤 */}
           <div className="hidden md:block px-8">
             <ResearchTableSkeleton />
           </div>
         </>
       ) : view === 'items' ? (
         <>
-          {/* 모바일: 카드 뷰 — ItemList가 자체적으로 검색/필터/정렬 포함 */}
           <div className="md:hidden px-4 pb-28">
             <ItemList
               items={items}
@@ -220,7 +261,6 @@ function ResearchPageContent() {
             />
             <FAB />
           </div>
-          {/* 데스크탑: 테이블 뷰 */}
           <div className="hidden md:block px-8 pb-6">
             <ResearchTable
               items={filteredItems}
@@ -232,7 +272,6 @@ function ResearchPageContent() {
           </div>
         </>
       ) : (
-        /* 일정 뷰: 모바일/데스크탑 공통 */
         <div className="px-4 md:px-8 pb-24 md:pb-6">
           <ScheduleTable
             items={items}
@@ -256,25 +295,40 @@ function ResearchPageContent() {
   )
 }
 
-function ViewToggle({ view, onChange }: { view: ViewMode; onChange: (v: ViewMode) => void }) {
+function ViewToggle({
+  view,
+  onChange,
+}: {
+  view: ViewMode
+  onChange: (v: ViewMode) => void
+}) {
   return (
-    <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-      <button
-        onClick={() => onChange('items')}
-        className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-          view === 'items' ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'
-        }`}
-      >
-        목록
-      </button>
-      <button
-        onClick={() => onChange('schedule')}
-        className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-          view === 'schedule' ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'
-        }`}
-      >
-        일정
-      </button>
+    <div
+      role="tablist"
+      aria-label="보기 모드"
+      className="inline-flex rounded-lg border border-border overflow-hidden bg-bg-elevated"
+    >
+      {(['items', 'schedule'] as const).map((v) => {
+        const active = view === v
+        return (
+          <button
+            key={v}
+            role="tab"
+            type="button"
+            aria-selected={active}
+            onClick={() => onChange(v)}
+            className={cn(
+              'px-3 py-1.5 text-sm font-medium transition-colors duration-150',
+              'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent',
+              active
+                ? 'bg-accent text-accent-fg'
+                : 'text-fg-muted hover:bg-bg-subtle',
+            )}
+          >
+            {v === 'items' ? '목록' : '일정'}
+          </button>
+        )
+      })}
     </div>
   )
 }

@@ -27,7 +27,7 @@ function formatTime(item: TripItem): string {
 export default function DayTimeline({ items, selectedItemId, onSelectItem }: DayTimelineProps) {
   if (items.length === 0) {
     return (
-      <div className="px-4 py-6 text-center text-xs text-gray-400">
+      <div className="px-4 py-6 text-center text-xs text-fg-subtle">
         이 날에 배정된 스톱이 없습니다
       </div>
     )
@@ -46,7 +46,7 @@ export default function DayTimeline({ items, selectedItemId, onSelectItem }: Day
             {km != null && (
               <li
                 aria-hidden="true"
-                className="flex items-center gap-2 pl-7 pr-4 py-1 text-[10px] tabular-nums text-gray-400"
+                className="flex items-center gap-2 pl-7 pr-4 py-1 text-[10px] tabular-nums text-fg-subtle"
               >
                 <span className="inline-block h-3 w-px bg-gray-200" />
                 <span>{formatDistance(km)}</span>
@@ -57,7 +57,7 @@ export default function DayTimeline({ items, selectedItemId, onSelectItem }: Day
                 type="button"
                 onClick={() => onSelectItem(item.id)}
                 className={`flex w-full items-start gap-2 px-4 py-2.5 text-left transition-colors ${
-                  active ? 'bg-gray-100' : 'hover:bg-gray-50'
+                  active ? 'bg-bg-subtle' : 'hover:bg-bg-subtle'
                 }`}
               >
                 <span
@@ -69,11 +69,11 @@ export default function DayTimeline({ items, selectedItemId, onSelectItem }: Day
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-1.5">
                     <span className="text-xs">{emoji}</span>
-                    <span className="truncate text-xs font-semibold text-gray-900">
+                    <span className="truncate text-xs font-semibold text-fg">
                       {item.name}
                     </span>
                   </span>
-                  <span className="mt-0.5 block text-[10px] tabular-nums text-gray-500">
+                  <span className="mt-0.5 block text-[10px] tabular-nums text-fg-muted">
                     {formatTime(item)}
                   </span>
                 </span>

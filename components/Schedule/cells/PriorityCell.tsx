@@ -84,7 +84,7 @@ export default function PriorityCell({
           <div
             ref={dropdownRef}
             data-portal="true"
-            className="fixed z-[1200] rounded-xl border border-gray-200 bg-white shadow-lg p-1 w-52"
+            className="fixed z-[1200] rounded-xl border border-border bg-white shadow-lg p-1 w-52"
             style={{ top: position.top, left: position.left }}
           >
             {TRIP_PRIORITY_OPTIONS.map(priority => {
@@ -94,7 +94,7 @@ export default function PriorityCell({
                   key={priority}
                   type="button"
                   onClick={() => onSelect(priority)}
-                  className={`flex items-center gap-2 w-full rounded-lg px-3 py-2 text-left hover:bg-gray-50 transition-colors ${
+                  className={`flex items-center gap-2 w-full rounded-lg px-3 py-2 text-left hover:bg-bg-subtle transition-colors ${
                     priority === value ? 'bg-gray-50' : ''
                   }`}
                 >
@@ -104,7 +104,7 @@ export default function PriorityCell({
                   >
                     {m.emoji} {priority}
                   </span>
-                  <span className="text-xs text-gray-400 truncate">{m.description}</span>
+                  <span className="text-xs text-fg-subtle truncate">{m.description}</span>
                 </button>
               )
             })}

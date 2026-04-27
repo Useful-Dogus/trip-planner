@@ -39,6 +39,12 @@ npm run dev # 로컬 개발 서버 (http://localhost:3000)
 
 TypeScript + Node.js 18+: Follow standard conventions
 
+## Design Guidelines
+
+- 신규 화면·컴포넌트를 디자인하거나 기존 UI 를 수정할 때는 [docs/design-guidelines.md](docs/design-guidelines.md) 를 먼저 참고한다.
+- Shopify Polaris, Apple HIG, Microsoft Fluent 2 의 핵심 원칙을 trip-planner 맥락에 맞춰 정리한 단일 가이드이며, 컬러/타이포/레이아웃/모션/접근성/콘텐츠/패턴/체크리스트를 포함한다.
+- hex 직접 사용·변칙 spacing·임의 radius/shadow 는 가이드 토큰 체계로 정렬한다.
+
 ## Recent Changes
 - 014-nav-ux-overhaul: Added TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x, SWR
 - 013-filter-ui-mobile: Added TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x
