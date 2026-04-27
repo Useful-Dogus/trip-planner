@@ -67,7 +67,7 @@ export default function TripPlannerMap({
   const dayItems = useMemo(() => {
     if (!selectedDate) return [] as TripItem[]
     return visibleItems
-      .filter(i => occursOnDate(i, selectedDate))
+      .filter(i => i.trip_priority === '확정' && occursOnDate(i, selectedDate))
       .sort((a, b) => (a.time_start ?? '99:99').localeCompare(b.time_start ?? '99:99'))
   }, [visibleItems, selectedDate])
 
