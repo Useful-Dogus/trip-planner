@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { List, Map, CalendarDays, Download, LogOut } from 'lucide-react'
+import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { cn } from '@/lib/cn'
 
 interface NavItem {
@@ -95,6 +96,10 @@ export default function Navigation() {
           })}
         </ul>
         <div className="border-t border-border pt-3 mt-2 space-y-0.5">
+          <div className="px-3 py-2 flex items-center justify-between gap-2">
+            <span className="text-xs text-fg-subtle">테마</span>
+            <ThemeToggle />
+          </div>
           <Link
             href="/gmaps-import"
             className={cn(

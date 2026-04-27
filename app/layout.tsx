@@ -26,9 +26,26 @@ export const viewport = {
   maximumScale: 5,
 }
 
+/**
+ * 초기 렌더 깜빡임 방지: <head> 안에서 동기적으로 저장된 테마를 읽어 dark 클래스를 적용.
+ * React hydration 전에 실행되어야 하므로 inline script 사용.
+ */
+const themeInitScript = `
+(function(){
+  try {
+    var saved = localStorage.getItem('trip-planner.theme') || 'system';
+    var dark = saved === 'dark' || (saved === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    if (dark) document.documentElement.classList.add('dark');
+  } catch (e) {}
+})();
+`
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="bg-bg text-fg font-sans antialiased">
         <Providers>{children}</Providers>
       </body>
