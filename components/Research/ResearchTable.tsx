@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { TripItem, TripPriority } from '@/types'
 import { TRIP_PRIORITY_META } from '@/lib/itemOptions'
 import NameCell from '@/components/Schedule/cells/NameCell'
@@ -73,6 +73,7 @@ export default function ResearchTable({
   }
   const [addingRow, setAddingRow] = useState(false)
   const [newItemName, setNewItemName] = useState('')
+  const cancelNewItemRef = useRef(false)
   const newItemInputRef = useCallback((el: HTMLInputElement | null) => {
     if (el) setTimeout(() => el.focus(), 0)
   }, [])
@@ -142,6 +143,10 @@ export default function ResearchTable({
   }, [])
 
   function handleNewItemBlur() {
+    if (cancelNewItemRef.current) {
+      cancelNewItemRef.current = false
+      return
+    }
     const name = newItemName.trim()
     if (name) {
       onCreateItem({
@@ -160,6 +165,7 @@ export default function ResearchTable({
       e.preventDefault()
       handleNewItemBlur()
     } else if (e.key === 'Escape') {
+      cancelNewItemRef.current = true
       setAddingRow(false)
       setNewItemName('')
     }
