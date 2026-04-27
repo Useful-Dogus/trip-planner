@@ -8,6 +8,10 @@ import MapSidePanel, { type DaySummary } from '@/components/Map/MapSidePanel'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import FAB from '@/components/UI/FAB'
 import { useItems } from '@/lib/hooks/useItems'
+import {
+  PANEL_SNAP_POINTS_VH,
+  useMobilePanelHeight,
+} from '@/lib/hooks/useMobilePanelHeight'
 import { useToast } from '@/components/UI/Toast'
 import { CATEGORY_OPTIONS } from '@/lib/itemOptions'
 import type { Category, TripItem } from '@/types'
@@ -89,6 +93,7 @@ export default function PlanScreen({ basePath }: PlanScreenProps) {
 
   const selectedItem = items.find((i) => i.id === selectedItemId) ?? null
   const days = useMemo(() => buildDaySummaries(items), [items])
+  const mobilePanel = useMobilePanelHeight()
 
   // URL ↔ state 동기화 헬퍼
   function pushUrl(updates: { item?: string | null; day?: string | null }) {
@@ -169,7 +174,10 @@ export default function PlanScreen({ basePath }: PlanScreenProps) {
       </div>
 
       {/* Mobile: map fullscreen + bottom drawer with same panel */}
-      <div className="md:hidden flex h-[calc(100vh-56px)] flex-col relative">
+      <div
+        className="md:hidden flex h-[calc(100vh-56px)] flex-col relative"
+        style={{ '--mobile-panel-height': mobilePanel.heightStyle } as React.CSSProperties}
+      >
         <div className="relative min-h-0 flex-1">
           <TripPlannerMap
             items={items}
@@ -181,13 +189,33 @@ export default function PlanScreen({ basePath }: PlanScreenProps) {
           <div className="absolute top-3 right-3 z-[600]">
             <ThemeToggle />
           </div>
-          <FAB className="bottom-[calc(40vh+1rem)] right-4" />
+          <FAB className="bottom-[calc(var(--mobile-panel-height,40vh)+1rem)] right-4" />
         </div>
         <div
-          className="flex-shrink-0 border-t border-border bg-bg-elevated"
-          style={{ height: '40vh' }}
+          className={`flex-shrink-0 border-t border-border bg-bg-elevated flex flex-col ${
+            mobilePanel.isDragging ? '' : 'transition-[height] duration-200 ease-out'
+          }`}
+          style={{ height: mobilePanel.heightStyle }}
         >
-          {sidePanel}
+          <button
+            type="button"
+            role="slider"
+            aria-label="패널 높이 조정"
+            aria-valuemin={PANEL_SNAP_POINTS_VH[0]}
+            aria-valuemax={PANEL_SNAP_POINTS_VH[PANEL_SNAP_POINTS_VH.length - 1]}
+            aria-valuenow={PANEL_SNAP_POINTS_VH[mobilePanel.snapIndex]}
+            aria-valuetext={
+              ['축소', '기본', '확장'][mobilePanel.snapIndex] ?? '기본'
+            }
+            className="flex-shrink-0 flex items-center justify-center w-full py-2 cursor-row-resize touch-none focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
+            {...mobilePanel.handlers}
+          >
+            <span
+              aria-hidden="true"
+              className="block h-1 w-10 rounded-full bg-fg-subtle/40"
+            />
+          </button>
+          <div className="min-h-0 flex-1">{sidePanel}</div>
         </div>
       </div>
 
