@@ -6,7 +6,9 @@ import dynamic from 'next/dynamic'
 import Navigation from '@/components/Layout/Navigation'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
 import ScheduleTable from '@/components/Schedule/ScheduleTable'
+import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { useItems } from '@/lib/hooks/useItems'
+import { useToast } from '@/components/UI/Toast'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
@@ -22,6 +24,7 @@ function SchedulePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { items, isLoading, updateItem, createItem } = useItems()
+  const { showToast } = useToast()
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
     searchParams.get('item'),
@@ -67,7 +70,12 @@ function SchedulePageContent() {
   return (
     <div className="md:pl-44 bg-bg text-fg min-h-screen">
       <header className="max-w-3xl mx-auto px-4 pt-4">
-        <h1 className="text-xl font-bold text-fg mb-4">일정</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-bold text-fg">일정</h1>
+          <div className="md:hidden">
+            <ThemeToggle />
+          </div>
+        </div>
       </header>
 
       {isLoading ? (
@@ -93,8 +101,11 @@ function SchedulePageContent() {
         item={selectedItem}
         isOpen={selectedItemId !== null}
         onClose={handleClosePanel}
-        onSave={() => {}}
-        onDelete={handleClosePanel}
+        onSave={() => showToast({ type: 'success', message: '저장했어요' })}
+        onDelete={() => {
+          handleClosePanel()
+          showToast({ type: 'success', message: '삭제했어요' })
+        }}
       />
     </div>
   )

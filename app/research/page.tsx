@@ -9,21 +9,19 @@ import ItemList from '@/components/Items/ItemList'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
 import ResearchTableSkeleton from '@/components/UI/ResearchTableSkeleton'
 import ResearchTable from '@/components/Research/ResearchTable'
-import ScheduleTable from '@/components/Schedule/ScheduleTable'
 import FAB from '@/components/UI/FAB'
 import FilterButton from '@/components/Research/FilterButton'
 import FilterPanel from '@/components/Research/FilterPanel'
 import ActiveFilterChips from '@/components/Research/ActiveFilterChips'
 import { Input } from '@/components/UI/Input'
+import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { useItems } from '@/lib/hooks/useItems'
+import { useToast } from '@/components/UI/Toast'
 import type { FilterState } from '@/components/Items/ItemList'
 import { getActiveFilterCount } from '@/components/Items/ItemList'
 import type { Category, ReservationStatus, TripPriority } from '@/types'
-import { cn } from '@/lib/cn'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
-
-type ViewMode = 'items' | 'schedule'
 
 export default function ResearchPage() {
   return (
@@ -37,7 +35,7 @@ function ResearchPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { items, isLoading, updateItem, createItem } = useItems()
-  const [view, setView] = useState<ViewMode>('items')
+  const { showToast } = useToast()
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
     searchParams.get('item'),
@@ -93,7 +91,8 @@ function ResearchPageContent() {
       chips.push({
         id: 'excluded',
         label: '제외 포함',
-        onRemove: () => setFilterState((prev) => ({ ...prev, showExcluded: false })),
+        onRemove: () =>
+          setFilterState((prev) => ({ ...prev, showExcluded: false })),
       })
     }
     return chips
@@ -189,53 +188,49 @@ function ResearchPageContent() {
 
   return (
     <div className="md:pl-44 bg-bg text-fg min-h-screen">
-      {/* 헤더 */}
       <header className="px-4 md:px-8 pt-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-fg">목록</h1>
-          <ViewToggle view={view} onChange={setView} />
+          <div className="md:hidden">
+            <ThemeToggle />
+          </div>
         </div>
 
-        {view === 'items' && (
-          <div className="hidden md:block mb-4">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 min-w-0">
-                <Input
-                  type="search"
-                  hideLabel
-                  label="검색"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="이름·주소·메모로 검색"
-                  leading={<Search className="size-4" aria-hidden="true" />}
-                />
-              </div>
-              <div className="relative flex items-center gap-1.5 flex-shrink-0">
-                <FilterButton
-                  activeCount={activeCount}
-                  onClick={() => setFilterPanelOpen((v) => !v)}
-                />
-                <FilterPanel
-                  isOpen={filterPanelOpen}
-                  filterState={filterState}
-                  onChange={setFilterState}
-                  onClose={() => setFilterPanelOpen(false)}
-                />
-              </div>
+        <div className="hidden md:block mb-4">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <Input
+                type="search"
+                hideLabel
+                label="검색"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="이름·주소·메모로 검색"
+                leading={<Search className="size-4" aria-hidden="true" />}
+              />
             </div>
-            {activeChips.length > 0 && (
-              <div className="mt-2">
-                <ActiveFilterChips chips={activeChips} />
-              </div>
-            )}
-            <p
-              className="text-xs text-fg-subtle mt-2 tabular"
-              aria-live="polite"
-            >
-              {filteredItems.length}개 항목
-            </p>
+            <div className="relative flex items-center gap-1.5 flex-shrink-0">
+              <FilterButton
+                activeCount={activeCount}
+                onClick={() => setFilterPanelOpen((v) => !v)}
+              />
+              <FilterPanel
+                isOpen={filterPanelOpen}
+                filterState={filterState}
+                onChange={setFilterState}
+                onClose={() => setFilterPanelOpen(false)}
+              />
+            </div>
           </div>
-        )}
+          {activeChips.length > 0 && (
+            <div className="mt-2">
+              <ActiveFilterChips chips={activeChips} />
+            </div>
+          )}
+          <p className="text-xs text-fg-subtle mt-2 tabular" aria-live="polite">
+            {filteredItems.length}개 항목
+          </p>
+        </div>
       </header>
 
       {isLoading ? (
@@ -249,7 +244,7 @@ function ResearchPageContent() {
             <ResearchTableSkeleton />
           </div>
         </>
-      ) : view === 'items' ? (
+      ) : (
         <>
           <div className="md:hidden px-4 pb-28">
             <ItemList
@@ -271,15 +266,6 @@ function ResearchPageContent() {
             />
           </div>
         </>
-      ) : (
-        <div className="px-4 md:px-8 pb-24 md:pb-6">
-          <ScheduleTable
-            items={items}
-            onUpdateItem={updateItem}
-            onCreateItem={createItem}
-            onOpenPanel={handleSelectItem}
-          />
-        </div>
       )}
 
       <Navigation />
@@ -288,47 +274,12 @@ function ResearchPageContent() {
         item={selectedItem}
         isOpen={selectedItemId !== null}
         onClose={handleClosePanel}
-        onSave={() => {}}
-        onDelete={handleClosePanel}
+        onSave={() => showToast({ type: 'success', message: '저장했어요' })}
+        onDelete={() => {
+          handleClosePanel()
+          showToast({ type: 'success', message: '삭제했어요' })
+        }}
       />
-    </div>
-  )
-}
-
-function ViewToggle({
-  view,
-  onChange,
-}: {
-  view: ViewMode
-  onChange: (v: ViewMode) => void
-}) {
-  return (
-    <div
-      role="tablist"
-      aria-label="보기 모드"
-      className="inline-flex rounded-lg border border-border overflow-hidden bg-bg-elevated"
-    >
-      {(['items', 'schedule'] as const).map((v) => {
-        const active = view === v
-        return (
-          <button
-            key={v}
-            role="tab"
-            type="button"
-            aria-selected={active}
-            onClick={() => onChange(v)}
-            className={cn(
-              'px-3 py-1.5 text-sm font-medium transition-colors duration-150',
-              'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent',
-              active
-                ? 'bg-accent text-accent-fg'
-                : 'text-fg-muted hover:bg-bg-subtle',
-            )}
-          >
-            {v === 'items' ? '목록' : '일정'}
-          </button>
-        )
-      })}
     </div>
   )
 }

@@ -13,8 +13,8 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { href: '/plan', label: '계획', icon: Map },
   { href: '/research', label: '목록', icon: List },
-  { href: '/map', label: '지도', icon: Map },
   { href: '/schedule', label: '일정', icon: CalendarDays },
 ]
 
