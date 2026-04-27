@@ -27,19 +27,27 @@ function nextDate(date: string): string {
 
 function occursOnDate(item: TripItem, date: string): boolean {
   if (!item.date) return false
-  if (!item.end_date) return item.date === date
-  return item.date <= date && date <= item.end_date
+  if (item.date === date) return true
+  // end_date 까지 확장하는 건 종일/다일 일정(time_start 없음)에만 적용.
+  // 자정을 넘기는 단일 일정이 종료일 리스트에 끼어들지 않도록.
+  if (item.end_date && !item.time_start) {
+    return item.date <= date && date <= item.end_date
+  }
+  return false
 }
 
 function buildDaySummaries(items: TripItem[]): DaySummary[] {
   const confirmed = items.filter(i => i.trip_priority === '확정' && i.date)
   const dateSet = new Set<string>()
   for (const i of confirmed) {
-    const end = i.end_date ?? i.date!
-    let cur = i.date!
-    while (cur <= end) {
-      dateSet.add(cur)
-      cur = nextDate(cur)
+    // 시작일은 항상 포함. end_date 까지 확장은 종일/다일 일정에만.
+    dateSet.add(i.date!)
+    if (i.end_date && !i.time_start) {
+      let cur = nextDate(i.date!)
+      while (cur <= i.end_date) {
+        dateSet.add(cur)
+        cur = nextDate(cur)
+      }
     }
   }
   const sortedDates = Array.from(dateSet).sort()
