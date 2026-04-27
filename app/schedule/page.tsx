@@ -23,20 +23,22 @@ function SchedulePageContent() {
   const searchParams = useSearchParams()
   const { items, isLoading, updateItem, createItem } = useItems()
 
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(
-    () => searchParams.get('item')
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
+    searchParams.get('item'),
   )
 
-  const selectedItem = items.find(i => i.id === selectedItemId) ?? null
+  const selectedItem = items.find((i) => i.id === selectedItemId) ?? null
 
-  // invalid item ID 처리
   useEffect(() => {
     if (isLoading || !selectedItemId) return
-    if (!items.find(i => i.id === selectedItemId)) {
+    if (!items.find((i) => i.id === selectedItemId)) {
       setSelectedItemId(null)
       const params = new URLSearchParams(searchParams.toString())
       params.delete('item')
-      router.replace(params.toString() ? `/schedule?${params.toString()}` : '/schedule', { scroll: false })
+      router.replace(
+        params.toString() ? `/schedule?${params.toString()}` : '/schedule',
+        { scroll: false },
+      )
     }
   }, [items, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -46,21 +48,27 @@ function SchedulePageContent() {
     const params = new URLSearchParams(searchParams.toString())
     if (next) params.set('item', next)
     else params.delete('item')
-    router.replace(params.toString() ? `/schedule?${params.toString()}` : '/schedule', { scroll: false })
+    router.replace(
+      params.toString() ? `/schedule?${params.toString()}` : '/schedule',
+      { scroll: false },
+    )
   }
 
   function handleClosePanel() {
     setSelectedItemId(null)
     const params = new URLSearchParams(searchParams.toString())
     params.delete('item')
-    router.replace(params.toString() ? `/schedule?${params.toString()}` : '/schedule', { scroll: false })
+    router.replace(
+      params.toString() ? `/schedule?${params.toString()}` : '/schedule',
+      { scroll: false },
+    )
   }
 
   return (
-    <div className="md:pl-44">
-      <div className="max-w-3xl mx-auto px-4 pt-4">
-        <h1 className="text-xl font-bold text-gray-900 mb-4">일정</h1>
-      </div>
+    <div className="md:pl-44 bg-bg text-fg min-h-screen">
+      <header className="max-w-3xl mx-auto px-4 pt-4">
+        <h1 className="text-xl font-bold text-fg mb-4">일정</h1>
+      </header>
 
       {isLoading ? (
         <div className="max-w-3xl mx-auto px-4 space-y-2">
