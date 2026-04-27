@@ -41,8 +41,13 @@ function numberIcon(num: number, selected: boolean) {
 
 function occursOnDate(item: TripItem, date: string): boolean {
   if (!item.date) return false
-  if (!item.end_date) return item.date === date
-  return item.date <= date && date <= item.end_date
+  if (item.date === date) return true
+  // end_date 까지 확장하는 건 종일/다일 일정(time_start 없음)에만 적용.
+  // 자정을 넘기는 단일 일정이 종료일에 끼어들지 않도록.
+  if (item.end_date && !item.time_start) {
+    return item.date <= date && date <= item.end_date
+  }
+  return false
 }
 
 export default function TripPlannerMap({
