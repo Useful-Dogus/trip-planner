@@ -124,19 +124,27 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
 
 function occursOnDate(item: TripItem, date: string) {
   if (!item.date) return false
-  if (!item.end_date) return item.date === date
-  return item.date <= date && date <= item.end_date
+  if (item.date === date) return true
+  // end_date 까지 확장하는 건 종일/다일 일정(time_start 없음)에만 적용.
+  // 자정을 넘기는 단일 일정이 종료일에 끼어들지 않도록.
+  if (item.end_date && !item.time_start) {
+    return item.date <= date && date <= item.end_date
+  }
+  return false
 }
 
 function collectScheduleDates(items: TripItem[]) {
   const dates = new Set<string>()
   items.forEach(item => {
     if (!item.date) return
-    const rangeEnd = item.end_date ?? item.date
-    let cursor = item.date
-    while (cursor <= rangeEnd) {
-      dates.add(cursor)
-      cursor = nextDate(cursor)
+    // 시작일은 항상 포함. end_date 확장은 종일/다일 일정에만.
+    dates.add(item.date)
+    if (item.end_date && !item.time_start) {
+      let cursor = nextDate(item.date)
+      while (cursor <= item.end_date) {
+        dates.add(cursor)
+        cursor = nextDate(cursor)
+      }
     }
   })
   return Array.from(dates).sort()
