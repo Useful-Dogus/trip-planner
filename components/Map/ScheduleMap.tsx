@@ -60,7 +60,7 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
               onClick={() => setSelectedDate(date)}
               className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium border shadow-sm transition-colors ${
                 selectedDate === date
-                  ? 'bg-accent text-white border-accent'
+                  ? 'bg-accent text-accent-fg border-accent'
                   : 'bg-bg-elevated text-fg border-border hover:border-border-strong'
               }`}
             >

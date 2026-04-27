@@ -207,7 +207,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
           <div className="absolute bottom-0 left-0 right-0 bg-bg-elevated border-t-2 border-warning-border px-5 pt-4 pb-6 z-10">
             <p className="text-sm font-medium text-fg mb-3">변경사항이 있습니다. 저장하지 않고 나가시겠습니까?</p>
             <div className="flex gap-3">
-              <button onClick={handleDiscardAndClose} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-accent hover:bg-accent-hover transition-colors">나가기</button>
+              <button onClick={handleDiscardAndClose} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-accent-fg bg-accent hover:bg-accent-hover transition-colors">나가기</button>
               <button onClick={() => setConfirmingClose(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-fg-muted border border-border hover:bg-bg-subtle transition-colors">계속 편집</button>
             </div>
           </div>
@@ -456,7 +456,7 @@ function ItemDetailView({
       </div>
 
       {/* 일정 + 예산 */}
-      <section className="bg-gray-50 rounded-xl p-4 space-y-2.5">
+      <section className="bg-bg-subtle rounded-xl p-4 space-y-2.5">
         <SectionTitle>일정 · 예산</SectionTitle>
 
         <InlineRow label="시작 날짜">

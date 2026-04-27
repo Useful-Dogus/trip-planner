@@ -62,7 +62,7 @@ export default function CandidateList({
         <button
           onClick={onImport}
           disabled={importing || selectedCount === 0}
-          className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-4 py-2 text-sm font-medium bg-accent text-accent-fg rounded-lg hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {importing ? '추가 중...' : `${selectedCount}개 추가`}
         </button>
@@ -88,10 +88,10 @@ export default function CandidateList({
             key={`${candidate.place.name}-${i}`}
             className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
               candidate.status === 'duplicate'
-                ? 'border-border bg-gray-50 opacity-60'
+                ? 'border-border bg-bg-subtle opacity-60'
                 : candidate.selected
                 ? 'border-border bg-bg-elevated'
-                : 'border-border bg-gray-50'
+                : 'border-border bg-bg-subtle'
             }`}
           >
             <input
@@ -128,7 +128,7 @@ export default function CandidateList({
               )}
 
               {candidate.status === 'similar' && candidate.similarItem && (
-                <p className="text-xs text-yellow-600 mt-0.5">
+                <p className="text-xs text-warning-fg mt-0.5">
                   유사 장소: {candidate.similarItem.name}
                 </p>
               )}

@@ -34,13 +34,13 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-stone-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-bg via-bg-subtle to-bg flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-6 h-6 text-white"
+              className="w-6 h-6 text-accent-fg"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -88,15 +88,15 @@ export default function LoginForm() {
           </div>
 
           {error && (
-            <div className="bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
-              <p className="text-rose-600 text-sm">{error}</p>
+            <div className="bg-critical-bg border border-critical-border rounded-lg px-3 py-2">
+              <p className="text-critical-fg text-sm">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-accent text-white rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50 hover:bg-accent-hover active:bg-accent-hover transition-colors mt-2"
+            className="w-full bg-accent text-accent-fg rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50 hover:bg-accent-hover active:bg-accent-hover transition-colors mt-2"
           >
             {loading ? '로그인 중...' : '로그인'}
           </button>

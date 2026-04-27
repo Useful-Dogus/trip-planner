@@ -252,7 +252,7 @@ export default function ResearchTable({
               onBlur={handleNewItemBlur}
               onKeyDown={handleNewItemKeyDown}
               placeholder="이름 입력 후 Enter…"
-              className="w-full bg-transparent border-b border-blue-300 focus:border-blue-500 outline-none text-sm text-fg py-0.5"
+              className="w-full bg-transparent border-b border-border-strong focus:border-accent outline-none text-sm text-fg py-0.5"
               style={{ fontSize: 16 }}
             />
           </div>

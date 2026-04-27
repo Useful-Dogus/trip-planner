@@ -63,7 +63,7 @@ export default function BudgetCell({ value, isEditing, onClick, onBlur, onKeyDow
       {value !== undefined ? (
         `$${value.toLocaleString()}`
       ) : (
-        <span className="text-gray-200">—</span>
+        <span className="text-fg-subtle">—</span>
       )}
     </span>
   )
