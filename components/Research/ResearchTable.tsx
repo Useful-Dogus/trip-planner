@@ -188,7 +188,7 @@ export default function ResearchTable({
   return (
     <div className="border border-border rounded-xl overflow-x-auto">
       {/* 컬럼 헤더 */}
-      <div className="flex items-center border-b border-border bg-white">
+      <div className="flex items-center border-b border-border bg-bg-elevated">
         <button
           type="button"
           onClick={() => handleSortHeader('name')}
@@ -243,7 +243,7 @@ export default function ResearchTable({
 
       {/* 새 항목 추가 행 */}
       {addingRow ? (
-        <div className="flex items-center border-b border-border bg-blue-50/30">
+        <div className="flex items-center border-b border-border bg-info-bg/30">
           <div className="flex-1 min-w-0 px-3 py-2.5">
             <input
               ref={newItemInputRef}

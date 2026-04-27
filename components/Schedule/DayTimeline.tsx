@@ -48,7 +48,7 @@ export default function DayTimeline({ items, selectedItemId, onSelectItem }: Day
                 aria-hidden="true"
                 className="flex items-center gap-2 pl-7 pr-4 py-1 text-[10px] tabular-nums text-fg-subtle"
               >
-                <span className="inline-block h-3 w-px bg-gray-200" />
+                <span className="inline-block h-3 w-px bg-border" />
                 <span>{formatDistance(km)}</span>
               </li>
             )}

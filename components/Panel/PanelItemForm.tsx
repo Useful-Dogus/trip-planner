@@ -155,7 +155,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     setField('links', form.links.filter((_, idx) => idx !== i))
   }
 
-  const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-white'
+  const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-bg-elevated'
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
@@ -172,7 +172,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
               className={`${inputClass}${nameError ? ' border-red-400 focus:ring-red-200' : ''}`}
               placeholder="장소 또는 활동 이름"
             />
-            {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
+            {nameError && <p className="text-xs text-critical-fg mt-1">{nameError}</p>}
           </div>
           <SelectField label={ITEM_FIELD_LABELS.category} value={form.category} onChange={value => setField('category', value as Category)} options={CATEGORY_OPTIONS.map(value => ({ value, label: value }))} />
           <SelectField label={ITEM_FIELD_LABELS.trip_priority} value={form.trip_priority} onChange={value => setField('trip_priority', value as TripPriority)} options={TRIP_PRIORITY_OPTIONS.map(value => ({ value, label: `${value} - ${TRIP_PRIORITY_META[value].description}` }))} />
@@ -260,7 +260,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
                 <input type="text" value={link.label} onChange={e => updateLink(i, 'label', e.target.value)} className={inputClass} placeholder="이름 (예: 공식 사이트)" />
                 <input type="url" value={link.url} onChange={e => updateLink(i, 'url', e.target.value)} className={inputClass} placeholder="https://..." />
               </div>
-              <button type="button" onClick={() => removeLink(i)} className="mt-1.5 text-fg-subtle hover:text-red-400 text-xl leading-none transition-colors">×</button>
+              <button type="button" onClick={() => removeLink(i)} className="mt-1.5 text-fg-subtle hover:text-critical-fg text-xl leading-none transition-colors">×</button>
             </div>
           ))}
           <button type="button" onClick={addLink} className="w-full text-sm text-fg-subtle hover:text-fg-muted border border-dashed border-border-strong rounded-lg px-4 py-2 transition-colors">
@@ -271,7 +271,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
 
       <div className="flex-shrink-0 px-5 py-3 border-t border-border space-y-2">
         {nameError && (
-          <p className="text-xs text-red-500">{nameError}</p>
+          <p className="text-xs text-critical-fg">{nameError}</p>
         )}
         <div className="flex gap-3">
           <button type="button" onClick={onCancel} className="px-4 py-2.5 rounded-lg text-sm font-medium text-fg-muted border border-border hover:bg-bg-subtle transition-colors">
@@ -308,7 +308,7 @@ function SelectField({
 }) {
   return (
     <Field label={label}>
-      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-white">
+      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-bg-elevated">
         {options.map(option => (
           <option key={option.value || 'empty'} value={option.value}>
             {option.label}

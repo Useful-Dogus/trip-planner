@@ -185,7 +185,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     }
   }
 
-  const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-border-strong bg-white'
+  const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-border-strong bg-bg-elevated'
   const labelClass = 'block text-sm font-medium text-fg mb-1'
 
   return (
@@ -203,7 +203,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
             className={`${inputClass}${nameError ? ' border-red-400 focus:ring-red-200' : ''}`}
             placeholder="장소 또는 활동 이름"
           />
-          {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
+          {nameError && <p className="text-xs text-critical-fg mt-1">{nameError}</p>}
         </div>
 
         <SelectField label={ITEM_FIELD_LABELS.category} value={form.category} onChange={value => setField('category', value as Category)} options={CATEGORY_OPTIONS.map(value => ({ value, label: value }))} />
@@ -294,7 +294,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
               <input type="text" value={link.label} onChange={e => updateLink(i, 'label', e.target.value)} className={inputClass} placeholder="이름 (예: 공식 사이트)" />
               <input type="url" value={link.url} onChange={e => updateLink(i, 'url', e.target.value)} className={inputClass} placeholder="https://..." />
             </div>
-            <button type="button" onClick={() => removeLink(i)} className="mt-1.5 text-fg-subtle hover:text-red-400 text-xl leading-none transition-colors">×</button>
+            <button type="button" onClick={() => removeLink(i)} className="mt-1.5 text-fg-subtle hover:text-critical-fg text-xl leading-none transition-colors">×</button>
           </div>
         ))}
         <button type="button" onClick={addLink} className="w-full text-sm text-fg-subtle hover:text-fg-muted border border-dashed border-border-strong rounded-lg px-4 py-2 transition-colors">
@@ -307,15 +307,15 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
         <textarea ref={memoRef} value={form.memo} onChange={e => setField('memo', e.target.value)} className={`${inputClass} resize-none overflow-hidden`} rows={4} placeholder="자유롭게 메모..." />
       </section>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-critical-fg">{error}</p>}
 
       <div
-        className="fixed left-0 right-0 md:static bg-white/95 backdrop-blur border-t md:border-t-0 px-4 py-3 md:px-0 md:py-0 z-40"
+        className="fixed left-0 right-0 md:static bg-bg-elevated/95 backdrop-blur border-t md:border-t-0 px-4 py-3 md:px-0 md:py-0 z-40"
         style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom))' }}
       >
         <div className="max-w-lg mx-auto md:max-w-none flex gap-3">
           {mode === 'edit' && (
-            <button type="button" onClick={handleDelete} disabled={loading} className="px-4 py-2.5 rounded-lg text-sm font-medium text-red-500 border border-red-200 hover:bg-red-50 transition-colors">
+            <button type="button" onClick={handleDelete} disabled={loading} className="px-4 py-2.5 rounded-lg text-sm font-medium text-critical-fg border border-critical-border hover:bg-critical-bg transition-colors">
               삭제
             </button>
           )}
@@ -345,7 +345,7 @@ function SelectField({
   return (
     <div>
       <label className="block text-sm font-medium text-fg mb-1">{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-border-strong bg-white">
+      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-border-strong bg-bg-elevated">
         {options.map(option => (
           <option key={option.value || 'empty'} value={option.value}>
             {option.label}

@@ -34,12 +34,15 @@ export default function FAB({
       onClick={handleClick}
       aria-label={label}
       className={cn(
-        'fixed bottom-20 right-4 z-40 size-14 rounded-full',
+        'fixed z-40 size-14 rounded-full',
         'bg-accent text-accent-fg shadow-e16',
         'flex items-center justify-center',
         'hover:bg-accent-hover active:bg-accent-hover',
         'transition-colors duration-150 ease-out-soft',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+        // 기본 위치 (className 으로 override 가능)
+        !className?.includes('bottom-') && 'bottom-20',
+        !className?.includes('right-') && !className?.includes('left-') && 'right-4',
         className,
       )}
       style={{

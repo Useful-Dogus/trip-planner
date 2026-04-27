@@ -14,19 +14,15 @@ interface TripPlannerMapProps {
 }
 
 function chipIcon(emoji: string, opts: { dim?: boolean; selected?: boolean }) {
-  const opacity = opts.dim ? 0.55 : 1
-  const border = opts.selected ? '#0f172a' : '#e2e8f0'
-  const borderWidth = opts.selected ? 2 : 1.5
+  const cls = [
+    'tp-chip-marker',
+    opts.selected && 'is-selected',
+    opts.dim && 'is-dim',
+  ]
+    .filter(Boolean)
+    .join(' ')
   return L.divIcon({
-    html: `<div style="
-      display:inline-flex;align-items:center;justify-content:center;
-      padding:2px 6px;background:white;
-      border:${borderWidth}px solid ${border};
-      border-radius:9999px;
-      box-shadow:0 1px 4px rgba(0,0,0,0.15);
-      font-size:14px;line-height:1;white-space:nowrap;
-      opacity:${opacity};
-    ">${emoji}</div>`,
+    html: `<div class="${cls}">${emoji}</div>`,
     className: '',
     iconSize: [28, 24],
     iconAnchor: [14, 12],
@@ -34,16 +30,9 @@ function chipIcon(emoji: string, opts: { dim?: boolean; selected?: boolean }) {
 }
 
 function numberIcon(num: number, selected: boolean) {
-  const bg = selected ? '#0f172a' : '#374151'
+  const cls = ['tp-number-marker', selected && 'is-selected'].filter(Boolean).join(' ')
   return L.divIcon({
-    html: `<div style="
-      width:28px;height:28px;border-radius:50%;
-      background:${bg};color:white;
-      display:flex;align-items:center;justify-content:center;
-      font-size:12px;font-weight:700;
-      border:2.5px solid white;
-      box-shadow:0 2px 6px rgba(0,0,0,0.3);
-    ">${num}</div>`,
+    html: `<div class="${cls}">${num}</div>`,
     className: '',
     iconSize: [28, 28],
     iconAnchor: [14, 14],
@@ -127,7 +116,7 @@ export default function TripPlannerMap({
       ))}
 
       {polyline.length > 1 && (
-        <Polyline positions={polyline} color="#0f172a" weight={2.5} opacity={0.6} />
+        <Polyline positions={polyline} pathOptions={{ className: 'tp-day-route' }} weight={2.5} opacity={0.6} />
       )}
     </MapContainer>
   )

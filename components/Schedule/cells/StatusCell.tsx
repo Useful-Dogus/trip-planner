@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { ReservationStatus } from '@/types'
 import { RESERVATION_STATUS_META, RESERVATION_STATUS_OPTIONS } from '@/lib/itemOptions'
+import { cn } from '@/lib/cn'
 
 interface StatusCellProps {
   value: ReservationStatus | null | undefined
@@ -14,10 +15,10 @@ interface StatusCellProps {
 }
 
 const STATUS_DOT: Record<ReservationStatus, string> = {
-  예약완료: 'bg-green-500',
-  '필요(미예약)': 'bg-orange-400',
-  불필요: 'bg-gray-300',
-  '확인 필요': 'bg-yellow-400',
+  예약완료: 'bg-success-fg',
+  '필요(미예약)': 'bg-warning-fg',
+  불필요: 'bg-fg-subtle',
+  '확인 필요': 'bg-warning-fg',
 }
 
 const STATUS_LABEL: Record<ReservationStatus, string> = {
@@ -49,7 +50,8 @@ export default function StatusCell({
 
     function handleClickOutside(e: MouseEvent) {
       const target = e.target as Node
-      if (buttonRef.current?.contains(target) || dropdownRef.current?.contains(target)) return
+      if (buttonRef.current?.contains(target) || dropdownRef.current?.contains(target))
+        return
       onClose()
     }
 
@@ -68,8 +70,13 @@ export default function StatusCell({
     if (!position || !dropdownRef.current) return
     const dropRect = dropdownRef.current.getBoundingClientRect()
     if (dropRect.right > window.innerWidth) {
-      setPosition(prev =>
-        prev ? { ...prev, left: Math.max(0, prev.left - (dropRect.right - window.innerWidth)) } : prev
+      setPosition((prev) =>
+        prev
+          ? {
+              ...prev,
+              left: Math.max(0, prev.left - (dropRect.right - window.innerWidth)),
+            }
+          : prev,
       )
     }
   }, [position])
@@ -80,15 +87,27 @@ export default function StatusCell({
         ref={buttonRef}
         type="button"
         onClick={onClick}
-        className="flex items-center gap-1.5 cursor-pointer hover:opacity-70 transition-opacity select-none"
+        aria-label={`예약상태: ${value ?? '없음'}, 클릭해서 변경`}
+        className="flex items-center gap-1.5 cursor-pointer hover:opacity-70 transition-opacity select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded"
       >
         {value ? (
           <>
-            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${STATUS_DOT[value]}`} />
-            <span className="text-xs text-fg-muted whitespace-nowrap">{STATUS_LABEL[value]}</span>
+            <span
+              aria-hidden="true"
+              className={cn(
+                'w-2 h-2 rounded-full flex-shrink-0',
+                STATUS_DOT[value],
+              )}
+            />
+            <span className="text-xs text-fg-muted whitespace-nowrap">
+              {STATUS_LABEL[value]}
+            </span>
           </>
         ) : (
-          <span className="w-2 h-2 rounded-full bg-gray-200 flex-shrink-0" />
+          <span
+            aria-hidden="true"
+            className="w-2 h-2 rounded-full bg-border flex-shrink-0"
+          />
         )}
       </button>
 
@@ -97,41 +116,59 @@ export default function StatusCell({
         createPortal(
           <div
             ref={dropdownRef}
+            role="menu"
             data-portal="true"
-            className="fixed z-[1200] rounded-xl border border-border bg-white shadow-lg p-1 w-44"
+            className="fixed z-[1200] rounded-lg border border-border bg-bg-elevated shadow-e16 p-1 w-44 animate-fade-in"
             style={{ top: position.top, left: position.left }}
           >
-            {RESERVATION_STATUS_OPTIONS.map(status => {
+            {RESERVATION_STATUS_OPTIONS.map((status) => {
               const meta = RESERVATION_STATUS_META[status]
+              const active = status === value
               return (
                 <button
                   key={status}
                   type="button"
+                  role="menuitemradio"
+                  aria-checked={active}
                   onClick={() => onSelect(status)}
-                  className={`flex items-center gap-2 w-full rounded-lg px-3 py-2 text-left hover:bg-bg-subtle transition-colors ${
-                    status === value ? 'bg-gray-50' : ''
-                  }`}
+                  className={cn(
+                    'flex items-center gap-2 w-full rounded px-3 py-2 text-left',
+                    'hover:bg-bg-subtle transition-colors',
+                    'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent',
+                    active && 'bg-accent-subtle',
+                  )}
                 >
                   <span
-                    className={`w-2 h-2 rounded-full flex-shrink-0 ${STATUS_DOT[status]}`}
+                    aria-hidden="true"
+                    className={cn(
+                      'w-2 h-2 rounded-full flex-shrink-0',
+                      STATUS_DOT[status],
+                    )}
                   />
-                  <div>
+                  <div className="min-w-0">
                     <div className="text-sm font-medium text-fg">{status}</div>
-                    <div className="text-xs text-fg-subtle">{meta.description}</div>
+                    <div className="text-xs text-fg-subtle truncate">
+                      {meta.description}
+                    </div>
                   </div>
                 </button>
               )
             })}
             <button
               type="button"
+              role="menuitemradio"
+              aria-checked={value == null}
               onClick={() => onSelect(null)}
-              className="flex items-center gap-2 w-full rounded-lg px-3 py-2 text-left hover:bg-bg-subtle transition-colors"
+              className="flex items-center gap-2 w-full rounded px-3 py-2 text-left hover:bg-bg-subtle transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
             >
-              <span className="w-2 h-2 rounded-full bg-gray-200 flex-shrink-0" />
+              <span
+                aria-hidden="true"
+                className="w-2 h-2 rounded-full bg-border flex-shrink-0"
+              />
               <span className="text-sm text-fg-subtle">없음</span>
             </button>
           </div>,
-          document.body
+          document.body,
         )}
     </>
   )

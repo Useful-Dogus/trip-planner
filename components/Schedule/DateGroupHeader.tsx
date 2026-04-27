@@ -37,7 +37,7 @@ export default function DateGroupHeader({
   const showBar = !isUndated && categoryBreakdown && categoryBreakdown.length > 0
 
   return (
-    <div className="bg-white border-b border-border sticky top-0 z-10">
+    <div className="bg-bg-elevated border-b border-border sticky top-0 z-10">
       <div className="flex items-center gap-2 px-3 py-3">
       <button
         type="button"
@@ -48,7 +48,7 @@ export default function DateGroupHeader({
           {formatDate(date)}
         </span>
         {isToday && (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-info-bg text-info-fg">
             오늘
           </span>
         )}

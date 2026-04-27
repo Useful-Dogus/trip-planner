@@ -57,7 +57,7 @@ export default function LoginForm() {
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-border p-6 space-y-4"
+          className="bg-bg-elevated rounded-2xl shadow-sm border border-border p-6 space-y-4"
         >
           <div>
             <label className="block text-xs font-semibold text-fg-muted uppercase tracking-wide mb-1.5">

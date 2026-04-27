@@ -149,7 +149,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
 
   return (
     <>
-      <div className={`fixed inset-0 bg-black/30 z-[1000] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={confirmingClose ? () => setConfirmingClose(false) : tryClose} aria-hidden="true" />
+      <div className={`fixed inset-0 bg-overlay z-[1000] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={confirmingClose ? () => setConfirmingClose(false) : tryClose} aria-hidden="true" />
 
       <div
         ref={panelRef}
@@ -157,16 +157,16 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         style={panelStyle}
-        className={`fixed z-[1010] bg-white shadow-2xl transition-transform duration-300 ease-in-out flex flex-col bottom-0 left-0 right-0 rounded-t-2xl h-[80vh] md:h-screen md:bottom-auto md:right-0 md:top-0 md:left-auto md:w-[520px] md:rounded-none md:rounded-l-2xl ${
+        className={`fixed z-[1010] bg-bg-elevated shadow-2xl transition-transform duration-300 ease-in-out flex flex-col bottom-0 left-0 right-0 rounded-t-2xl h-[80vh] md:h-screen md:bottom-auto md:right-0 md:top-0 md:left-auto md:w-[520px] md:rounded-none md:rounded-l-2xl ${
           isOpen ? 'translate-y-0 md:translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-y-0 md:translate-x-full'
         }`}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-gray-200 rounded-full md:hidden" />
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-border rounded-full md:hidden" />
           <span className="text-sm font-semibold text-fg">{mode === 'edit' ? '편집' : '상세 정보'}</span>
           <div className="flex items-center gap-2">
             {mode === 'edit' && displayItem && (
-              <button onClick={() => handleDelete(displayItem.id)} aria-label="항목 삭제" className="px-3 py-1.5 text-xs font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+              <button onClick={() => handleDelete(displayItem.id)} aria-label="항목 삭제" className="px-3 py-1.5 text-xs font-medium text-critical-fg border border-critical-border rounded-lg hover:bg-critical-bg transition-colors">
                 삭제
               </button>
             )}
@@ -204,7 +204,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
         </div>
 
         {confirmingClose && (
-          <div className="absolute bottom-0 left-0 right-0 bg-white border-t-2 border-amber-100 px-5 pt-4 pb-6 z-10">
+          <div className="absolute bottom-0 left-0 right-0 bg-bg-elevated border-t-2 border-warning-border px-5 pt-4 pb-6 z-10">
             <p className="text-sm font-medium text-fg mb-3">변경사항이 있습니다. 저장하지 않고 나가시겠습니까?</p>
             <div className="flex gap-3">
               <button onClick={handleDiscardAndClose} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-accent hover:bg-accent-hover transition-colors">나가기</button>
@@ -579,7 +579,7 @@ function ItemDetailView({
                     <button
                       type="button"
                       onClick={() => { const next = links.filter((_, idx) => idx !== i); saveLinks(next); setEditingLinkIdx(null) }}
-                      className="text-fg-subtle hover:text-red-400 text-xl leading-none transition-colors flex-shrink-0"
+                      className="text-fg-subtle hover:text-critical-fg text-xl leading-none transition-colors flex-shrink-0"
                     >×</button>
                   </div>
                 </div>
@@ -590,7 +590,7 @@ function ItemDetailView({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={e => e.stopPropagation()}
-                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors min-w-0 flex-1"
+                    className="flex items-center gap-2 text-sm text-accent hover:text-accent-hover transition-colors min-w-0 flex-1"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                       <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
@@ -667,7 +667,7 @@ function ItemDetailView({
       <div className="pt-2">
         <button
           onClick={onDeleteRequest}
-          className="w-full px-4 py-2.5 rounded-lg text-sm font-medium text-red-500 border border-red-200 hover:bg-red-50 transition-colors"
+          className="w-full px-4 py-2.5 rounded-lg text-sm font-medium text-critical-fg border border-critical-border hover:bg-critical-bg transition-colors"
         >
           삭제
         </button>
@@ -760,7 +760,7 @@ function MetadataDropdownChip({
       {isOpen && position && createPortal(
         <div
           ref={dropdownRef}
-          className="fixed z-[1200] rounded-xl border border-border bg-white shadow-lg p-1"
+          className="fixed z-[1200] rounded-xl border border-border bg-bg-elevated shadow-lg p-1"
           style={{ top: position.top, left: position.left, width: position.width }}
         >
           <div className="px-3 py-2 text-[11px] font-medium text-fg-subtle">{label}</div>

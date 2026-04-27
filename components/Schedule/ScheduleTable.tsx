@@ -44,7 +44,7 @@ function formatTimeRange(item: TripItem) {
 function getStatusMeta(value: ReservationStatus | null | undefined) {
   if (!value) {
     return {
-      dotClass: 'bg-gray-200',
+      dotClass: 'bg-border',
       label: '예약 정보 없음',
     }
   }
@@ -58,10 +58,10 @@ function getStatusMeta(value: ReservationStatus | null | undefined) {
 
   return {
     dotClass: {
-      예약완료: 'bg-green-500',
-      '필요(미예약)': 'bg-orange-400',
-      불필요: 'bg-gray-300',
-      '확인 필요': 'bg-yellow-400',
+      예약완료: 'bg-success-bg0',
+      '필요(미예약)': 'bg-warning-fg',
+      불필요: 'bg-border-strong',
+      '확인 필요': 'bg-warning-fg',
     }[value],
     label: shortLabel[value],
   }
@@ -109,7 +109,7 @@ function MobileScheduleItemCard({
     <button
       type="button"
       onClick={() => onOpenPanel(item.id)}
-      className="w-full rounded-2xl border border-border bg-white p-4 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md active:scale-[0.99]"
+      className="w-full rounded-2xl border border-border bg-bg-elevated p-4 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md active:scale-[0.99]"
     >
       <div className="flex items-start gap-3">
         <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-50 text-lg">
@@ -153,8 +153,8 @@ function MobileNewItemEditor({
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>, currentValue: string) => void
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-4">
-      <div className="mb-2 text-xs font-medium text-blue-700">{formatDate(date)}</div>
+    <div className="rounded-2xl border border-dashed border-info-border bg-info-bg/40 p-4">
+      <div className="mb-2 text-xs font-medium text-info-fg">{formatDate(date)}</div>
       <input
         ref={inputRef}
         value={value}
@@ -325,7 +325,7 @@ export default function ScheduleTable({
           )
         })}
         {addingToDate === date ? (
-          <div className="flex min-w-[720px] items-center border-b border-gray-50 bg-blue-50/30">
+          <div className="flex min-w-[720px] items-center border-b border-gray-50 bg-info-bg/30">
             <div className="w-16 flex-shrink-0 px-3 py-2.5" />
             <div className="min-w-[220px] flex-1 px-3 py-2.5">
               <input
@@ -430,7 +430,7 @@ export default function ScheduleTable({
           const categoryBreakdown = buildCategoryBreakdown(groupItems)
 
           return (
-            <div key={date} ref={isToday ? todayRef : undefined} className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+            <div key={date} ref={isToday ? todayRef : undefined} className="overflow-hidden rounded-xl border border-border bg-bg-elevated shadow-sm">
               <DateGroupHeader
                 date={date}
                 dayOffset={dayOffset}
@@ -462,8 +462,8 @@ export default function ScheduleTable({
         })}
 
         {undatedItems.length > 0 && (
-          <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
-            <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-border sticky top-0 z-10">
+          <div className="overflow-hidden rounded-xl border border-border bg-bg-elevated shadow-sm">
+            <div className="flex items-center gap-2 px-3 py-3 bg-bg-elevated border-b border-border sticky top-0 z-10">
               <button
                 type="button"
                 onClick={() => setUndatedCollapsed(prev => !prev)}
@@ -501,11 +501,11 @@ export default function ScheduleTable({
       </div>
 
       <div className="hidden md:block">
-        <div className="overflow-hidden rounded-xl border border-border bg-white">
+        <div className="overflow-hidden rounded-xl border border-border bg-bg-elevated">
           <div className="overflow-x-auto">
             <div className={TABLE_MIN_WIDTH}>
               {/* 컬럼 헤더 */}
-              <div className="flex items-center gap-0 border-b border-border bg-white px-0">
+              <div className="flex items-center gap-0 border-b border-border bg-bg-elevated px-0">
                 <div className="w-16 flex-shrink-0 px-3 py-2.5">
                   <span className="text-xs font-semibold text-fg-muted whitespace-nowrap">시간</span>
                 </div>
@@ -567,7 +567,7 @@ export default function ScheduleTable({
               {/* 미배정 버킷 (최하단, 있을 때만) */}
               {undatedItems.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-border sticky top-0 z-10">
+                  <div className="flex items-center gap-2 px-3 py-3 bg-bg-elevated border-b border-border sticky top-0 z-10">
                     <button
                       type="button"
                       onClick={() => setUndatedCollapsed(prev => !prev)}

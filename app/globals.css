@@ -7,30 +7,30 @@
 /* ============================================================
  * 시맨틱 디자인 토큰
  * - 색은 RGB triple 로 정의해 Tailwind 의 rgb(var(--x) / <alpha-value>) 와 호환
- * - 다크 모드는 prefers-color-scheme 기반 자동 적용 (토글 없음)
+ * - 다크 모드는 html.dark 클래스로 적용 (테마 토글 가능)
  * ========================================================== */
 @layer base {
   :root {
     /* surface */
     --bg: 255 255 255;
-    --bg-subtle: 248 250 252;        /* slate-50 */
+    --bg-subtle: 248 250 252;
     --bg-elevated: 255 255 255;
-    --bg-overlay: 15 23 42;          /* slate-900 (overlay 색, opacity 는 호출부에서) */
+    --bg-overlay: 15 23 42;
 
     /* text */
-    --fg: 15 23 42;                  /* slate-900 */
-    --fg-muted: 71 85 105;           /* slate-600 */
-    --fg-subtle: 148 163 184;        /* slate-400 */
+    --fg: 15 23 42;
+    --fg-muted: 71 85 105;
+    --fg-subtle: 148 163 184;
     --fg-on-accent: 255 255 255;
 
     /* line */
-    --border: 226 232 240;           /* slate-200 */
-    --border-strong: 203 213 225;    /* slate-300 */
+    --border: 226 232 240;
+    --border-strong: 203 213 225;
 
     /* accent — Teal */
-    --accent: 13 148 136;            /* teal-600 */
-    --accent-hover: 15 118 110;      /* teal-700 */
-    --accent-subtle: 240 253 250;    /* teal-50 */
+    --accent: 13 148 136;
+    --accent-hover: 15 118 110;
+    --accent-subtle: 240 253 250;
 
     /* status */
     --success-bg: 240 253 244;
@@ -46,10 +46,10 @@
     --info-fg: 30 64 175;
     --info-border: 191 219 254;
 
-    /* shadow base color (slate-900) */
+    /* shadow base */
     --shadow: 15 23 42;
 
-    /* category — light mode hex (인라인 스타일 호환) */
+    /* category — 라이트 hex */
     --cat-transit: #94a3b8;
     --cat-stay: #0ea5e9;
     --cat-sight: #f97316;
@@ -61,63 +61,130 @@
     --cat-activity: #f59e0b;
     --cat-leisure: #22c55e;
     --cat-other: #cbd5e1;
+
+    /* trip priority — 라이트 hex (인라인 style 호환용. className 으로 마이그레이션 됨) */
+    --priority-review-bg: #f8fafc;
+    --priority-review-fg: #94a3b8;
+    --priority-review-border: #e2e8f0;
+    --priority-maybe-bg: #eff6ff;
+    --priority-maybe-fg: #3b82f6;
+    --priority-maybe-border: #bfdbfe;
+    --priority-want-bg: #f5f3ff;
+    --priority-want-fg: #7c3aed;
+    --priority-want-border: #ddd6fe;
+    --priority-confirm-bg: #f0fdf4;
+    --priority-confirm-fg: #16a34a;
+    --priority-confirm-border: #bbf7d0;
+    --priority-exclude-bg: #f8fafc;
+    --priority-exclude-fg: #cbd5e1;
+    --priority-exclude-border: #e2e8f0;
+
+    /* reservation — 라이트 hex */
+    --reservation-check-bg: #fffbeb;
+    --reservation-check-fg: #d97706;
+    --reservation-check-border: #fde68a;
+    --reservation-none-bg: #f8fafc;
+    --reservation-none-fg: #94a3b8;
+    --reservation-none-border: #e2e8f0;
+    --reservation-needed-bg: #fff7ed;
+    --reservation-needed-fg: #ea580c;
+    --reservation-needed-border: #fed7aa;
+    --reservation-done-bg: #f0fdf4;
+    --reservation-done-fg: #16a34a;
+    --reservation-done-border: #bbf7d0;
+
+    /* leaflet tile filter (라이트는 무필터) */
+    --tile-filter: none;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      /* 층 구조: base → elevated 한 단계씩 밝게 (Apple/Fluent 권장) */
-      --bg: 11 16 32;                /* deep navy */
-      --bg-subtle: 19 26 46;
-      --bg-elevated: 26 34 58;
-      --bg-overlay: 0 0 0;
+  /* 다크 모드: html.dark 클래스로 적용 */
+  :root.dark {
+    --bg: 11 16 32;
+    --bg-subtle: 19 26 46;
+    --bg-elevated: 26 34 58;
+    --bg-overlay: 0 0 0;
 
-      --fg: 241 245 249;             /* slate-100 */
-      --fg-muted: 148 163 184;       /* slate-400 */
-      --fg-subtle: 100 116 139;      /* slate-500 */
-      --fg-on-accent: 11 16 32;
+    --fg: 241 245 249;
+    --fg-muted: 148 163 184;
+    --fg-subtle: 100 116 139;
+    --fg-on-accent: 11 16 32;
 
-      --border: 30 41 59;            /* slate-800 */
-      --border-strong: 51 65 85;     /* slate-700 */
+    --border: 30 41 59;
+    --border-strong: 51 65 85;
 
-      /* accent: 다크에서 채도 -10%, 명도 +15% (Fluent 권장) */
-      --accent: 45 212 191;          /* teal-400 */
-      --accent-hover: 94 234 212;    /* teal-300 */
-      --accent-subtle: 19 78 74;     /* teal-900 */
+    --accent: 45 212 191;
+    --accent-hover: 94 234 212;
+    --accent-subtle: 19 78 74;
 
-      --success-bg: 6 78 59;
-      --success-fg: 187 247 208;
-      --success-border: 21 128 61;
-      --warning-bg: 113 63 18;
-      --warning-fg: 254 240 138;
-      --warning-border: 161 98 7;
-      --critical-bg: 127 29 29;
-      --critical-fg: 254 202 202;
-      --critical-border: 185 28 28;
-      --info-bg: 30 58 138;
-      --info-fg: 191 219 254;
-      --info-border: 37 99 235;
+    --success-bg: 6 78 59;
+    --success-fg: 187 247 208;
+    --success-border: 21 128 61;
+    --warning-bg: 113 63 18;
+    --warning-fg: 254 240 138;
+    --warning-border: 161 98 7;
+    --critical-bg: 127 29 29;
+    --critical-fg: 254 202 202;
+    --critical-border: 185 28 28;
+    --info-bg: 30 58 138;
+    --info-fg: 191 219 254;
+    --info-border: 37 99 235;
 
-      --shadow: 0 0 0;
+    --shadow: 0 0 0;
 
-      /* category 다크 톤 (채도 살짝 낮춤) */
-      --cat-transit: #b6c3d2;
-      --cat-stay: #38bdf8;
-      --cat-sight: #fb923c;
-      --cat-food: #f87171;
-      --cat-cafe: #d97706;
-      --cat-shop: #f472b6;
-      --cat-culture: #a78bfa;
-      --cat-show: #34d399;
-      --cat-activity: #fbbf24;
-      --cat-leisure: #4ade80;
-      --cat-other: #cbd5e1;
-    }
+    --cat-transit: #b6c3d2;
+    --cat-stay: #38bdf8;
+    --cat-sight: #fb923c;
+    --cat-food: #f87171;
+    --cat-cafe: #d97706;
+    --cat-shop: #f472b6;
+    --cat-culture: #a78bfa;
+    --cat-show: #34d399;
+    --cat-activity: #fbbf24;
+    --cat-leisure: #4ade80;
+    --cat-other: #cbd5e1;
+
+    /* trip priority dark — 라이트 톤보다 어두운 배경 + 밝은 fg */
+    --priority-review-bg: #1e293b;
+    --priority-review-fg: #94a3b8;
+    --priority-review-border: #334155;
+    --priority-maybe-bg: #1e3a8a;
+    --priority-maybe-fg: #93c5fd;
+    --priority-maybe-border: #1d4ed8;
+    --priority-want-bg: #4c1d95;
+    --priority-want-fg: #c4b5fd;
+    --priority-want-border: #6d28d9;
+    --priority-confirm-bg: #14532d;
+    --priority-confirm-fg: #86efac;
+    --priority-confirm-border: #166534;
+    --priority-exclude-bg: #1e293b;
+    --priority-exclude-fg: #64748b;
+    --priority-exclude-border: #334155;
+
+    /* reservation dark */
+    --reservation-check-bg: #78350f;
+    --reservation-check-fg: #fcd34d;
+    --reservation-check-border: #92400e;
+    --reservation-none-bg: #1e293b;
+    --reservation-none-fg: #94a3b8;
+    --reservation-none-border: #334155;
+    --reservation-needed-bg: #7c2d12;
+    --reservation-needed-fg: #fdba74;
+    --reservation-needed-border: #9a3412;
+    --reservation-done-bg: #14532d;
+    --reservation-done-fg: #86efac;
+    --reservation-done-border: #166534;
+
+    /* leaflet 다크 모드 보정 (밝기/색상 반전) */
+    --tile-filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.95) saturate(0.7);
   }
 
   html {
-    color-scheme: light dark;
+    color-scheme: light;
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+  }
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
@@ -125,12 +192,10 @@
     font-feature-settings: 'ss01', 'ss02', 'cv11';
   }
 
-  /* 표·시간·금액 등 숫자 정렬 */
   .tabular {
     font-variant-numeric: tabular-nums;
   }
 
-  /* 글로벌 포커스 스타일: keyboard 사용자에게만 가시 */
   :focus {
     outline: none;
   }
@@ -140,31 +205,26 @@
     border-radius: 6px;
   }
 
-  /* placeholder 톤 */
   ::placeholder {
     color: rgb(var(--fg-subtle));
     opacity: 1;
   }
 
-  /* 셀렉션 */
   ::selection {
     background-color: rgb(var(--accent) / 0.18);
     color: rgb(var(--fg));
   }
 
-  /* 기본 link 톤 정리 (각 컴포넌트에서 override) */
   a {
     color: inherit;
   }
 }
 
 @layer utilities {
-  /* sheet/dialog 등이 사용하는 backdrop blur 헬퍼 */
   .bg-overlay {
     background-color: rgb(var(--bg-overlay) / 0.40);
   }
 
-  /* skeleton shimmer */
   .skeleton {
     background-image: linear-gradient(
       90deg,
@@ -177,9 +237,84 @@
   }
 }
 
+/* leaflet 지도 tile 다크 모드 필터 (다크에서 흰 지도가 그대로 보이지 않게) */
+.leaflet-tile-pane {
+  filter: var(--tile-filter);
+}
+
+/* leaflet divIcon 마커 (TripPlannerMap, ResearchMap, ScheduleMap 공용) */
+.tp-chip-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  background: rgb(var(--bg-elevated));
+  color: rgb(var(--fg));
+  border: 1.5px solid rgb(var(--border));
+  border-radius: 9999px;
+  box-shadow: 0 1px 4px rgb(var(--shadow) / 0.20);
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.tp-chip-marker.is-selected {
+  border-width: 2px;
+  border-color: rgb(var(--accent));
+}
+.tp-chip-marker.is-dim {
+  opacity: 0.55;
+}
+.tp-number-marker {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgb(var(--fg-muted));
+  color: rgb(var(--bg-elevated));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  border: 2.5px solid rgb(var(--bg-elevated));
+  box-shadow: 0 2px 6px rgb(var(--shadow) / 0.30);
+}
+.tp-number-marker.is-selected {
+  background: rgb(var(--accent));
+}
+.tp-number-marker.is-small {
+  width: 26px;
+  height: 26px;
+  font-size: 11px;
+}
+
+/* polyline (day route) */
+.tp-day-route {
+  stroke: rgb(var(--accent));
+}
+
+/* leaflet 컨트롤·attribution 다크 모드 보정 */
+:root.dark .leaflet-control,
+:root.dark .leaflet-bar,
+:root.dark .leaflet-control-attribution {
+  background-color: rgb(var(--bg-elevated)) !important;
+  color: rgb(var(--fg)) !important;
+}
+:root.dark .leaflet-bar a {
+  background-color: rgb(var(--bg-elevated)) !important;
+  color: rgb(var(--fg)) !important;
+  border-color: rgb(var(--border)) !important;
+}
+:root.dark .leaflet-bar a:hover {
+  background-color: rgb(var(--bg-subtle)) !important;
+}
+:root.dark .leaflet-popup-content-wrapper,
+:root.dark .leaflet-popup-tip {
+  background-color: rgb(var(--bg-elevated)) !important;
+  color: rgb(var(--fg)) !important;
+}
+
 /* ============================================================
  * Reduced motion
- * - 시스템 환경에서 모션 감소 요청 시 transform 슬라이드 → fade 또는 즉시
  * ========================================================== */
 @media (prefers-reduced-motion: reduce) {
   *,

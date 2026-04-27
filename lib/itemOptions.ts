@@ -1,13 +1,5 @@
 import type { Category, ReservationStatus, TripItem, TripPriority } from '@/types'
 
-interface BadgeStyle {
-  background: string
-  color: string
-  borderColor: string
-  fontWeight?: number
-  textDecoration?: string
-}
-
 export const CATEGORY_OPTIONS: Category[] = [
   '교통',
   '숙박',
@@ -78,10 +70,8 @@ interface PriorityMeta {
   description: string
   order: number
   emoji: string
-  /** 신규 — Tailwind className 기반 톤 */
+  /** Tailwind className 기반 톤 — 라이트/다크 자동 적용 */
   className: string
-  /** legacy — 인라인 style 객체 (점진 마이그레이션 중) */
-  style: BadgeStyle
 }
 
 export const TRIP_PRIORITY_META: Record<TripPriority, PriorityMeta> = {
@@ -90,45 +80,30 @@ export const TRIP_PRIORITY_META: Record<TripPriority, PriorityMeta> = {
     order: 0,
     emoji: '🤔',
     className: 'bg-bg-subtle text-fg-subtle border-border',
-    style: { background: '#f8fafc', color: '#94a3b8', borderColor: '#e2e8f0' },
   },
   '시간 되면': {
     description: '여유가 있으면 가볼 곳',
     order: 1,
     emoji: '⏳',
     className: 'bg-info-bg text-info-fg border-info-border',
-    style: { background: '#eff6ff', color: '#3b82f6', borderColor: '#bfdbfe' },
   },
   '가고 싶음': {
     description: '꼭 가고 싶은 곳',
     order: 2,
     emoji: '⭐',
     className: 'bg-accent-subtle text-accent border-accent/30',
-    style: { background: '#f5f3ff', color: '#7c3aed', borderColor: '#ddd6fe' },
   },
   확정: {
     description: '일정에 넣기로 결정',
     order: 3,
     emoji: '✅',
     className: 'bg-success-bg text-success-fg border-success-border font-semibold',
-    style: {
-      background: '#f0fdf4',
-      color: '#16a34a',
-      borderColor: '#bbf7d0',
-      fontWeight: 600,
-    },
   },
   제외: {
     description: '이번 여행에서 제외',
     order: 4,
     emoji: '❌',
     className: 'bg-bg-subtle text-fg-subtle border-border line-through',
-    style: {
-      background: '#f8fafc',
-      color: '#cbd5e1',
-      borderColor: '#e2e8f0',
-      textDecoration: 'line-through',
-    },
   },
 }
 
@@ -136,7 +111,6 @@ interface ReservationMeta {
   description: string
   emoji: string
   className: string
-  style: BadgeStyle
 }
 
 export const RESERVATION_STATUS_META: Record<ReservationStatus, ReservationMeta> = {
@@ -144,30 +118,21 @@ export const RESERVATION_STATUS_META: Record<ReservationStatus, ReservationMeta>
     description: '예약 필요 여부 미확정',
     emoji: '🔍',
     className: 'bg-warning-bg text-warning-fg border-warning-border',
-    style: { background: '#fffbeb', color: '#d97706', borderColor: '#fde68a' },
   },
   불필요: {
     description: '예약 없이 진행 가능',
     emoji: '🆓',
     className: 'bg-bg-subtle text-fg-subtle border-border',
-    style: { background: '#f8fafc', color: '#94a3b8', borderColor: '#e2e8f0' },
   },
   '필요(미예약)': {
     description: '예약이 필요하지만 아직 안 함',
     emoji: '🔔',
     className: 'bg-warning-bg text-warning-fg border-warning-border font-semibold',
-    style: {
-      background: '#fff7ed',
-      color: '#ea580c',
-      borderColor: '#fed7aa',
-      fontWeight: 600,
-    },
   },
   예약완료: {
     description: '예약 완료',
     emoji: '✅',
     className: 'bg-success-bg text-success-fg border-success-border',
-    style: { background: '#f0fdf4', color: '#16a34a', borderColor: '#bbf7d0' },
   },
 }
 
