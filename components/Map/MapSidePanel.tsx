@@ -53,8 +53,14 @@ function matchesQuery(item: TripItem, q: string): boolean {
 
 function occursOnDate(item: TripItem, date: string): boolean {
   if (!item.date) return false
-  if (!item.end_date) return item.date === date
-  return item.date <= date && date <= item.end_date
+  if (item.date === date) return true
+  // end_date 까지 확장하는 건 종일/다일 일정(time_start 없음)에만 적용.
+  // time_start 가 있는 일정은 시작일에만 표시 — 자정을 넘기는 단일 일정이
+  // 종료일 리스트에 끼어들지 않도록.
+  if (item.end_date && !item.time_start) {
+    return item.date <= date && date <= item.end_date
+  }
+  return false
 }
 
 export default function MapSidePanel({
