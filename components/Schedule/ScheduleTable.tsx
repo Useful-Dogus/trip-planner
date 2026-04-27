@@ -109,7 +109,7 @@ function MobileScheduleItemCard({
     <button
       type="button"
       onClick={() => onOpenPanel(item.id)}
-      className="w-full rounded-2xl border border-border bg-white p-4 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md active:scale-[0.99]"
+      className="w-full rounded-2xl border border-border bg-bg-elevated p-4 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md active:scale-[0.99]"
     >
       <div className="flex items-start gap-3">
         <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-50 text-lg">
@@ -430,7 +430,7 @@ export default function ScheduleTable({
           const categoryBreakdown = buildCategoryBreakdown(groupItems)
 
           return (
-            <div key={date} ref={isToday ? todayRef : undefined} className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+            <div key={date} ref={isToday ? todayRef : undefined} className="overflow-hidden rounded-xl border border-border bg-bg-elevated shadow-sm">
               <DateGroupHeader
                 date={date}
                 dayOffset={dayOffset}
@@ -462,8 +462,8 @@ export default function ScheduleTable({
         })}
 
         {undatedItems.length > 0 && (
-          <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
-            <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-border sticky top-0 z-10">
+          <div className="overflow-hidden rounded-xl border border-border bg-bg-elevated shadow-sm">
+            <div className="flex items-center gap-2 px-3 py-3 bg-bg-elevated border-b border-border sticky top-0 z-10">
               <button
                 type="button"
                 onClick={() => setUndatedCollapsed(prev => !prev)}
@@ -501,11 +501,11 @@ export default function ScheduleTable({
       </div>
 
       <div className="hidden md:block">
-        <div className="overflow-hidden rounded-xl border border-border bg-white">
+        <div className="overflow-hidden rounded-xl border border-border bg-bg-elevated">
           <div className="overflow-x-auto">
             <div className={TABLE_MIN_WIDTH}>
               {/* 컬럼 헤더 */}
-              <div className="flex items-center gap-0 border-b border-border bg-white px-0">
+              <div className="flex items-center gap-0 border-b border-border bg-bg-elevated px-0">
                 <div className="w-16 flex-shrink-0 px-3 py-2.5">
                   <span className="text-xs font-semibold text-fg-muted whitespace-nowrap">시간</span>
                 </div>
@@ -567,7 +567,7 @@ export default function ScheduleTable({
               {/* 미배정 버킷 (최하단, 있을 때만) */}
               {undatedItems.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-white border-b border-border sticky top-0 z-10">
+                  <div className="flex items-center gap-2 px-3 py-3 bg-bg-elevated border-b border-border sticky top-0 z-10">
                     <button
                       type="button"
                       onClick={() => setUndatedCollapsed(prev => !prev)}

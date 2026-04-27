@@ -90,7 +90,7 @@ export default function CandidateList({
               candidate.status === 'duplicate'
                 ? 'border-border bg-gray-50 opacity-60'
                 : candidate.selected
-                ? 'border-border bg-white'
+                ? 'border-border bg-bg-elevated'
                 : 'border-border bg-gray-50'
             }`}
           >

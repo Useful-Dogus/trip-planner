@@ -80,7 +80,7 @@ export default function CategoryCell({
           <div
             ref={dropdownRef}
             data-portal="true"
-            className="fixed z-[1200] rounded-xl border border-border bg-white shadow-lg p-2"
+            className="fixed z-[1200] rounded-xl border border-border bg-bg-elevated shadow-lg p-2"
             style={{ top: position.top, left: position.left }}
           >
             <div className="grid grid-cols-4 gap-1">

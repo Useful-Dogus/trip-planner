@@ -37,7 +37,7 @@ export default function DateGroupHeader({
   const showBar = !isUndated && categoryBreakdown && categoryBreakdown.length > 0
 
   return (
-    <div className="bg-white border-b border-border sticky top-0 z-10">
+    <div className="bg-bg-elevated border-b border-border sticky top-0 z-10">
       <div className="flex items-center gap-2 px-3 py-3">
       <button
         type="button"

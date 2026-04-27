@@ -188,7 +188,7 @@ export default function ResearchTable({
   return (
     <div className="border border-border rounded-xl overflow-x-auto">
       {/* 컬럼 헤더 */}
-      <div className="flex items-center border-b border-border bg-white">
+      <div className="flex items-center border-b border-border bg-bg-elevated">
         <button
           type="button"
           onClick={() => handleSortHeader('name')}

@@ -185,7 +185,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     }
   }
 
-  const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-border-strong bg-white'
+  const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-border-strong bg-bg-elevated'
   const labelClass = 'block text-sm font-medium text-fg mb-1'
 
   return (
@@ -310,7 +310,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
       {error && <p className="text-sm text-critical-fg">{error}</p>}
 
       <div
-        className="fixed left-0 right-0 md:static bg-white/95 backdrop-blur border-t md:border-t-0 px-4 py-3 md:px-0 md:py-0 z-40"
+        className="fixed left-0 right-0 md:static bg-bg-elevated/95 backdrop-blur border-t md:border-t-0 px-4 py-3 md:px-0 md:py-0 z-40"
         style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom))' }}
       >
         <div className="max-w-lg mx-auto md:max-w-none flex gap-3">
@@ -345,7 +345,7 @@ function SelectField({
   return (
     <div>
       <label className="block text-sm font-medium text-fg mb-1">{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-border-strong bg-white">
+      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-border-strong bg-bg-elevated">
         {options.map(option => (
           <option key={option.value || 'empty'} value={option.value}>
             {option.label}

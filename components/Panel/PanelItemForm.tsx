@@ -155,7 +155,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     setField('links', form.links.filter((_, idx) => idx !== i))
   }
 
-  const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-white'
+  const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-bg-elevated'
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
@@ -308,7 +308,7 @@ function SelectField({
 }) {
   return (
     <Field label={label}>
-      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-white">
+      <select value={value} onChange={e => onChange(e.target.value)} className="w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-bg-elevated">
         {options.map(option => (
           <option key={option.value || 'empty'} value={option.value}>
             {option.label}

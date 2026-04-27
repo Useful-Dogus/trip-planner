@@ -104,7 +104,7 @@ export default function GmapsImportPage() {
   }
 
   return (
-    <div className="md:pl-44 min-h-screen bg-white">
+    <div className="md:pl-44 min-h-screen bg-bg-elevated">
       <div className="max-w-2xl mx-auto px-4 py-8 pb-24 md:pb-8">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-fg">구글맵 연동</h1>
@@ -115,7 +115,7 @@ export default function GmapsImportPage() {
 
         {/* idle / loading */}
         {(state === 'idle' || state === 'loading') && (
-          <div className="bg-white rounded-xl border border-border p-6">
+          <div className="bg-bg-elevated rounded-xl border border-border p-6">
             <UrlInput
               onSubmit={handleUrlSubmit}
               loading={state === 'loading'}
@@ -126,7 +126,7 @@ export default function GmapsImportPage() {
 
         {/* review */}
         {state === 'review' && (
-          <div className="bg-white rounded-xl border border-border p-6">
+          <div className="bg-bg-elevated rounded-xl border border-border p-6">
             <CandidateList
               candidates={candidates}
               onChange={setCandidates}
@@ -147,7 +147,7 @@ export default function GmapsImportPage() {
 
         {/* importing */}
         {state === 'importing' && (
-          <div className="bg-white rounded-xl border border-border p-6">
+          <div className="bg-bg-elevated rounded-xl border border-border p-6">
             <CandidateList
               candidates={candidates}
               onChange={setCandidates}
@@ -159,7 +159,7 @@ export default function GmapsImportPage() {
 
         {/* done: 이동 중 표시 */}
         {state === 'done' && (
-          <div className="bg-white rounded-xl border border-border p-8 text-center">
+          <div className="bg-bg-elevated rounded-xl border border-border p-8 text-center">
             <div className="w-12 h-12 rounded-full bg-success-bg flex items-center justify-center mx-auto mb-4">
               <svg
                 className="w-6 h-6 text-green-600"
