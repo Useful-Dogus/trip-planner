@@ -62,7 +62,7 @@ npm run dev
 | `AUTH_PASSWORD` | 로그인 비밀번호 | 직접 설정 (임의 문자열) |
 | `JWT_SECRET` | JWT 서명 키 | 직접 생성 (충분히 긴 랜덤 문자열) |
 | `SUPABASE_URL` | Supabase 프로젝트 URL | [Supabase 대시보드](https://supabase.com) → Project Settings → API |
-| `SUPABASE_PUBLISHABLE_KEY` | Supabase anon key | [Supabase 대시보드](https://supabase.com) → Project Settings → API |
+| `SUPABASE_SERVICE_KEY` | Supabase service role key | [Supabase 대시보드](https://supabase.com) → Project Settings → API |
 
 ## 스크립트
 
