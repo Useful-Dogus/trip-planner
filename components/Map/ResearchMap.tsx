@@ -7,19 +7,7 @@ import { CATEGORY_META } from '@/lib/itemOptions'
 
 function createEmojiChipIcon(emoji: string) {
   return L.divIcon({
-    html: `<div style="
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:2px 6px;
-      background:white;
-      border:1.5px solid #e2e8f0;
-      border-radius:9999px;
-      box-shadow:0 1px 4px rgba(0,0,0,0.15);
-      font-size:14px;
-      line-height:1;
-      white-space:nowrap;
-    ">${emoji}</div>`,
+    html: `<div class="tp-chip-marker">${emoji}</div>`,
     className: '',
     iconSize: [28, 24],
     iconAnchor: [14, 12],

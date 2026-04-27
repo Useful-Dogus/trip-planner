@@ -48,7 +48,7 @@ export default function DateGroupHeader({
           {formatDate(date)}
         </span>
         {isToday && (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-info-bg text-info-fg">
             오늘
           </span>
         )}

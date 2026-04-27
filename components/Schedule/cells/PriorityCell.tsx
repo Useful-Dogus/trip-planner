@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { TripPriority } from '@/types'
 import { TRIP_PRIORITY_META, TRIP_PRIORITY_OPTIONS } from '@/lib/itemOptions'
+import { cn } from '@/lib/cn'
 
 interface PriorityCellProps {
   value: TripPriority
@@ -36,7 +37,8 @@ export default function PriorityCell({
 
     function handleClickOutside(e: MouseEvent) {
       const target = e.target as Node
-      if (buttonRef.current?.contains(target) || dropdownRef.current?.contains(target)) return
+      if (buttonRef.current?.contains(target) || dropdownRef.current?.contains(target))
+        return
       onClose()
     }
 
@@ -55,8 +57,13 @@ export default function PriorityCell({
     if (!position || !dropdownRef.current) return
     const dropRect = dropdownRef.current.getBoundingClientRect()
     if (dropRect.right > window.innerWidth) {
-      setPosition(prev =>
-        prev ? { ...prev, left: Math.max(0, prev.left - (dropRect.right - window.innerWidth)) } : prev
+      setPosition((prev) =>
+        prev
+          ? {
+              ...prev,
+              left: Math.max(0, prev.left - (dropRect.right - window.innerWidth)),
+            }
+          : prev,
       )
     }
   }, [position])
@@ -67,14 +74,18 @@ export default function PriorityCell({
         ref={buttonRef}
         type="button"
         onClick={onClick}
-        className="flex items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity select-none"
+        aria-label={`우선순위: ${value}, 클릭해서 변경`}
+        className="flex items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded"
         title={value}
       >
         <span
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border whitespace-nowrap"
-          style={meta.style as React.CSSProperties}
+          className={cn(
+            'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border whitespace-nowrap',
+            meta.className,
+          )}
         >
-          {meta.emoji} {value}
+          <span aria-hidden="true">{meta.emoji}</span>
+          {value}
         </span>
       </button>
 
@@ -83,33 +94,45 @@ export default function PriorityCell({
         createPortal(
           <div
             ref={dropdownRef}
+            role="menu"
             data-portal="true"
-            className="fixed z-[1200] rounded-xl border border-border bg-white shadow-lg p-1 w-52"
+            className="fixed z-[1200] rounded-lg border border-border bg-bg-elevated shadow-e16 p-1 w-52 animate-fade-in"
             style={{ top: position.top, left: position.left }}
           >
-            {TRIP_PRIORITY_OPTIONS.map(priority => {
+            {TRIP_PRIORITY_OPTIONS.map((priority) => {
               const m = TRIP_PRIORITY_META[priority]
+              const active = priority === value
               return (
                 <button
                   key={priority}
                   type="button"
+                  role="menuitemradio"
+                  aria-checked={active}
                   onClick={() => onSelect(priority)}
-                  className={`flex items-center gap-2 w-full rounded-lg px-3 py-2 text-left hover:bg-bg-subtle transition-colors ${
-                    priority === value ? 'bg-gray-50' : ''
-                  }`}
+                  className={cn(
+                    'flex items-center gap-2 w-full rounded px-3 py-2 text-left',
+                    'hover:bg-bg-subtle transition-colors',
+                    'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent',
+                    active && 'bg-accent-subtle',
+                  )}
                 >
                   <span
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border whitespace-nowrap"
-                    style={m.style as React.CSSProperties}
+                    className={cn(
+                      'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border whitespace-nowrap',
+                      m.className,
+                    )}
                   >
-                    {m.emoji} {priority}
+                    <span aria-hidden="true">{m.emoji}</span>
+                    {priority}
                   </span>
-                  <span className="text-xs text-fg-subtle truncate">{m.description}</span>
+                  <span className="text-xs text-fg-subtle truncate">
+                    {m.description}
+                  </span>
                 </button>
               )
             })}
           </div>,
-          document.body
+          document.body,
         )}
     </>
   )

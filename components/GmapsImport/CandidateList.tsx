@@ -16,8 +16,8 @@ const STATUS_LABEL: Record<ImportCandidate['status'], string> = {
 }
 
 const STATUS_COLOR: Record<ImportCandidate['status'], string> = {
-  new: 'bg-green-100 text-green-700',
-  similar: 'bg-yellow-100 text-yellow-700',
+  new: 'bg-success-bg text-success-fg',
+  similar: 'bg-warning-bg text-warning-fg',
   duplicate: 'bg-bg-subtle text-fg-muted',
 }
 

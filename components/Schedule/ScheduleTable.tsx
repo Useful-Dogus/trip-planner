@@ -44,7 +44,7 @@ function formatTimeRange(item: TripItem) {
 function getStatusMeta(value: ReservationStatus | null | undefined) {
   if (!value) {
     return {
-      dotClass: 'bg-gray-200',
+      dotClass: 'bg-border',
       label: '예약 정보 없음',
     }
   }
@@ -58,10 +58,10 @@ function getStatusMeta(value: ReservationStatus | null | undefined) {
 
   return {
     dotClass: {
-      예약완료: 'bg-green-500',
-      '필요(미예약)': 'bg-orange-400',
-      불필요: 'bg-gray-300',
-      '확인 필요': 'bg-yellow-400',
+      예약완료: 'bg-success-bg0',
+      '필요(미예약)': 'bg-warning-fg',
+      불필요: 'bg-border-strong',
+      '확인 필요': 'bg-warning-fg',
     }[value],
     label: shortLabel[value],
   }
@@ -153,8 +153,8 @@ function MobileNewItemEditor({
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>, currentValue: string) => void
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-4">
-      <div className="mb-2 text-xs font-medium text-blue-700">{formatDate(date)}</div>
+    <div className="rounded-2xl border border-dashed border-info-border bg-info-bg/40 p-4">
+      <div className="mb-2 text-xs font-medium text-info-fg">{formatDate(date)}</div>
       <input
         ref={inputRef}
         value={value}
@@ -325,7 +325,7 @@ export default function ScheduleTable({
           )
         })}
         {addingToDate === date ? (
-          <div className="flex min-w-[720px] items-center border-b border-gray-50 bg-blue-50/30">
+          <div className="flex min-w-[720px] items-center border-b border-gray-50 bg-info-bg/30">
             <div className="w-16 flex-shrink-0 px-3 py-2.5" />
             <div className="min-w-[220px] flex-1 px-3 py-2.5">
               <input

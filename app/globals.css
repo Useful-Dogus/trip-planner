@@ -242,6 +242,56 @@
   filter: var(--tile-filter);
 }
 
+/* leaflet divIcon 마커 (TripPlannerMap, ResearchMap, ScheduleMap 공용) */
+.tp-chip-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  background: rgb(var(--bg-elevated));
+  color: rgb(var(--fg));
+  border: 1.5px solid rgb(var(--border));
+  border-radius: 9999px;
+  box-shadow: 0 1px 4px rgb(var(--shadow) / 0.20);
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.tp-chip-marker.is-selected {
+  border-width: 2px;
+  border-color: rgb(var(--accent));
+}
+.tp-chip-marker.is-dim {
+  opacity: 0.55;
+}
+.tp-number-marker {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgb(var(--fg-muted));
+  color: rgb(var(--bg-elevated));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  border: 2.5px solid rgb(var(--bg-elevated));
+  box-shadow: 0 2px 6px rgb(var(--shadow) / 0.30);
+}
+.tp-number-marker.is-selected {
+  background: rgb(var(--accent));
+}
+.tp-number-marker.is-small {
+  width: 26px;
+  height: 26px;
+  font-size: 11px;
+}
+
+/* polyline (day route) */
+.tp-day-route {
+  stroke: rgb(var(--accent));
+}
+
 /* leaflet 컨트롤·attribution 다크 모드 보정 */
 :root.dark .leaflet-control,
 :root.dark .leaflet-bar,

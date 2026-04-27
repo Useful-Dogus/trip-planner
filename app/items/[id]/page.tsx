@@ -74,7 +74,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                    className="flex items-center gap-2 text-sm text-accent hover:text-accent-hover transition-colors"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

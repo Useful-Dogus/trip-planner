@@ -134,7 +134,7 @@ export default function GmapsImportPage() {
               importing={false}
             />
             {error && (
-              <p className="mt-3 text-sm text-red-600">{error}</p>
+              <p className="mt-3 text-sm text-critical-fg">{error}</p>
             )}
             <button
               onClick={handleReset}
@@ -160,7 +160,7 @@ export default function GmapsImportPage() {
         {/* done: 이동 중 표시 */}
         {state === 'done' && (
           <div className="bg-white rounded-xl border border-border p-8 text-center">
-            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 rounded-full bg-success-bg flex items-center justify-center mx-auto mb-4">
               <svg
                 className="w-6 h-6 text-green-600"
                 fill="none"

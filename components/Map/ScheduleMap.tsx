@@ -13,19 +13,7 @@ interface ScheduleMapProps {
 
 function createNumberIcon(num: number) {
   return L.divIcon({
-    html: `<div style="
-      width:26px;height:26px;
-      border-radius:50%;
-      background:#374151;
-      color:white;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:11px;
-      font-weight:700;
-      border:2.5px solid white;
-      box-shadow:0 1px 4px rgba(0,0,0,0.3);
-    ">${num}</div>`,
+    html: `<div class="tp-number-marker is-small">${num}</div>`,
     className: '',
     iconSize: [26, 26],
     iconAnchor: [13, 13],
@@ -122,7 +110,12 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
         ))}
 
         {polylinePositions.length > 1 && (
-          <Polyline positions={polylinePositions} color="#94A3B8" weight={2} opacity={0.7} />
+          <Polyline
+            positions={polylinePositions}
+            pathOptions={{ className: 'tp-day-route' }}
+            weight={2}
+            opacity={0.7}
+          />
         )}
       </MapContainer>
     </div>

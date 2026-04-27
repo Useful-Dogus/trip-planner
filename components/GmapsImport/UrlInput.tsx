@@ -48,7 +48,7 @@ export default function UrlInput({ onSubmit, loading, error }: UrlInputProps) {
       </form>
 
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <p className="mt-2 text-sm text-critical-fg">{error}</p>
       )}
     </div>
   )
