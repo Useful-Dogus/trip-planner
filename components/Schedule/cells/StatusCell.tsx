@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { ReservationStatus } from '@/types'
 import { RESERVATION_STATUS_META, RESERVATION_STATUS_OPTIONS } from '@/lib/itemOptions'
@@ -63,6 +63,16 @@ export default function StatusCell({
       window.removeEventListener('scroll', updatePosition, true)
     }
   }, [isEditing, onClose])
+
+  useLayoutEffect(() => {
+    if (!position || !dropdownRef.current) return
+    const dropRect = dropdownRef.current.getBoundingClientRect()
+    if (dropRect.right > window.innerWidth) {
+      setPosition(prev =>
+        prev ? { ...prev, left: Math.max(0, prev.left - (dropRect.right - window.innerWidth)) } : prev
+      )
+    }
+  }, [position])
 
   return (
     <>
