@@ -97,7 +97,7 @@ export default function Navigation() {
         </ul>
         <div className="border-t border-border pt-3 mt-2 space-y-0.5">
           <div className="px-3 py-2 flex items-center justify-between gap-2">
-            <span className="text-xs text-fg-subtle">테마</span>
+            <span className="text-xs text-fg-subtle whitespace-nowrap">테마</span>
             <ThemeToggle />
           </div>
           <Link
