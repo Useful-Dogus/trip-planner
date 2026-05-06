@@ -109,7 +109,7 @@ export default function Navigation() {
             )}
           >
             <Download className="size-4 shrink-0" aria-hidden="true" />
-            <span>지도 연동</span>
+            <span>구글맵 가져오기</span>
           </Link>
           <button
             type="button"
