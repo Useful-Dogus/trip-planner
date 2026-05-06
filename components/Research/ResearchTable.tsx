@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { TripItem, TripPriority } from '@/types'
-import { TRIP_PRIORITY_META } from '@/lib/itemOptions'
+import { compareReservationStatus, compareTripPriority } from '@/lib/itemOptions'
 import NameCell from '@/components/Schedule/cells/NameCell'
 import CategoryCell from '@/components/Schedule/cells/CategoryCell'
 import PriorityCell from '@/components/Schedule/cells/PriorityCell'
@@ -26,14 +26,6 @@ interface ResearchTableProps {
   onCreateItem: (item: Omit<TripItem, 'id' | 'created_at' | 'updated_at'>) => void
   onOpenPanel: (id: string) => void
   hasActiveSearch?: boolean
-}
-
-const PRIORITY_ORDER: Record<TripPriority, number> = {
-  '확정': 0,
-  '가고 싶음': 1,
-  '시간 되면': 2,
-  '검토 필요': 3,
-  '제외': 4,
 }
 
 function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
@@ -80,16 +72,20 @@ export default function ResearchTable({
 
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => {
+      if (sortKey === 'trip_priority') {
+        const cmp = compareTripPriority(a.trip_priority, b.trip_priority, sortDir)
+        if (cmp !== 0) return cmp
+        return a.name.localeCompare(b.name, 'ko')
+      }
+      if (sortKey === 'reservation_status') {
+        const cmp = compareReservationStatus(a.reservation_status, b.reservation_status, sortDir)
+        if (cmp !== 0) return cmp
+        return a.name.localeCompare(b.name, 'ko')
+      }
       let cmp = 0
       if (sortKey === 'budget') {
         cmp = (a.budget ?? 0) - (b.budget ?? 0)
-      } else if (sortKey === 'reservation_status') {
-        cmp = (a.reservation_status ?? 'zzz').localeCompare(b.reservation_status ?? 'zzz')
-      } else if (sortKey === 'trip_priority') {
-        cmp = (PRIORITY_ORDER[a.trip_priority] ?? 99) - (PRIORITY_ORDER[b.trip_priority] ?? 99)
-        if (cmp === 0) cmp = a.name.localeCompare(b.name, 'ko')
       } else {
-        // name
         cmp = a.name.localeCompare(b.name, 'ko')
       }
       return sortDir === 'asc' ? cmp : -cmp

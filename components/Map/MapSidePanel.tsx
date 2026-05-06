@@ -225,7 +225,7 @@ function CandidatesView({
       .sort((a, b) => {
         const oa = TRIP_PRIORITY_META[a.trip_priority]?.order ?? 99
         const ob = TRIP_PRIORITY_META[b.trip_priority]?.order ?? 99
-        if (oa !== ob) return ob - oa
+        if (oa !== ob) return oa - ob
         return a.name.localeCompare(b.name)
       })
   }, [items, categoryFilter, query])

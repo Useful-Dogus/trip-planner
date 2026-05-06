@@ -75,29 +75,29 @@ interface PriorityMeta {
 }
 
 export const TRIP_PRIORITY_META: Record<TripPriority, PriorityMeta> = {
-  '검토 필요': {
-    description: '아직 결정하지 않은 후보',
+  확정: {
+    description: '일정에 넣기로 결정',
     order: 0,
-    emoji: '🤔',
-    className: 'bg-bg-subtle text-fg-subtle border-border',
-  },
-  '시간 되면': {
-    description: '여유가 있으면 가볼 곳',
-    order: 1,
-    emoji: '⏳',
-    className: 'bg-info-bg text-info-fg border-info-border',
+    emoji: '✅',
+    className: 'bg-success-bg text-success-fg border-success-border font-semibold',
   },
   '가고 싶음': {
     description: '꼭 가고 싶은 곳',
-    order: 2,
+    order: 1,
     emoji: '⭐',
     className: 'bg-accent-subtle text-accent border-accent/30',
   },
-  확정: {
-    description: '일정에 넣기로 결정',
+  '시간 되면': {
+    description: '여유가 있으면 가볼 곳',
+    order: 2,
+    emoji: '⏳',
+    className: 'bg-info-bg text-info-fg border-info-border',
+  },
+  '검토 필요': {
+    description: '아직 결정하지 않은 후보',
     order: 3,
-    emoji: '✅',
-    className: 'bg-success-bg text-success-fg border-success-border font-semibold',
+    emoji: '🤔',
+    className: 'bg-bg-subtle text-fg-subtle border-border',
   },
   제외: {
     description: '이번 여행에서 제외',
@@ -109,31 +109,68 @@ export const TRIP_PRIORITY_META: Record<TripPriority, PriorityMeta> = {
 
 interface ReservationMeta {
   description: string
+  order: number
   emoji: string
   className: string
 }
 
 export const RESERVATION_STATUS_META: Record<ReservationStatus, ReservationMeta> = {
+  예약완료: {
+    description: '예약 완료',
+    order: 0,
+    emoji: '✅',
+    className: 'bg-success-bg text-success-fg border-success-border',
+  },
+  '필요(미예약)': {
+    description: '예약이 필요하지만 아직 안 함',
+    order: 1,
+    emoji: '🔔',
+    className: 'bg-warning-bg text-warning-fg border-warning-border font-semibold',
+  },
   '확인 필요': {
     description: '예약 필요 여부 미확정',
+    order: 2,
     emoji: '🔍',
     className: 'bg-warning-bg text-warning-fg border-warning-border',
   },
   불필요: {
     description: '예약 없이 진행 가능',
+    order: 3,
     emoji: '🆓',
     className: 'bg-bg-subtle text-fg-subtle border-border',
   },
-  '필요(미예약)': {
-    description: '예약이 필요하지만 아직 안 함',
-    emoji: '🔔',
-    className: 'bg-warning-bg text-warning-fg border-warning-border font-semibold',
-  },
-  예약완료: {
-    description: '예약 완료',
-    emoji: '✅',
-    className: 'bg-success-bg text-success-fg border-success-border',
-  },
+}
+
+/**
+ * trip_priority 비교 함수. null/undefined 는 dir 과 무관하게 항상 마지막.
+ * 동순위 tie-break 는 호출자 책임.
+ */
+export function compareTripPriority(
+  a: TripPriority | null | undefined,
+  b: TripPriority | null | undefined,
+  dir: 'asc' | 'desc',
+): number {
+  if (a == null && b == null) return 0
+  if (a == null) return 1
+  if (b == null) return -1
+  const cmp = TRIP_PRIORITY_META[a].order - TRIP_PRIORITY_META[b].order
+  return dir === 'asc' ? cmp : -cmp
+}
+
+/**
+ * reservation_status 비교 함수. null/undefined 는 dir 과 무관하게 항상 마지막.
+ * 동순위 tie-break 는 호출자 책임.
+ */
+export function compareReservationStatus(
+  a: ReservationStatus | null | undefined,
+  b: ReservationStatus | null | undefined,
+  dir: 'asc' | 'desc',
+): number {
+  if (a == null && b == null) return 0
+  if (a == null) return 1
+  if (b == null) return -1
+  const cmp = RESERVATION_STATUS_META[a].order - RESERVATION_STATUS_META[b].order
+  return dir === 'asc' ? cmp : -cmp
 }
 
 const LEGACY_CATEGORY_MAP: Record<string, Category> = {
