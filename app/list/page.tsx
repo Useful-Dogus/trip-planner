@@ -144,7 +144,7 @@ function ResearchPageContent() {
 
     const params = new URLSearchParams(searchParams.toString())
     params.delete('imported')
-    const newUrl = params.toString() ? `/research?${params.toString()}` : '/research'
+    const newUrl = params.toString() ? `/list?${params.toString()}` : '/list'
     router.replace(newUrl, { scroll: false })
 
     const timer = setTimeout(() => setHighlightedIds(new Set()), 1000)
@@ -158,7 +158,7 @@ function ResearchPageContent() {
       const params = new URLSearchParams(searchParams.toString())
       params.delete('item')
       router.replace(
-        params.toString() ? `/research?${params.toString()}` : '/research',
+        params.toString() ? `/list?${params.toString()}` : '/list',
         { scroll: false },
       )
     }
@@ -171,7 +171,7 @@ function ResearchPageContent() {
     if (next) params.set('item', next)
     else params.delete('item')
     router.replace(
-      params.toString() ? `/research?${params.toString()}` : '/research',
+      params.toString() ? `/list?${params.toString()}` : '/list',
       { scroll: false },
     )
   }
@@ -181,7 +181,7 @@ function ResearchPageContent() {
     const params = new URLSearchParams(searchParams.toString())
     params.delete('item')
     router.replace(
-      params.toString() ? `/research?${params.toString()}` : '/research',
+      params.toString() ? `/list?${params.toString()}` : '/list',
       { scroll: false },
     )
   }

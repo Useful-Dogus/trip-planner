@@ -22,7 +22,7 @@ const TripPlannerMap = dynamic(() => import('@/components/Map/TripPlannerMap'), 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
 interface PlanScreenProps {
-  /** URL 동기화에 사용할 라우트 경로 (예: '/plan' 또는 '/map') */
+  /** URL 동기화에 사용할 라우트 경로 (예: '/map') */
   basePath: string
 }
 

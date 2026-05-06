@@ -22,8 +22,8 @@ export default function GmapsImportPage() {
     if (state !== 'done') return
     const target =
       insertedIds.length > 0
-        ? `/research?imported=${insertedIds.join(',')}`
-        : '/research'
+        ? `/list?imported=${insertedIds.join(',')}`
+        : '/list'
     router.push(target)
   }, [state, insertedIds, router])
 

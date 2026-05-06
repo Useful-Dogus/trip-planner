@@ -165,7 +165,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     try {
       if (mode === 'create') {
         await createItem(body as Omit<TripItem, 'id' | 'created_at' | 'updated_at'>)
-        router.push('/research')
+        router.push('/list')
       } else if (itemId) {
         await updateItem(itemId, body)
         router.push(`/items/${itemId}`)
@@ -181,7 +181,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     setLoading(true)
     if (itemId) {
       await deleteItem(itemId)
-      router.push('/research')
+      router.push('/list')
     }
   }
 
