@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
 import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
+import { getEndLodging, getStartLodging, isStayItem } from '@/lib/lodging'
 
 interface ScheduleMapProps {
   items: TripItem[]
@@ -44,7 +45,27 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
       })
   }, [items, selectedDate])
 
-  const polylinePositions = dayItems.map(i => [i.lat!, i.lng!] as [number, number])
+  const polylinePositions = useMemo<[number, number][]>(() => {
+    if (!selectedDate) return []
+    const activityCoords = dayItems
+      .filter(i => !isStayItem(i))
+      .map(i => [i.lat!, i.lng!] as [number, number])
+    const startStay = getStartLodging(selectedDate, items)
+    const endStay = getEndLodging(selectedDate, items)
+    const startCoord: [number, number] | null =
+      startStay && startStay.lat != null && startStay.lng != null
+        ? [startStay.lat, startStay.lng]
+        : null
+    const endCoord: [number, number] | null =
+      endStay && endStay.lat != null && endStay.lng != null
+        ? [endStay.lat, endStay.lng]
+        : null
+    return [
+      ...(startCoord ? [startCoord] : []),
+      ...activityCoords,
+      ...(endCoord ? [endCoord] : []),
+    ]
+  }, [dayItems, items, selectedDate])
 
   return (
     <div className="relative h-full">

@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Polyline, Tooltip } from 'react-leafle
 import L from 'leaflet'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
+import { getEndLodging, getStartLodging, isStayItem } from '@/lib/lodging'
 
 interface TripPlannerMapProps {
   items: TripItem[]
@@ -72,7 +73,28 @@ export default function TripPlannerMap({
   }, [visibleItems, selectedDate])
 
   const dayItemIds = useMemo(() => new Set(dayItems.map(i => i.id)), [dayItems])
-  const polyline = dayItems.map(i => [i.lat!, i.lng!] as [number, number])
+
+  const polyline = useMemo<[number, number][]>(() => {
+    if (!selectedDate) return []
+    const activityCoords = dayItems
+      .filter(i => !isStayItem(i))
+      .map(i => [i.lat!, i.lng!] as [number, number])
+    const startStay = getStartLodging(selectedDate, items)
+    const endStay = getEndLodging(selectedDate, items)
+    const startCoord: [number, number] | null =
+      startStay && startStay.lat != null && startStay.lng != null
+        ? [startStay.lat, startStay.lng]
+        : null
+    const endCoord: [number, number] | null =
+      endStay && endStay.lat != null && endStay.lng != null
+        ? [endStay.lat, endStay.lng]
+        : null
+    return [
+      ...(startCoord ? [startCoord] : []),
+      ...activityCoords,
+      ...(endCoord ? [endCoord] : []),
+    ]
+  }, [dayItems, items, selectedDate])
 
   return (
     <MapContainer
