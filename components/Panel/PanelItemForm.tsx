@@ -188,7 +188,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
           <h3 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">일정</h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-3">
-              <Field label="시작 날짜">
+              <Field label="시작 날짜" hint={form.category === '숙박' ? '체크인' : undefined}>
                 <input
                   type="date"
                   value={form.date}
@@ -209,7 +209,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
               </Field>
             </div>
             <div className="space-y-3">
-              <Field label="종료 날짜">
+              <Field label="종료 날짜" hint={form.category === '숙박' ? '체크아웃' : undefined}>
                 <input
                   type="date"
                   value={form.end_date}
@@ -286,10 +286,13 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
   )
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-fg mb-1">{label}</label>
+      <label className="block text-sm font-medium text-fg mb-1">
+        {label}
+        {hint && <span className="ml-1 text-xs text-fg-subtle font-normal">({hint})</span>}
+      </label>
       {children}
     </div>
   )

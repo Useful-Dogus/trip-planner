@@ -213,7 +213,10 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-3">
             <div>
-              <label className={labelClass}>시작 날짜</label>
+              <label className={labelClass}>
+                시작 날짜
+                {form.category === '숙박' && <span className="ml-1 text-xs text-fg-subtle font-normal">(체크인)</span>}
+              </label>
               <input
                 type="date"
                 value={form.date}
@@ -236,7 +239,10 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
           </div>
           <div className="space-y-3">
             <div>
-              <label className={labelClass}>종료 날짜</label>
+              <label className={labelClass}>
+                종료 날짜
+                {form.category === '숙박' && <span className="ml-1 text-xs text-fg-subtle font-normal">(체크아웃)</span>}
+              </label>
               <input
                 type="date"
                 value={form.end_date}
