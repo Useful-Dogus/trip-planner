@@ -18,7 +18,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-6">
           <Link
-            href="/research"
+            href="/list"
             className="text-sm text-fg-subtle hover:text-fg-muted transition-colors"
           >
             ← 목록

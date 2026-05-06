@@ -13,8 +13,8 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/plan', label: '계획', icon: Map },
-  { href: '/research', label: '목록', icon: List },
+  { href: '/list', label: '목록', icon: List },
+  { href: '/map', label: '지도', icon: Map },
   { href: '/schedule', label: '일정', icon: CalendarDays },
 ]
 
@@ -109,7 +109,7 @@ export default function Navigation() {
             )}
           >
             <Download className="size-4 shrink-0" aria-hidden="true" />
-            <span>지도 연동</span>
+            <span>구글맵 가져오기</span>
           </Link>
           <button
             type="button"

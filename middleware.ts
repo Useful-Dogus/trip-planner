@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 
-const PROTECTED_PAGES = ['/research', '/schedule', '/items', '/gmaps-import']
+const PROTECTED_PAGES = ['/list', '/map', '/schedule', '/items', '/gmaps-import']
 const PROTECTED_API = ['/api/items', '/api/geocode', '/api/gmaps']
 
 export async function middleware(request: NextRequest) {
@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
 
   if (isLoginPage) {
     if (isAuthenticated) {
-      return NextResponse.redirect(new URL('/research', request.url))
+      return NextResponse.redirect(new URL('/list', request.url))
     }
     return NextResponse.next()
   }
@@ -37,7 +37,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/login',
-    '/research/:path*',
+    '/list/:path*',
+    '/map/:path*',
     '/schedule/:path*',
     '/items/:path*',
     '/gmaps-import/:path*',

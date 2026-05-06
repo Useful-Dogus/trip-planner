@@ -9,6 +9,7 @@ import DayTimeline from '@/components/Schedule/DayTimeline'
 import EmptyState from '@/components/UI/EmptyState'
 import { Input } from '@/components/UI/Input'
 import { cn } from '@/lib/cn'
+import { getLodgingForDate } from '@/lib/lodging'
 
 export interface DaySummary {
   date: string
@@ -90,6 +91,11 @@ export default function MapSidePanel({
     if (!selectedDate) return null
     return days.find((d) => d.date === selectedDate) ?? null
   }, [days, selectedDate])
+
+  const dayLodging = useMemo(() => {
+    if (!selectedDate) return null
+    return getLodgingForDate(selectedDate, items)
+  }, [items, selectedDate])
 
   const mode: 'candidates' | 'day' = selectedDate === null ? 'candidates' : 'day'
 
@@ -196,6 +202,7 @@ export default function MapSidePanel({
         <DayView
           dateLabel={formatDateLabel(selectedDate).full}
           breakdown={dayBreakdown?.breakdown ?? []}
+          lodgingName={dayLodging?.name ?? null}
           items={dayItems}
           selectedItemId={selectedItemId}
           onSelectItem={onSelectItem}
@@ -382,12 +389,14 @@ function CategoryFilterChip({
 function DayView({
   dateLabel,
   breakdown,
+  lodgingName,
   items,
   selectedItemId,
   onSelectItem,
 }: {
   dateLabel: string
   breakdown: { category: Category; count: number }[]
+  lodgingName: string | null
   items: TripItem[]
   selectedItemId: string | null
   onSelectItem: (id: string) => void
@@ -395,9 +404,21 @@ function DayView({
   return (
     <>
       <div className="flex-shrink-0 border-b border-border px-4 pt-3 pb-3">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-sm font-semibold text-fg">{dateLabel}</h2>
-          <span className="text-[11px] tabular text-fg-muted">{items.length}곳</span>
+        <div className="flex items-baseline justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold text-fg">{dateLabel}</h2>
+            {lodgingName && (
+              <p
+                className="mt-0.5 truncate text-xs text-fg-muted"
+                title={lodgingName}
+              >
+                🏨 {lodgingName}
+              </p>
+            )}
+          </div>
+          <span className="flex-shrink-0 text-[11px] tabular text-fg-muted">
+            {items.length}곳
+          </span>
         </div>
         {breakdown.length > 0 && (
           <div className="mt-2">

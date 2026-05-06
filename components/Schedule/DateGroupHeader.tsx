@@ -6,6 +6,7 @@ interface DateGroupHeaderProps {
   totalBudget: number
   isCollapsed: boolean
   isToday?: boolean
+  lodgingName?: string | null
   onToggleCollapse: () => void
   onAddItem: () => void
 }
@@ -25,6 +26,7 @@ export default function DateGroupHeader({
   totalBudget,
   isCollapsed,
   isToday = false,
+  lodgingName = null,
   onToggleCollapse,
   onAddItem,
 }: DateGroupHeaderProps) {
@@ -63,7 +65,16 @@ export default function DateGroupHeader({
         </svg>
       </button>
 
-      <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
+        {lodgingName && (
+          <span
+            className="inline-flex items-center gap-1 text-xs text-fg-muted min-w-0 max-w-[10rem] sm:max-w-[14rem]"
+            title={lodgingName}
+          >
+            <span className="flex-shrink-0">🏨</span>
+            <span className="truncate">{lodgingName}</span>
+          </span>
+        )}
         {totalBudget > 0 && (
           <span className="text-xs text-fg-muted tabular-nums">
             ${totalBudget.toLocaleString()}

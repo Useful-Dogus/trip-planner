@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, Fragment } from 'rea
 import type { ReservationStatus, TripItem } from '@/types'
 import { CATEGORY_META, RESERVATION_STATUS_META } from '@/lib/itemOptions'
 import { haversineKm } from '@/lib/distance'
+import { getLodgingForDate, isLodgingMidStay } from '@/lib/lodging'
 import { EDITABLE_FIELDS, type EditableField } from './TableRow'
 import TableRow from './TableRow'
 import DateGroupHeader from './DateGroupHeader'
@@ -413,10 +414,12 @@ export default function ScheduleTable({
     <div className="space-y-4">
       <div className="md:hidden space-y-4">
         {datedEntries.map(([date, groupItems]) => {
-          const totalBudget = groupItems.reduce((sum, i) => sum + (i.budget ?? 0), 0)
+          const visibleItems = groupItems.filter(i => !isLodgingMidStay(i, date))
+          const totalBudget = visibleItems.reduce((sum, i) => sum + (i.budget ?? 0), 0)
           const isCollapsed = collapsedDates.has(date)
           const dayOffset = getDayOffset(date)
           const isToday = date === todayKey
+          const lodging = getLodgingForDate(date, items)
 
           return (
             <div key={date} ref={isToday ? todayRef : undefined} className="overflow-hidden rounded-xl border border-border bg-bg-elevated shadow-sm">
@@ -426,6 +429,7 @@ export default function ScheduleTable({
                 totalBudget={totalBudget}
                 isCollapsed={isCollapsed}
                 isToday={isToday}
+                lodgingName={lodging?.name ?? null}
                 onToggleCollapse={() =>
                   setCollapsedDates(prev => {
                     const next = new Set(prev)
@@ -444,7 +448,7 @@ export default function ScheduleTable({
                   setNewItemName('')
                 }}
               />
-              {!isCollapsed && renderMobileGroupRows(date, groupItems)}
+              {!isCollapsed && renderMobileGroupRows(date, visibleItems)}
             </div>
           )
         })}
@@ -514,10 +518,12 @@ export default function ScheduleTable({
 
               {/* 날짜 있는 그룹 */}
               {datedEntries.map(([date, groupItems]) => {
-                const totalBudget = groupItems.reduce((sum, i) => sum + (i.budget ?? 0), 0)
+                const visibleItems = groupItems.filter(i => !isLodgingMidStay(i, date))
+                const totalBudget = visibleItems.reduce((sum, i) => sum + (i.budget ?? 0), 0)
                 const isCollapsed = collapsedDates.has(date)
                 const dayOffset = getDayOffset(date)
                 const isToday = date === todayKey
+                const lodging = getLodgingForDate(date, items)
 
                 return (
                   <div key={date} ref={isToday ? todayRef : undefined}>
@@ -527,6 +533,7 @@ export default function ScheduleTable({
                       totalBudget={totalBudget}
                       isCollapsed={isCollapsed}
                       isToday={isToday}
+                      lodgingName={lodging?.name ?? null}
                       onToggleCollapse={() =>
                         setCollapsedDates(prev => {
                           const next = new Set(prev)
@@ -545,7 +552,7 @@ export default function ScheduleTable({
                         setNewItemName('')
                       }}
                     />
-                    {!isCollapsed && renderDesktopGroupRows(date, groupItems)}
+                    {!isCollapsed && renderDesktopGroupRows(date, visibleItems)}
                   </div>
                 )
               })}
