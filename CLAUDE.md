@@ -1,8 +1,11 @@
 # trip-planner Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-14
+Auto-generated from all feature plans. Last updated: 2026-05-15
 
 ## Active Technologies
+- npm workspaces 모노레포 — `apps/web` (Next.js 14), `apps/api` (NestJS 10) (080-nestjs-scaffolding)
+- NestJS + @nestjs/config + zod + @nestjs/terminus + @supabase/supabase-js (080-nestjs-scaffolding)
+
 - TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), React 18, Tailwind CSS 3.x (004-mobile-panel-ux)
 - N/A (UI 전용 변경) (004-mobile-panel-ux)
 - TypeScript 5.x + Node.js 18+ + Next.js 14.2.0 (App Router), React 18.3.1, Tailwind CSS 3.x, SWR (신규 추가) (005-data-caching-fast-ux)
@@ -23,17 +26,32 @@ Auto-generated from all feature plans. Last updated: 2026-04-14
 ## Project Structure
 
 ```text
-app/           # Next.js App Router (pages + API routes)
-components/    # React 컴포넌트 (Map/, Items/, UI/)
-lib/           # 공통 유틸 (auth.ts, data.ts, geocode.ts)
-types/         # TypeScript 타입 정의
-supabase/      # DB 스키마 (schema.sql)
-middleware.ts  # JWT 인증 라우트 보호
+apps/
+  web/                # Next.js 14 App Router (pages + 기존 API routes)
+    app/              # Next.js App Router (pages + API routes)
+    components/       # React 컴포넌트 (Map/, Items/, UI/)
+    lib/              # 공통 유틸 (auth.ts, data.ts, geocode.ts)
+    types/            # TypeScript 타입 정의
+    services/         # gmaps 등 외부 서비스 어댑터
+    middleware.ts     # JWT 인증 라우트 보호
+  api/                # NestJS 10 (현재: 헬스체크 + Supabase 통합 스캐폴딩)
+    src/
+      config/         # ConfigModule + zod env 검증
+      supabase/       # SupabaseService (@Global), SupabaseHealthIndicator
+      health/         # @nestjs/terminus 기반 GET /health
+supabase/             # DB 스키마 (schema.sql, 워크스페이스 공유)
+tsconfig.base.json    # 공유 TypeScript base
+.eslintrc.base.cjs    # 공유 ESLint base
+docker-compose.yml    # api + web 컨테이너 실행
 ```
 
 ## Commands
 
-npm run dev # 로컬 개발 서버 (http://localhost:3000)
+npm run dev       # web (3000) + api (3001) 동시 실행
+npm run dev:web   # apps/web 만
+npm run dev:api   # apps/api 만
+npm run build     # 둘 다 빌드
+npm run lint      # 모든 워크스페이스 린트
 
 ## Code Style
 
@@ -46,6 +64,7 @@ TypeScript + Node.js 18+: Follow standard conventions
 - hex 직접 사용·변칙 spacing·임의 radius/shadow 는 가이드 토큰 체계로 정렬한다.
 
 ## Recent Changes
+- 080-nestjs-scaffolding: 모노레포 전환 (apps/web + apps/api), NestJS 스캐폴딩, Supabase DI, /health 엔드포인트
 - 014-nav-ux-overhaul: Added TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x, SWR
 - 013-filter-ui-mobile: Added TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x
 - 010-add-readme-docs: Added Markdown (표준) + N/A (문서 파일만 작성)

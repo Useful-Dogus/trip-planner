@@ -2,37 +2,24 @@
   "name": "trip-planner",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.100.0",
-    "fuse.js": "^7.3.0",
-    "jose": "^5.2.4",
-    "leaflet": "^1.9.4",
-    "lucide-react": "^1.11.0",
-    "next": "^14.2.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-leaflet": "^4.2.1",
-    "swr": "^2.4.1",
-    "uuid": "^9.0.1"
+    "dev": "concurrently -n web,api -c blue,magenta \"npm run dev:web\" \"npm run dev:api\"",
+    "dev:web": "npm run dev -w trip-planner-web",
+    "dev:api": "npm run start:dev -w @trip-planner/api",
+    "build": "npm run build:web && npm run build:api",
+    "build:web": "npm run build -w trip-planner-web",
+    "build:api": "npm run build -w @trip-planner/api",
+    "start:web": "npm run start -w trip-planner-web",
+    "start:api": "npm run start:prod -w @trip-planner/api",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {
-    "@types/leaflet": "^1.9.8",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "@types/uuid": "^9.0.8",
-    "autoprefixer": "^10.0.1",
-    "eslint": "^8",
-    "eslint-config-next": "^14.2.0",
-    "postcss": "^8",
+    "concurrently": "^8.2.2",
     "prettier": "^3.8.1",
-    "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
 }
