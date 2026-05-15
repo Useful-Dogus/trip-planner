@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "dotenv -e ../../.env.local -- next dev",
+    "build": "dotenv -e ../../.env.local -- next build",
+    "start": "dotenv -e ../../.env.local -- next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
@@ -29,6 +29,7 @@
     "@types/react-dom": "^18",
     "@types/uuid": "^9.0.8",
     "autoprefixer": "^10.0.1",
+    "dotenv-cli": "^7.4.2",
     "eslint": "^8",
     "eslint-config-next": "^14.2.0",
     "postcss": "^8",
