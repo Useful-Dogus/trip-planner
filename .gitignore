@@ -15,6 +15,9 @@ node_modules
 apps/*/dist
 apps/*/build
 
+# graphql code-first generated schema
+apps/api/schema.gql
+
 # production
 /build
 

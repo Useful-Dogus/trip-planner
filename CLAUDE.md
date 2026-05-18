@@ -1,10 +1,12 @@
 # trip-planner Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-05-15
+Auto-generated from all feature plans. Last updated: 2026-05-18
 
 ## Active Technologies
 - npm workspaces 모노레포 — `apps/web` (Next.js 14), `apps/api` (NestJS 10) (080-nestjs-scaffolding)
 - NestJS + @nestjs/config + zod + @nestjs/terminus + @supabase/supabase-js (080-nestjs-scaffolding)
+- TypeScript 5 / Node.js 18+ (081-apollo-graphql)
+- Supabase (`items` 단일 테이블 — 현재 단일 사용자/단일 trip 모델). 추가 테이블 도입 없음. (081-apollo-graphql)
 
 - TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), React 18, Tailwind CSS 3.x (004-mobile-panel-ux)
 - N/A (UI 전용 변경) (004-mobile-panel-ux)
@@ -64,10 +66,9 @@ TypeScript + Node.js 18+: Follow standard conventions
 - hex 직접 사용·변칙 spacing·임의 radius/shadow 는 가이드 토큰 체계로 정렬한다.
 
 ## Recent Changes
+- 081-apollo-graphql: Added TypeScript 5 / Node.js 18+
 - 080-nestjs-scaffolding: 모노레포 전환 (apps/web + apps/api), NestJS 스캐폴딩, Supabase DI, /health 엔드포인트
 - 014-nav-ux-overhaul: Added TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x, SWR
-- 013-filter-ui-mobile: Added TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x
-- 010-add-readme-docs: Added Markdown (표준) + N/A (문서 파일만 작성)
 
 
 

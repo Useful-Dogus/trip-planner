@@ -1,3 +1,8 @@
+/**
+ * @deprecated #104 — 이 REST 라우트는 NestJS GraphQL(`POST /graphql`)로 대체될 예정이다.
+ * 응답에는 `Deprecation: true` 헤더가 자동으로 추가된다 (apps/web/middleware.ts).
+ * 제거 시점은 클라이언트 마이그레이션(#106) 이후 별도 이슈에서 결정한다.
+ */
 import { NextRequest, NextResponse } from 'next/server'
 import { readItems, writeItems } from '@/lib/data'
 import { v4 as uuidv4 } from 'uuid'

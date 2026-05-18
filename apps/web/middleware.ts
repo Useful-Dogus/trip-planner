@@ -26,12 +26,19 @@ export async function middleware(request: NextRequest) {
 
   if (!isAuthenticated) {
     if (isProtectedApi) {
-      return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 })
+      const res = NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 })
+      if (isProtectedApi) res.headers.set('Deprecation', 'true')
+      return res
     }
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  return NextResponse.next()
+  const res = NextResponse.next()
+  if (isProtectedApi || pathname.startsWith('/api/')) {
+    // @deprecated #104 — /api/* 라우트는 NestJS GraphQL(/graphql)로 대체될 예정.
+    res.headers.set('Deprecation', 'true')
+  }
+  return res
 }
 
 export const config = {
