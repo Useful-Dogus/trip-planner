@@ -1,5 +1,5 @@
 # dependencies
-node_modules
+/node_modules
 /.pnp
 .pnp.js
 .yarn/install-state.gz
@@ -8,12 +8,8 @@ node_modules
 /coverage
 
 # next.js
-.next/
+/.next/
 /out/
-
-# nest.js / build outputs
-apps/*/dist
-apps/*/build
 
 # production
 /build
