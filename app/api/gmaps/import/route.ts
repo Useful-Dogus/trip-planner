@@ -1,15 +1,9 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { v4 as uuidv4 } from 'uuid'
 import { mapGoogleCategory } from '@/services/gmaps/categoryMap'
 import type { GooglePlace, TripItem } from '@/types'
-
-function getSupabaseClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key) throw new Error('NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set')
-  return createClient(url, key)
-}
+import { createRouteHandlerSupabase } from '@/lib/supabase-server'
+import { ensureActiveTrip } from '@/lib/trip'
 
 function placeToItem(
   place: GooglePlace,
@@ -58,11 +52,15 @@ export async function POST(request: Request) {
       )
     }
 
+    const supabase = createRouteHandlerSupabase()
+    const tripId = await ensureActiveTrip(supabase)
+
     const rows = places.map(p => {
       const override = p.googlePlaceId ? categoryOverrides[p.googlePlaceId] : undefined
       const item = placeToItem(p, override)
       return {
         id: item.id,
+        trip_id: tripId,
         name: item.name,
         category: item.category,
         status: item.trip_priority,
@@ -84,7 +82,6 @@ export async function POST(request: Request) {
       }
     })
 
-    const supabase = getSupabaseClient()
     const { data: insertedRows, error } = await supabase.from('items').insert(rows).select('id')
 
     if (error) {

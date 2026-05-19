@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { readItems } from '@/lib/data'
+import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 import Navigation from '@/components/Layout/Navigation'
 import ItemForm from '@/components/Items/ItemForm'
 
 export default async function EditItemPage({ params }: { params: { id: string } }) {
-  const items = await readItems()
+  const items = await readItems(createRouteHandlerSupabase())
   const item = items.find(i => i.id === params.id)
 
   if (!item) notFound()
