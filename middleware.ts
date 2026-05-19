@@ -10,13 +10,14 @@ export async function middleware(request: NextRequest) {
 
   const isProtectedPage = PROTECTED_PAGES.some(p => pathname.startsWith(p))
   const isProtectedApi = PROTECTED_API.some(p => pathname.startsWith(p))
-  const isLoginPage = pathname === '/login'
+  const isAuthPage =
+    pathname === '/login' || pathname === '/signup' || pathname === '/forgot'
 
   const response = NextResponse.next({ request })
   const session = await getSessionFromMiddleware(request, response)
   const isAuthenticated = session !== null
 
-  if (isLoginPage) {
+  if (isAuthPage) {
     if (isAuthenticated) {
       return NextResponse.redirect(new URL('/list', request.url))
     }
@@ -38,6 +39,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/login',
+    '/signup',
+    '/forgot',
     '/list/:path*',
     '/map/:path*',
     '/schedule/:path*',
