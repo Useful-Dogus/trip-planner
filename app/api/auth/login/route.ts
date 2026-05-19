@@ -1,26 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createToken } from '@/lib/auth'
+import { signInWithEmail } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
-  const body = await request.json()
-  const { id, password } = body
+  const body = await request.json().catch(() => null)
+  const email = typeof body?.email === 'string' ? body.email.trim() : ''
+  const password = typeof body?.password === 'string' ? body.password : ''
 
-  if (id !== process.env.AUTH_ID || password !== process.env.AUTH_PASSWORD) {
+  if (!email || !password) {
+    return NextResponse.json({ error: '이메일과 비밀번호를 입력해주세요.' }, { status: 400 })
+  }
+
+  const { error } = await signInWithEmail(email, password)
+  if (error) {
     return NextResponse.json(
       { error: '자격증명이 올바르지 않습니다.' },
-      { status: 401 }
+      { status: 401 },
     )
   }
 
-  const token = await createToken({ id })
-
-  const response = NextResponse.json({ ok: true })
-  response.cookies.set('auth', token, {
-    httpOnly: true,
-    maxAge: 60 * 60 * 24 * 7, // 7일
-    path: '/',
-    sameSite: 'lax',
-  })
-
-  return response
+  return NextResponse.json({ ok: true })
 }

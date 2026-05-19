@@ -1,6 +1,6 @@
 # trip-planner Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-14
+Auto-generated from all feature plans. Last updated: 2026-05-19
 
 ## Active Technologies
 - TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), React 18, Tailwind CSS 3.x (004-mobile-panel-ux)
@@ -14,6 +14,8 @@ Auto-generated from all feature plans. Last updated: 2026-04-14
 - N/A (클라이언트 상태만 변경) (013-filter-ui-mobile)
 - TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x, SWR (014-nav-ux-overhaul)
 - N/A (UI 전용 변경, 데이터 모델 변경 없음) (014-nav-ux-overhaul)
+- TypeScript 5.x, Node.js 18+ + Next.js 14 (App Router), React 18, `@supabase/supabase-js` ^2.100, `@supabase/ssr` (신규 추가), Tailwind 3.x (082-supabase-auth)
+- Supabase Auth (auth.users 자동 관리). 본 이슈 자체 신규 테이블 없음. 후속 #108 에서 `trip_members` 등 추가 예정. (082-supabase-auth)
 
 - TypeScript 5.x + Node.js 18+ + Next.js 14+ (App Router), Tailwind CSS 3.x, React 18 (003-panel-editing-ux)
 - Supabase (데이터 저장소, 파일 기반에서 마이그레이션 완료)
@@ -46,9 +48,9 @@ TypeScript + Node.js 18+: Follow standard conventions
 - hex 직접 사용·변칙 spacing·임의 radius/shadow 는 가이드 토큰 체계로 정렬한다.
 
 ## Recent Changes
+- 082-supabase-auth: Added TypeScript 5.x, Node.js 18+ + Next.js 14 (App Router), React 18, `@supabase/supabase-js` ^2.100, `@supabase/ssr` (신규 추가), Tailwind 3.x
 - 014-nav-ux-overhaul: Added TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x, SWR
 - 013-filter-ui-mobile: Added TypeScript 5.x + Next.js 14 (App Router), React 18, Tailwind CSS 3.x
-- 010-add-readme-docs: Added Markdown (표준) + N/A (문서 파일만 작성)
 
 
 
