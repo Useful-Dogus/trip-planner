@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readItems, writeItems } from '@/lib/data'
+import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 import type { Category, TripPriority, ReservationStatus } from '@/types'
 import {
   CATEGORY_OPTIONS,
@@ -86,7 +87,8 @@ function validatePartial(body: Record<string, unknown>): string | null {
 type RouteContext = { params: { id: string } }
 
 export async function GET(_req: NextRequest, { params }: RouteContext) {
-  const items = await readItems()
+  const client = createRouteHandlerSupabase()
+  const items = await readItems(client)
   const item = items.find(i => i.id === params.id)
   if (!item) {
     return NextResponse.json({ error: '항목을 찾을 수 없습니다.' }, { status: 404 })
@@ -95,7 +97,8 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteContext) {
-  const items = await readItems()
+  const client = createRouteHandlerSupabase()
+  const items = await readItems(client)
   const idx = items.findIndex(i => i.id === params.id)
   if (idx === -1) {
     return NextResponse.json({ error: '항목을 찾을 수 없습니다.' }, { status: 404 })
@@ -121,20 +124,21 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
   }
 
   items[idx] = updated
-  await writeItems(items)
+  await writeItems(client, items)
 
   return NextResponse.json({ item: updated })
 }
 
 export async function DELETE(_req: NextRequest, { params }: RouteContext) {
-  const items = await readItems()
+  const client = createRouteHandlerSupabase()
+  const items = await readItems(client)
   const idx = items.findIndex(i => i.id === params.id)
   if (idx === -1) {
     return NextResponse.json({ error: '항목을 찾을 수 없습니다.' }, { status: 404 })
   }
 
   items.splice(idx, 1)
-  await writeItems(items)
+  await writeItems(client, items)
 
   return NextResponse.json({ ok: true })
 }

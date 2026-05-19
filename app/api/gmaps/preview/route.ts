@@ -4,6 +4,7 @@ import { fetchListPage, GmapsFetcherError } from '@/services/gmaps/fetcher'
 import { parseListPage, GmapsParserError } from '@/services/gmaps/parser'
 import { matchCandidates } from '@/services/gmaps/matcher'
 import { readItems } from '@/lib/data'
+import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 import type { ImportCandidate } from '@/types'
 import { mapGoogleCategory } from '@/services/gmaps/categoryMap'
 
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
     }
 
     // 4. 기존 items 조회 후 중복/유사 분류
-    const existingItems = await readItems()
+    const existingItems = await readItems(createRouteHandlerSupabase())
     const candidates: ImportCandidate[] = matchCandidates(places, existingItems).map(c => ({
       ...c,
       mappedCategory: c.mappedCategory ?? mapGoogleCategory(c.place.googleCategory),

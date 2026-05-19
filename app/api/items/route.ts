@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readItems, writeItems } from '@/lib/data'
+import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 import { v4 as uuidv4 } from 'uuid'
 import type { TripItem, Category, TripPriority, Link, ReservationStatus } from '@/types'
 import {
@@ -89,7 +90,8 @@ function validateItem(body: Record<string, unknown>): string | null {
 }
 
 export async function GET() {
-  const items = await readItems()
+  const client = createRouteHandlerSupabase()
+  const items = await readItems(client)
   return NextResponse.json({ items })
 }
 
@@ -121,9 +123,10 @@ export async function POST(request: NextRequest) {
   if (body.time_start !== undefined) item.time_start = body.time_start as string
   if (body.time_end !== undefined && body.time_end !== null) item.time_end = body.time_end as string
 
-  const items = await readItems()
+  const client = createRouteHandlerSupabase()
+  const items = await readItems(client)
   items.push(item)
-  await writeItems(items)
+  await writeItems(client, items)
 
   return NextResponse.json({ item }, { status: 201 })
 }
