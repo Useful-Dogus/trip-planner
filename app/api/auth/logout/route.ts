@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
+import { signOut } from '@/lib/auth'
 
 export async function POST() {
-  const response = NextResponse.json({ ok: true })
-  response.cookies.set('auth', '', { maxAge: 0, path: '/' })
-  return response
+  await signOut()
+  return NextResponse.json({ ok: true })
 }
