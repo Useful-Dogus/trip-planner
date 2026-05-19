@@ -1,10 +1,26 @@
--- Supabase SQL Editor 에서 실행하세요.
--- 신규 호스트(또는 빈 스키마)에 처음부터 적용할 때 사용하는 권위 있는 정의.
--- 운영 DB 에 이미 데이터가 있는 경우 migration_108_rls_trip_members.sql 을 대신 사용한다.
+-- 일회성 마이그레이션: 기존 단일 사용자/단일 trip 데이터 보존하며 RLS + trip_members 도입.
+-- Supabase SQL Editor 에서 한 번 실행. 트랜잭션 내에서 처리되어 부분 실패 시 롤백.
+-- 사전 조건: auth.users 에 chanhee13p@gmail.com 엔트리 존재.
 
--- ============================================================================
--- Tables
--- ============================================================================
+begin;
+
+-- ---------------------------------------------------------------------------
+-- 1. owner 사용자 식별 (없으면 트랜잭션 중단)
+-- ---------------------------------------------------------------------------
+
+do $$
+declare
+  v_owner_id uuid;
+begin
+  select id into v_owner_id from auth.users where email = 'chanhee13p@gmail.com';
+  if v_owner_id is null then
+    raise exception 'auth.users 에 chanhee13p@gmail.com 이 없습니다. 마이그레이션 중단.';
+  end if;
+end $$;
+
+-- ---------------------------------------------------------------------------
+-- 2. 테이블 생성 (trips, trip_members)
+-- ---------------------------------------------------------------------------
 
 create table if not exists public.trips (
   id            uuid        primary key default gen_random_uuid(),
@@ -26,36 +42,43 @@ create table if not exists public.trip_members (
 
 create index if not exists idx_trip_members_user on public.trip_members(user_id);
 
-create table if not exists public.items (
-  id          text        primary key,
-  trip_id     uuid        not null references public.trips(id) on delete cascade,
-  name        text        not null,
-  category    text        not null default '기타',
-  status      text        not null default '검토 필요',
-  reservation_status text,
-  priority    text,
-  address     text,
-  lat         double precision,
-  lng         double precision,
-  links       jsonb       not null default '[]',
-  budget      integer,
-  memo        text,
-  date        text,
-  end_date    text,
-  time_start  text,
-  time_end    text,
-  is_franchise     boolean,
-  branches         jsonb,
-  google_place_id  text,
-  created_at       text        not null,
-  updated_at       text        not null
-);
+-- ---------------------------------------------------------------------------
+-- 3. default trip + owner 멤버십 시드
+-- ---------------------------------------------------------------------------
+
+with owner_lookup as (
+  select id as user_id from auth.users where email = 'chanhee13p@gmail.com'
+),
+new_trip as (
+  insert into public.trips (owner_user_id, title)
+  select user_id, '내 여행' from owner_lookup
+  returning id, owner_user_id
+)
+insert into public.trip_members (trip_id, user_id, role)
+select id, owner_user_id, 'owner' from new_trip;
+
+-- ---------------------------------------------------------------------------
+-- 4. items.trip_id 추가 + 기존 데이터 채움
+-- ---------------------------------------------------------------------------
+
+alter table public.items add column if not exists trip_id uuid references public.trips(id) on delete cascade;
+
+update public.items
+set trip_id = (
+  select t.id from public.trips t
+  join auth.users u on u.id = t.owner_user_id
+  where u.email = 'chanhee13p@gmail.com'
+  limit 1
+)
+where trip_id is null;
+
+alter table public.items alter column trip_id set not null;
 
 create index if not exists idx_items_trip on public.items(trip_id);
 
--- ============================================================================
--- RLS 재귀 회피용 헬퍼 함수 (SECURITY DEFINER)
--- ============================================================================
+-- ---------------------------------------------------------------------------
+-- 5. 헬퍼 함수 (RLS 재귀 회피)
+-- ---------------------------------------------------------------------------
 
 create or replace function public.is_trip_member(p_trip_id uuid)
 returns boolean
@@ -87,15 +110,14 @@ revoke all on function public.user_role_in_trip(uuid) from public, anon;
 grant execute on function public.is_trip_member(uuid) to authenticated;
 grant execute on function public.user_role_in_trip(uuid) to authenticated;
 
--- ============================================================================
--- Row Level Security
--- ============================================================================
+-- ---------------------------------------------------------------------------
+-- 6. RLS 정책 적용
+-- ---------------------------------------------------------------------------
 
 alter table public.trips         enable row level security;
 alter table public.trip_members  enable row level security;
 alter table public.items         enable row level security;
 
--- trips: 멤버만 SELECT, 본인이 owner 인 경우만 INSERT/UPDATE/DELETE
 drop policy if exists trips_select on public.trips;
 create policy trips_select on public.trips
   for select using (public.is_trip_member(id));
@@ -113,8 +135,6 @@ drop policy if exists trips_delete on public.trips;
 create policy trips_delete on public.trips
   for delete using (owner_user_id = auth.uid());
 
--- trip_members: 같은 trip 의 멤버만 SELECT, owner 만 INSERT/UPDATE/DELETE
--- INSERT 는 부트스트랩(owner 자기 자신을 막 생성한 trip 에 추가)을 위해 trips.owner_user_id OR 분기 포함
 drop policy if exists trip_members_select on public.trip_members;
 create policy trip_members_select on public.trip_members
   for select using (public.is_trip_member(trip_id));
@@ -135,7 +155,6 @@ drop policy if exists trip_members_delete on public.trip_members;
 create policy trip_members_delete on public.trip_members
   for delete using (public.user_role_in_trip(trip_id) = 'owner');
 
--- items: viewer 이상 SELECT, editor 이상 INSERT/UPDATE/DELETE
 drop policy if exists items_select on public.items;
 create policy items_select on public.items
   for select using (public.user_role_in_trip(trip_id) is not null);
@@ -152,3 +171,10 @@ create policy items_update on public.items
 drop policy if exists items_delete on public.items;
 create policy items_delete on public.items
   for delete using (public.user_role_in_trip(trip_id) in ('owner', 'editor'));
+
+commit;
+
+-- 검증 쿼리 (별도로 실행):
+--   select count(*) from public.trips;                            -- 1
+--   select count(*) from public.trip_members;                     -- 1
+--   select count(*) from public.items where trip_id is null;      -- 0
