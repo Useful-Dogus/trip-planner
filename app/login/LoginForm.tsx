@@ -1,14 +1,23 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const err = searchParams.get('error')
+    if (err === 'invalid_link') {
+      setError('만료되었거나 사용된 링크입니다. 재설정 링크를 다시 받아주세요.')
+    }
+  }, [searchParams])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -100,6 +109,15 @@ export default function LoginForm() {
           >
             {loading ? '로그인 중...' : '로그인'}
           </button>
+
+          <div className="flex items-center justify-between text-sm text-fg-subtle pt-2">
+            <Link href="/signup" className="text-accent font-semibold hover:underline">
+              가입하기
+            </Link>
+            <Link href="/forgot" className="hover:underline">
+              비밀번호를 잊으셨나요?
+            </Link>
+          </div>
         </form>
       </div>
     </div>

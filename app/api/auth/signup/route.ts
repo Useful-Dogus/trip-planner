@@ -18,11 +18,14 @@ export async function POST(request: NextRequest) {
 
   const { data, error } = await signUpWithEmail(email, password, emailRedirectTo)
   if (error) {
-    const msg = /already/i.test(error.message)
-      ? '이미 사용 중인 이메일입니다.'
-      : '회원가입에 실패했습니다. 입력 정보를 확인해주세요.'
-    const status = /already/i.test(error.message) ? 409 : 400
-    return NextResponse.json({ error: msg }, { status })
+    // 이메일 enumeration 방지: 기존 가입 여부를 응답에 노출하지 않는다.
+    if (/already/i.test(error.message)) {
+      return NextResponse.json({ ok: true, needsEmailConfirmation: true })
+    }
+    return NextResponse.json(
+      { error: '회원가입에 실패했습니다. 입력 정보를 확인해주세요.' },
+      { status: 400 },
+    )
   }
 
   const needsEmailConfirmation = !data.session
