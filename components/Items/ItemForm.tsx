@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import type { Category, ReservationStatus, TripItem, TripPriority, Link as TripLink } from '@/types'
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip, useTripPath } from '@/lib/hooks/useTripContext'
+import { useConfirm } from '@/components/UI/ConfirmDialog'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
@@ -45,6 +46,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   const dateMin = trip.startDate ?? undefined
   const dateMax = trip.endDate ?? undefined
   const { createItem, updateItem, deleteItem } = useItems()
+  const confirm = useConfirm()
 
   // 지도에서 좌표 프리필 (create 모드에서만)
   const queryLat = mode === 'create' ? searchParams.get('lat') : null
@@ -209,7 +211,13 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   }
 
   async function handleDelete() {
-    if (!confirm('이 항목을 삭제하시겠습니까?')) return
+    const ok = await confirm({
+      title: '항목 삭제',
+      description: '이 항목을 삭제하시겠습니까?',
+      confirmLabel: '삭제',
+      tone: 'destructive',
+    })
+    if (!ok) return
     setLoading(true)
     if (itemId) {
       await deleteItem(itemId)
