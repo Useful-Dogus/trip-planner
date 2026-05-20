@@ -34,7 +34,6 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
   const confirm = useConfirm()
   const [mode, setMode] = useState<'view' | 'edit'>('view')
   const [isDirty, setIsDirty] = useState(false)
-  const [confirmingClose, setConfirmingClose] = useState(false)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
   const [savingField, setSavingField] = useState<'category' | 'trip_priority' | 'reservation_status' | null>(null)
   const [openField, setOpenField] = useState<'category' | 'trip_priority' | 'reservation_status' | null>(null)
@@ -43,7 +42,6 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
   useEffect(() => {
     setMode('view')
     setIsDirty(false)
-    setConfirmingClose(false)
     setSavingField(null)
     setOpenField(null)
   }, [item?.id])
@@ -52,32 +50,10 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
     if (!isOpen) {
       setMode('view')
       setIsDirty(false)
-      setConfirmingClose(false)
       setSavingField(null)
       setOpenField(null)
     }
   }, [isOpen])
-
-  useEffect(() => {
-    if (!isOpen) return
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        if (confirmingClose) {
-          setConfirmingClose(false)
-        } else if (mode === 'edit' && isDirty) {
-          setConfirmingClose(true)
-        } else {
-          onClose()
-        }
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = ''
-    }
-  }, [confirmingClose, isDirty, isOpen, mode, onClose])
 
   useEffect(() => {
     const vv = window.visualViewport
@@ -107,16 +83,17 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
     if (delta > 50) onClose()
   }
 
-  function tryClose() {
+  async function tryClose() {
     if (mode === 'edit' && isDirty) {
-      setConfirmingClose(true)
-    } else {
-      onClose()
+      const ok = await confirm({
+        title: '저장하지 않고 닫기',
+        description: '변경사항이 저장되지 않습니다. 계속하시겠습니까?',
+        confirmLabel: '나가기',
+        cancelLabel: '계속 편집',
+        tone: 'destructive',
+      })
+      if (!ok) return
     }
-  }
-
-  function handleDiscardAndClose() {
-    setConfirmingClose(false)
     onClose()
   }
 
@@ -173,7 +150,6 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
           </button>
         ) : null
       }
-      dismissibleBackdrop={!isDirty || mode !== 'edit'}
     >
       <div ref={panelRef} className="flex-1 flex flex-col overflow-hidden">
         {displayItem && mode === 'view' && (
@@ -200,19 +176,6 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
         )}
       </div>
 
-      {confirmingClose && (
-        <div className="absolute bottom-0 left-0 right-0 bg-bg-elevated border-t-2 border-warning-border px-5 pt-4 pb-6 z-10">
-          <p className="text-sm font-medium text-fg mb-3">변경사항이 있습니다. 저장하지 않고 나가시겠습니까?</p>
-          <div className="flex gap-3">
-            <button onClick={handleDiscardAndClose} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-accent-fg bg-accent hover:bg-accent-hover transition-colors">
-              나가기
-            </button>
-            <button onClick={() => setConfirmingClose(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-fg-muted border border-border hover:bg-bg-subtle transition-colors">
-              계속 편집
-            </button>
-          </div>
-        </div>
-      )}
     </Sheet>
   )
 }

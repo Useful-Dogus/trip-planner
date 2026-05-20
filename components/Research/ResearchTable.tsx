@@ -9,8 +9,8 @@ import PriorityCell from '@/components/Schedule/cells/PriorityCell'
 import StatusCell from '@/components/Schedule/cells/StatusCell'
 import BudgetCell from '@/components/Schedule/cells/BudgetCell'
 import type { Category, ReservationStatus } from '@/types'
-type SortKey = 'name' | 'trip_priority' | 'reservation_status' | 'budget'
-type SortDir = 'asc' | 'desc'
+export type SortKey = 'name' | 'trip_priority' | 'reservation_status' | 'budget'
+export type SortDir = 'asc' | 'desc'
 
 type EditableField = 'name' | 'category' | 'trip_priority' | 'reservation_status' | 'budget'
 const EDITABLE_FIELDS: EditableField[] = ['name', 'category', 'trip_priority', 'reservation_status', 'budget']
@@ -26,6 +26,10 @@ interface ResearchTableProps {
   onCreateItem: (item: Omit<TripItem, 'id' | 'created_at' | 'updated_at'>) => void
   onOpenPanel: (id: string) => void
   hasActiveSearch?: boolean
+  /** 외부에서 정렬 제어 (URL 동기화용). 미지정 시 컴포넌트 내부 state. */
+  sortKey?: SortKey
+  sortDir?: SortDir
+  onSortChange?: (key: SortKey, dir: SortDir) => void
 }
 
 function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
@@ -50,17 +54,25 @@ export default function ResearchTable({
   onCreateItem,
   onOpenPanel,
   hasActiveSearch = false,
+  sortKey: sortKeyProp,
+  sortDir: sortDirProp,
+  onSortChange,
 }: ResearchTableProps) {
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
-  const [sortKey, setSortKey] = useState<SortKey>('trip_priority')
-  const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [internalSortKey, setInternalSortKey] = useState<SortKey>('trip_priority')
+  const [internalSortDir, setInternalSortDir] = useState<SortDir>('asc')
+
+  const controlled = sortKeyProp !== undefined && sortDirProp !== undefined && onSortChange !== undefined
+  const sortKey = controlled ? sortKeyProp! : internalSortKey
+  const sortDir = controlled ? sortDirProp! : internalSortDir
 
   function handleSortHeader(key: SortKey) {
-    if (key === sortKey) {
-      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    const nextDir: SortDir = key === sortKey ? (sortDir === 'asc' ? 'desc' : 'asc') : 'asc'
+    if (controlled) {
+      onSortChange!(key, nextDir)
     } else {
-      setSortKey(key)
-      setSortDir('asc')
+      setInternalSortKey(key)
+      setInternalSortDir(nextDir)
     }
   }
   const [addingRow, setAddingRow] = useState(false)
