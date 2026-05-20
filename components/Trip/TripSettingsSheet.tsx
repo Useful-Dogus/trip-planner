@@ -1,0 +1,121 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Sheet, { SheetSection } from '@/components/UI/Sheet'
+import { Input } from '@/components/UI/Input'
+import Button from '@/components/UI/Button'
+import { useToast } from '@/components/UI/Toast'
+import { useTrip } from '@/lib/hooks/useTripContext'
+
+interface Props {
+  open: boolean
+  onClose: () => void
+}
+
+export default function TripSettingsSheet({ open, onClose }: Props) {
+  const trip = useTrip()
+  const router = useRouter()
+  const { showToast } = useToast()
+
+  const [title, setTitle] = useState(trip.title)
+  const [startDate, setStartDate] = useState(trip.startDate ?? '')
+  const [endDate, setEndDate] = useState(trip.endDate ?? '')
+  const [region, setRegion] = useState(trip.region ?? '')
+  const [basecamp, setBasecamp] = useState(trip.basecampAddress ?? '')
+  const [saving, setSaving] = useState(false)
+
+  async function handleSave() {
+    if (!title.trim()) {
+      showToast({ message: '제목은 비울 수 없습니다.', type: 'error' })
+      return
+    }
+    if (startDate && endDate && endDate < startDate) {
+      showToast({ message: '종료일은 시작일보다 빠를 수 없습니다.', type: 'error' })
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/trips/${trip.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          start_date: startDate || null,
+          end_date: endDate || null,
+          region: region.trim() || null,
+          basecamp_address: basecamp.trim() || null,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast({ message: data?.error ?? '저장에 실패했습니다.', type: 'error' })
+        return
+      }
+      showToast({ message: '여행 정보를 저장했습니다.', type: 'success' })
+      router.refresh()
+      onClose()
+    } catch {
+      showToast({ message: '네트워크 오류가 발생했습니다.', type: 'error' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Sheet
+      open={open}
+      onClose={onClose}
+      title="여행 설정"
+      description="제목·기간·지역·베이스캠프를 수정합니다."
+      footer={
+        <>
+          <Button type="button" variant="ghost" onClick={onClose} disabled={saving}>
+            취소
+          </Button>
+          <Button type="button" onClick={handleSave} disabled={saving}>
+            {saving ? '저장 중...' : '저장'}
+          </Button>
+        </>
+      }
+    >
+      <SheetSection>
+        <div className="space-y-4">
+          <Input
+            label="제목"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            data-autofocus
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="시작일"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <Input
+              label="종료일"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
+          <Input
+            label="지역"
+            placeholder="예: 도쿄, 뉴욕"
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+          />
+          <Input
+            label="베이스캠프 주소"
+            placeholder="숙소 등 동선의 기준점"
+            value={basecamp}
+            onChange={(e) => setBasecamp(e.target.value)}
+          />
+        </div>
+      </SheetSection>
+    </Sheet>
+  )
+}
