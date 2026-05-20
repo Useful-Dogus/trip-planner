@@ -94,3 +94,39 @@ export async function PATCH(
 
   return NextResponse.json({ trip: data })
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: { tripId: string } },
+) {
+  const { tripId } = params
+  if (!UUID_RE.test(tripId)) {
+    return NextResponse.json({ error: '잘못된 trip id' }, { status: 400 })
+  }
+
+  const client = createRouteHandlerSupabase()
+  const { data: userData } = await client.auth.getUser()
+  if (!userData.user) {
+    return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 })
+  }
+
+  const { data, error } = await client
+    .from('trips')
+    .delete()
+    .eq('id', tripId)
+    .select('id')
+    .maybeSingle()
+
+  if (error) {
+    console.error('[DELETE /api/trips/:id]', error)
+    return NextResponse.json({ error: '여행 삭제에 실패했습니다.' }, { status: 500 })
+  }
+  if (!data) {
+    return NextResponse.json(
+      { error: '권한이 없거나 trip 을 찾을 수 없습니다 (소유자만 삭제 가능).' },
+      { status: 403 },
+    )
+  }
+
+  return NextResponse.json({ ok: true })
+}
