@@ -7,6 +7,9 @@ import Navigation from '@/components/Layout/Navigation'
 import MapSidePanel, { type DaySummary } from '@/components/Map/MapSidePanel'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import FAB from '@/components/UI/FAB'
+import { useTripPath } from '@/lib/hooks/useTripContext'
+import Link from 'next/link'
+import { Plus } from 'lucide-react'
 import { useItems } from '@/lib/hooks/useItems'
 import {
   PANEL_SNAP_POINTS_VH,
@@ -82,6 +85,7 @@ function buildDaySummaries(items: TripItem[]): DaySummary[] {
 export default function PlanScreen({ basePath }: PlanScreenProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const tripPath = useTripPath()
   const { items, isLoading } = useItems()
   const { showToast } = useToast()
 
@@ -174,6 +178,14 @@ export default function PlanScreen({ basePath }: PlanScreenProps) {
           <div className="pointer-events-none absolute top-3 left-3 z-[600] max-w-[60%] rounded-md bg-bg-elevated/90 px-2.5 py-1.5 shadow-sm backdrop-blur">
             <TripContextLabel />
           </div>
+          <Link
+            href={tripPath('items/new')}
+            className="absolute top-3 right-3 z-[600] inline-flex items-center gap-1.5 rounded-lg bg-accent text-accent-fg px-3 py-2 text-sm font-medium shadow-md hover:bg-accent-hover transition-colors"
+            aria-label="새 항목 추가"
+          >
+            <Plus className="size-4" aria-hidden />
+            새 항목
+          </Link>
         </div>
       </div>
 

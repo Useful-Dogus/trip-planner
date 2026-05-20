@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { Search, Share2 } from 'lucide-react'
+import Link from 'next/link'
+import { Plus, Search, Share2 } from 'lucide-react'
 import ShareDialog from '@/components/Share/ShareDialog'
 import { useTripId } from '@/lib/hooks/useTripContext'
 import TripPageTitle from '@/components/UI/TripPageTitle'
@@ -191,6 +192,13 @@ function ResearchPageContent() {
         <div className="flex items-center justify-between mb-4">
           <TripPageTitle section="목록" />
           <div className="flex items-center gap-2">
+            <Link
+              href={`/trip/${tripId}/items/new`}
+              className="hidden md:inline-flex items-center gap-1.5 rounded-md bg-accent text-accent-fg px-3 py-1.5 text-sm font-medium hover:bg-accent-hover"
+            >
+              <Plus className="size-4" aria-hidden />
+              새 항목
+            </Link>
             <button
               type="button"
               onClick={() => setShareDialogOpen(true)}
