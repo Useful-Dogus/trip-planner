@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
 import { mapGoogleCategory } from '@/services/gmaps/categoryMap'
 import type { GooglePlace, TripItem } from '@/types'
@@ -34,7 +34,7 @@ function placeToItem(
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const {
@@ -53,7 +53,10 @@ export async function POST(request: Request) {
     }
 
     const supabase = createRouteHandlerSupabase()
-    const tripId = await ensureActiveTrip(supabase)
+    const queryTripId = request.nextUrl.searchParams.get('tripId')
+    const tripId = queryTripId && queryTripId.trim()
+      ? queryTripId
+      : await ensureActiveTrip(supabase)
 
     const rows = places.map(p => {
       const override = p.googlePlaceId ? categoryOverrides[p.googlePlaceId] : undefined

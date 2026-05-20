@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import { redirectToActiveTrip } from '@/lib/activeTripRedirect'
 
-export default function Home() {
-  redirect('/map')
+export default async function Home() {
+  await redirectToActiveTrip('map')
 }

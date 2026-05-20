@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import { useToast } from '@/components/UI/Toast'
 import type { TripItem } from '@/types'
 import { normalizeTripItem } from '@/lib/itemOptions'
+import { useOptionalTripId } from '@/lib/hooks/useTripContext'
 
 const fetcher = (url: string) =>
   fetch(url).then(r => {
@@ -18,15 +19,24 @@ function applyItemChanges(item: TripItem, changes: Record<string, unknown>): Tri
   return normalizeTripItem({ ...item, ...changes } as TripItem).item
 }
 
+function withTripId(url: string, tripId: string | null): string {
+  if (!tripId) return url
+  const sep = url.includes('?') ? '&' : '?'
+  return `${url}${sep}tripId=${encodeURIComponent(tripId)}`
+}
+
 export function useItems() {
   const [hasMounted, setHasMounted] = useState(false)
+  const tripId = useOptionalTripId()
 
   useEffect(() => {
     setHasMounted(true)
   }, [])
 
+  const swrKey = hasMounted ? withTripId('/api/items', tripId) : null
+
   const { data, error, isLoading, isValidating, mutate } = useSWR<{ items: TripItem[] }>(
-    hasMounted ? '/api/items' : null,
+    swrKey,
     fetcher
   )
   const { showToast } = useToast()
@@ -55,7 +65,7 @@ export function useItems() {
       { revalidate: false }
     )
     try {
-      const res = await fetch(`/api/items/${id}`, {
+      const res = await fetch(withTripId(`/api/items/${id}`, tripId), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(changes),
@@ -83,7 +93,7 @@ export function useItems() {
       { revalidate: false }
     )
     try {
-      const res = await fetch(`/api/items/${id}`, { method: 'DELETE' })
+      const res = await fetch(withTripId(`/api/items/${id}`, tripId), { method: 'DELETE' })
       if (!res.ok) throw new Error('Delete failed')
       mutate()
     } catch {
@@ -110,7 +120,7 @@ export function useItems() {
       { revalidate: false }
     )
     try {
-      const res = await fetch('/api/items', {
+      const res = await fetch(withTripId('/api/items', tripId), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(item),

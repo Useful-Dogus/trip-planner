@@ -89,10 +89,16 @@ function validateItem(body: Record<string, unknown>): string | null {
   return null
 }
 
-export async function GET() {
+function getTripIdFromRequest(request: NextRequest): string | null {
+  const v = request.nextUrl.searchParams.get('tripId')
+  return v && v.trim() ? v : null
+}
+
+export async function GET(request: NextRequest) {
   try {
     const client = createRouteHandlerSupabase()
-    const items = await readItems(client)
+    const tripId = getTripIdFromRequest(request)
+    const items = await readItems(client, tripId)
     return NextResponse.json({ items })
   } catch (e) {
     const err = e as { message?: string; code?: string; details?: string; hint?: string }
@@ -138,9 +144,10 @@ export async function POST(request: NextRequest) {
   if (body.time_end !== undefined && body.time_end !== null) item.time_end = body.time_end as string
 
   const client = createRouteHandlerSupabase()
-  const items = await readItems(client)
+  const tripId = getTripIdFromRequest(request)
+  const items = await readItems(client, tripId)
   items.push(item)
-  await writeItems(client, items)
+  await writeItems(client, items, tripId)
 
   return NextResponse.json({ item }, { status: 201 })
 }
