@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ArrowLeft, List, Map, CalendarDays, Download, LogOut, User } from 'lucide-react'
+import { ArrowLeft, List, Map, CalendarDays, Download, LogOut, MoreHorizontal, User } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
+import Sheet, { SheetSection } from '@/components/UI/Sheet'
 import { cn } from '@/lib/cn'
 import { clearAppCache } from '@/lib/clearAppCache'
 import { useOptionalTripId, buildTripPath } from '@/lib/hooks/useTripContext'
@@ -33,6 +35,7 @@ function legacyHref(sub: string): string {
 export default function Navigation() {
   const pathname = usePathname()
   const tripId = useOptionalTripId()
+  const [moreOpen, setMoreOpen] = useState(false)
 
   const hrefFor = (sub: string): string =>
     tripId ? buildTripPath(tripId, sub) : legacyHref(sub)
@@ -74,8 +77,83 @@ export default function Navigation() {
               </li>
             )
           })}
+          <li className="flex-1">
+            <button
+              type="button"
+              onClick={() => setMoreOpen(true)}
+              className={cn(
+                'flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-11 w-full',
+                'text-[11px] font-medium transition-colors duration-150 text-fg-subtle hover:text-fg-muted',
+              )}
+              aria-label="더보기"
+            >
+              <MoreHorizontal className="size-5" aria-hidden="true" />
+              <span>더보기</span>
+            </button>
+          </li>
         </ul>
       </nav>
+
+      <Sheet
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        side="bottom"
+        title="더보기"
+      >
+        <SheetSection>
+          <div className="flex items-center justify-between py-1">
+            <span className="text-sm text-fg">테마</span>
+            <ThemeToggle />
+          </div>
+        </SheetSection>
+        <SheetSection>
+          <ul className="space-y-0.5">
+            <li>
+              <Link
+                href="/me"
+                onClick={() => setMoreOpen(false)}
+                className="flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm text-fg hover:bg-bg-subtle"
+              >
+                <User className="size-4 shrink-0" aria-hidden />
+                프로필
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={hrefFor('gmaps-import')}
+                onClick={() => setMoreOpen(false)}
+                className="flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm text-fg hover:bg-bg-subtle"
+              >
+                <Download className="size-4 shrink-0" aria-hidden />
+                구글맵 가져오기
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/dashboard"
+                onClick={() => setMoreOpen(false)}
+                className="flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm text-fg hover:bg-bg-subtle"
+              >
+                <ArrowLeft className="size-4 shrink-0" aria-hidden />
+                내 여행 목록
+              </Link>
+            </li>
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false)
+                  handleLogout()
+                }}
+                className="flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm text-critical-fg hover:bg-bg-subtle w-full text-left"
+              >
+                <LogOut className="size-4 shrink-0" aria-hidden />
+                로그아웃
+              </button>
+            </li>
+          </ul>
+        </SheetSection>
+      </Sheet>
 
       {/* Desktop: left sidebar */}
       <aside
