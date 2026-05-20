@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { LogOut, MapPin, MoreVertical, Plus, Search, Trash2, User } from 'lucide-react'
@@ -51,11 +52,25 @@ interface Props {
   userEmail: string | null
 }
 
+const fetcher = (url: string) => fetch(url).then((r) => r.json())
+
 export default function DashboardClient({ initialTrips, userEmail }: Props) {
   const router = useRouter()
   const confirm = useConfirm()
   const { showToast } = useToast()
-  const [trips, setTrips] = useState<TripSummary[]>(initialTrips)
+  const { data, mutate: mutateTrips } = useSWR<{ trips: TripSummary[] }>(
+    '/api/trips',
+    fetcher,
+    { fallbackData: { trips: initialTrips }, revalidateOnFocus: false },
+  )
+  const trips = data?.trips ?? initialTrips
+  // legacy state (탬플릿 호환). 실제 보존은 SWR 캐시.
+  const setTrips = (updater: (prev: TripSummary[]) => TripSummary[]) => {
+    mutateTrips(
+      (cur) => ({ trips: updater(cur?.trips ?? initialTrips) }),
+      { revalidate: false },
+    )
+  }
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('created_desc')
   const [menuOpen, setMenuOpen] = useState<string | null>(null)

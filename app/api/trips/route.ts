@@ -1,5 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerSupabase } from '@/lib/supabase-server'
+import { listUserTrips } from '@/lib/trips'
+
+export async function GET() {
+  try {
+    const client = createRouteHandlerSupabase()
+    const { data: userData } = await client.auth.getUser()
+    if (!userData.user) {
+      return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 })
+    }
+    const trips = await listUserTrips(client)
+    return NextResponse.json({ trips })
+  } catch (e) {
+    console.error('[GET /api/trips]', e)
+    return NextResponse.json({ error: '여행 목록을 불러오지 못했습니다.' }, { status: 500 })
+  }
+}
 
 function sanitizeText(v: unknown): string | null {
   if (typeof v !== 'string') return null
