@@ -1,12 +1,15 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, MapPin, Plus, Search, User } from 'lucide-react'
+import { LogOut, MapPin, MoreVertical, Plus, Search, Trash2, User } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { Input } from '@/components/UI/Input'
 import Button from '@/components/UI/Button'
 import EmptyState from '@/components/UI/EmptyState'
+import { useConfirm } from '@/components/UI/ConfirmDialog'
+import { useToast } from '@/components/UI/Toast'
 import { clearAppCache } from '@/lib/clearAppCache'
 import type { TripSummary } from '@/lib/trips'
 
@@ -53,9 +56,38 @@ interface Props {
 }
 
 export default function DashboardClient({ initialTrips, userEmail }: Props) {
-  const [trips] = useState<TripSummary[]>(initialTrips)
+  const router = useRouter()
+  const confirm = useConfirm()
+  const { showToast } = useToast()
+  const [trips, setTrips] = useState<TripSummary[]>(initialTrips)
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('created_desc')
+  const [menuOpen, setMenuOpen] = useState<string | null>(null)
+
+  async function handleDeleteTrip(trip: TripSummary) {
+    setMenuOpen(null)
+    const ok = await confirm({
+      title: `여행 삭제: ${trip.title}`,
+      description: '이 여행과 연관된 모든 항목·공유 링크·멤버가 함께 삭제됩니다. 되돌릴 수 없습니다.',
+      confirmLabel: '삭제',
+      tone: 'destructive',
+      typeToConfirm: trip.title,
+    })
+    if (!ok) return
+    try {
+      const res = await fetch(`/api/trips/${trip.id}`, { method: 'DELETE' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        showToast({ message: data?.error ?? '삭제에 실패했습니다.', type: 'error' })
+        return
+      }
+      setTrips((prev) => prev.filter((t) => t.id !== trip.id))
+      showToast({ message: '여행을 삭제했어요.', type: 'success' })
+      router.refresh()
+    } catch {
+      showToast({ message: '네트워크 오류가 발생했습니다.', type: 'error' })
+    }
+  }
 
   const visibleTrips = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -176,12 +208,12 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
             {visibleTrips.map(trip => {
               const range = formatRange(trip.start_date, trip.end_date)
               return (
-                <li key={trip.id}>
+                <li key={trip.id} className="relative">
                   <Link
                     href={`/trip/${trip.id}/map`}
                     className="block bg-bg-elevated border border-border rounded-xl p-4 hover:border-border-strong hover:shadow-sm transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                   >
-                    <h2 className="text-base font-semibold text-fg mb-2 truncate">{trip.title}</h2>
+                    <h2 className="text-base font-semibold text-fg mb-2 truncate pr-8">{trip.title}</h2>
                     <div className="space-y-1 text-xs text-fg-muted">
                       {range ? (
                         <p>{range}</p>
@@ -199,6 +231,40 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
                       </p>
                     </div>
                   </Link>
+                  <div className="absolute top-3 right-3">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setMenuOpen(menuOpen === trip.id ? null : trip.id)
+                      }}
+                      className="inline-flex size-8 items-center justify-center rounded-md text-fg-subtle hover:bg-bg-subtle hover:text-fg-muted"
+                      aria-label="여행 메뉴"
+                      aria-expanded={menuOpen === trip.id}
+                    >
+                      <MoreVertical className="size-4" aria-hidden />
+                    </button>
+                    {menuOpen === trip.id && (
+                      <>
+                        <button
+                          type="button"
+                          className="fixed inset-0 z-10 cursor-default"
+                          aria-label="메뉴 닫기"
+                          onClick={() => setMenuOpen(null)}
+                        />
+                        <div className="absolute right-0 top-9 z-20 w-44 rounded-lg border border-border bg-bg-elevated shadow-md py-1">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTrip(trip)}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-critical-fg hover:bg-bg-subtle"
+                          >
+                            <Trash2 className="size-4" aria-hidden />
+                            여행 삭제
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </li>
               )
             })}

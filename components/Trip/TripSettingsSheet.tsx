@@ -7,6 +7,8 @@ import { Input } from '@/components/UI/Input'
 import Button from '@/components/UI/Button'
 import { useToast } from '@/components/UI/Toast'
 import { useTrip } from '@/lib/hooks/useTripContext'
+import { useConfirm } from '@/components/UI/ConfirmDialog'
+import { Trash2 } from 'lucide-react'
 
 interface Props {
   open: boolean
@@ -17,6 +19,7 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
   const trip = useTrip()
   const router = useRouter()
   const { showToast } = useToast()
+  const confirm = useConfirm()
 
   const [title, setTitle] = useState(trip.title)
   const [startDate, setStartDate] = useState(trip.startDate ?? '')
@@ -59,6 +62,33 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
       showToast({ message: '네트워크 오류가 발생했습니다.', type: 'error' })
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (trip.role !== 'owner') {
+      showToast({ message: '소유자만 여행을 삭제할 수 있습니다.', type: 'error' })
+      return
+    }
+    const ok = await confirm({
+      title: `여행 삭제: ${trip.title}`,
+      description: '이 여행과 연관된 모든 항목·공유 링크·멤버가 함께 삭제됩니다. 되돌릴 수 없습니다.',
+      confirmLabel: '삭제',
+      tone: 'destructive',
+      typeToConfirm: trip.title,
+    })
+    if (!ok) return
+    try {
+      const res = await fetch(`/api/trips/${trip.id}`, { method: 'DELETE' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        showToast({ message: data?.error ?? '삭제에 실패했습니다.', type: 'error' })
+        return
+      }
+      showToast({ message: '여행을 삭제했어요.', type: 'success' })
+      router.push('/dashboard')
+    } catch {
+      showToast({ message: '네트워크 오류가 발생했습니다.', type: 'error' })
     }
   }
 
@@ -116,6 +146,18 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
           />
         </div>
       </SheetSection>
+
+      {trip.role === 'owner' && (
+        <SheetSection title="위험 구역">
+          <p className="text-xs text-fg-muted mb-3">
+            여행을 삭제하면 연관된 모든 항목·공유 링크·멤버가 함께 삭제됩니다. 되돌릴 수 없습니다.
+          </p>
+          <Button type="button" variant="destructive" onClick={handleDelete} disabled={saving}>
+            <Trash2 className="size-4" aria-hidden />
+            여행 삭제
+          </Button>
+        </SheetSection>
+      )}
     </Sheet>
   )
 }
