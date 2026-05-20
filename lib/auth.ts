@@ -57,3 +57,12 @@ export async function exchangeCodeForSession(code: string) {
   const supabase = createRouteHandlerSupabase()
   return supabase.auth.exchangeCodeForSession(code)
 }
+
+export async function resendSignupConfirmation(email: string, emailRedirectTo: string) {
+  const supabase = createRouteHandlerSupabase()
+  return supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo },
+  })
+}

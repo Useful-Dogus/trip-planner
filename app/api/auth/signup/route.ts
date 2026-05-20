@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { signUpWithEmail } from '@/lib/auth'
+import { mapAuthError } from '@/lib/auth-errors'
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
@@ -22,9 +23,11 @@ export async function POST(request: NextRequest) {
     if (/already/i.test(error.message)) {
       return NextResponse.json({ ok: true, needsEmailConfirmation: true })
     }
+    const mapped = mapAuthError(error)
+    const status = mapped.code === 'rate_limit' ? 429 : 400
     return NextResponse.json(
-      { error: '회원가입에 실패했습니다. 입력 정보를 확인해주세요.' },
-      { status: 400 },
+      { error: mapped.message, code: mapped.code },
+      { status },
     )
   }
 
