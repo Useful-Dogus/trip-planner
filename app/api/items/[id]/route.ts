@@ -6,11 +6,15 @@ import {
   CATEGORY_OPTIONS,
   RESERVATION_STATUS_OPTIONS,
   TRIP_PRIORITY_OPTIONS,
-  TRIP_DATE_MAX,
-  TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
+import {
+  fetchTripBounds,
+  formatBoundsLabel,
+  isDateWithinBounds,
+  type TripBounds,
+} from '@/lib/trips'
 
-function validatePartial(body: Record<string, unknown>): string | null {
+function validatePartial(body: Record<string, unknown>, bounds: TripBounds | null): string | null {
   if (body.name !== undefined && (typeof body.name !== 'string' || !body.name.trim())) {
     return 'name은 비워둘 수 없습니다.'
   }
@@ -40,9 +44,9 @@ function validatePartial(body: Record<string, unknown>): string | null {
   if (
     body.date !== undefined &&
     body.date !== null &&
-    ((body.date as string) < TRIP_DATE_MIN || (body.date as string) > TRIP_DATE_MAX)
+    !isDateWithinBounds(body.date as string, bounds)
   ) {
-    return 'date는 2026-07-01부터 2026-07-31 사이여야 합니다.'
+    return `date는 여행 기간(${formatBoundsLabel(bounds)}) 내여야 합니다.`
   }
   if (
     body.end_date !== undefined &&
@@ -54,9 +58,9 @@ function validatePartial(body: Record<string, unknown>): string | null {
   if (
     body.end_date !== undefined &&
     body.end_date !== null &&
-    ((body.end_date as string) < TRIP_DATE_MIN || (body.end_date as string) > TRIP_DATE_MAX)
+    !isDateWithinBounds(body.end_date as string, bounds)
   ) {
-    return 'end_date는 2026-07-01부터 2026-07-31 사이여야 합니다.'
+    return `end_date는 여행 기간(${formatBoundsLabel(bounds)}) 내여야 합니다.`
   }
   if (
     body.date !== undefined &&
@@ -111,8 +115,9 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
     return NextResponse.json({ error: '항목을 찾을 수 없습니다.' }, { status: 404 })
   }
 
+  const bounds = tripId ? await fetchTripBounds(client, tripId) : null
   const body = await request.json()
-  const error = validatePartial(body)
+  const error = validatePartial(body, bounds)
   if (error) return NextResponse.json({ error }, { status: 400 })
 
   const updated = {

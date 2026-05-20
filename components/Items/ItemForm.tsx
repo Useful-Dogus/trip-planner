@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Category, ReservationStatus, TripItem, TripPriority, Link as TripLink } from '@/types'
 import { useItems } from '@/lib/hooks/useItems'
-import { useTripPath } from '@/lib/hooks/useTripContext'
+import { useTrip, useTripPath } from '@/lib/hooks/useTripContext'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
@@ -12,8 +12,6 @@ import {
   TRIP_PRIORITY_OPTIONS,
   RESERVATION_STATUS_META,
   RESERVATION_STATUS_OPTIONS,
-  TRIP_DATE_MAX,
-  TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
 
 interface FormData {
@@ -42,6 +40,9 @@ interface ItemFormProps {
 export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   const router = useRouter()
   const tripPath = useTripPath()
+  const trip = useTrip()
+  const dateMin = trip.startDate ?? undefined
+  const dateMax = trip.endDate ?? undefined
   const { createItem, updateItem, deleteItem } = useItems()
   const [form, setForm] = useState<FormData>({
     name: initialData?.name ?? '',
@@ -222,8 +223,8 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
               <input
                 type="date"
                 value={form.date}
-                min={TRIP_DATE_MIN}
-                max={TRIP_DATE_MAX}
+                min={dateMin}
+                max={dateMax}
                 onChange={e => setField('date', e.target.value)}
                 className={inputClass}
               />
@@ -248,8 +249,8 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
               <input
                 type="date"
                 value={form.end_date}
-                min={TRIP_DATE_MIN}
-                max={TRIP_DATE_MAX}
+                min={dateMin}
+                max={dateMax}
                 onChange={e => setField('end_date', e.target.value)}
                 className={inputClass}
               />

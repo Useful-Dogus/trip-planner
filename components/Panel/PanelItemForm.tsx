@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { Category, ReservationStatus, TripItem, TripPriority, Link as TripLink } from '@/types'
 import { useItems } from '@/lib/hooks/useItems'
+import { useTrip } from '@/lib/hooks/useTripContext'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
@@ -10,8 +11,6 @@ import {
   TRIP_PRIORITY_OPTIONS,
   RESERVATION_STATUS_META,
   RESERVATION_STATUS_OPTIONS,
-  TRIP_DATE_MAX,
-  TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
 
 interface FormData {
@@ -40,6 +39,9 @@ export interface PanelItemFormProps {
 
 export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }: PanelItemFormProps) {
   const { updateItem } = useItems()
+  const trip = useTrip()
+  const dateMin = trip.startDate ?? undefined
+  const dateMax = trip.endDate ?? undefined
   const [form, setForm] = useState<FormData>({
     name: item.name,
     category: item.category,
@@ -192,8 +194,8 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
                 <input
                   type="date"
                   value={form.date}
-                  min={TRIP_DATE_MIN}
-                  max={TRIP_DATE_MAX}
+                  min={dateMin}
+                  max={dateMax}
                   onChange={e => setField('date', e.target.value)}
                   className={inputClass}
                 />
@@ -213,8 +215,8 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
                 <input
                   type="date"
                   value={form.end_date}
-                  min={TRIP_DATE_MIN}
-                  max={TRIP_DATE_MAX}
+                  min={dateMin}
+                  max={dateMax}
                   onChange={e => setField('end_date', e.target.value)}
                   className={inputClass}
                 />
