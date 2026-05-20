@@ -5,26 +5,36 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { clearAppCache } from '@/lib/clearAppCache'
 import { ErrorBanner } from '@/components/UI'
+import { useToast } from '@/components/UI/Toast'
+import type { AuthErrorCode } from '@/lib/auth-errors'
 
 export default function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { showToast } = useToast()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [errorState, setErrorState] = useState<{
+    code: AuthErrorCode | 'init'
+    message: string
+  } | null>(null)
   const [loading, setLoading] = useState(false)
+  const [resending, setResending] = useState(false)
 
   useEffect(() => {
     const err = searchParams.get('error')
     if (err === 'invalid_link') {
-      setError('만료되었거나 사용된 링크입니다. 재설정 링크를 다시 받아주세요.')
+      setErrorState({
+        code: 'init',
+        message: '만료되었거나 사용된 링크입니다. 재설정 링크를 다시 받아주세요.',
+      })
     }
   }, [searchParams])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    setError('')
+    setErrorState(null)
 
     const res = await fetch('/api/auth/login', {
       method: 'POST',
@@ -34,16 +44,44 @@ export default function LoginForm() {
 
     if (res.ok) {
       clearAppCache()
-      // 로그인 후에는 풀 페이지 리로드: Next.js 라우터 캐시가 미인증 상태를
-      // 캐시하고 있어서 router.push를 쓰면 쿠키가 설정돼도 기존 캐시를 재사용.
       window.location.href = '/dashboard'
       return
-    } else {
-      const data = await res.json()
-      setError(data.error || '로그인에 실패했습니다.')
-      setLoading(false)
+    }
+
+    const data = (await res.json().catch(() => ({}))) as {
+      error?: string
+      code?: AuthErrorCode
+    }
+    setErrorState({
+      code: data.code ?? 'invalid_credentials',
+      message: data.error ?? '로그인에 실패했습니다.',
+    })
+    setLoading(false)
+  }
+
+  async function handleResendConfirmation() {
+    if (!email) return
+    setResending(true)
+    try {
+      await fetch('/api/auth/resend-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      showToast({
+        type: 'success',
+        message: '확인 메일을 다시 보냈어요. 메일함을 확인해주세요.',
+      })
+    } finally {
+      setResending(false)
     }
   }
+
+  const errorTone =
+    errorState?.code === 'email_not_confirmed' ||
+    errorState?.code === 'rate_limit'
+      ? 'warning'
+      : 'critical'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-bg via-bg-subtle to-bg flex items-center justify-center p-4">
@@ -99,9 +137,24 @@ export default function LoginForm() {
             />
           </div>
 
-          {error && (
-            <ErrorBanner tone="critical" onDismiss={() => setError('')}>
-              {error}
+          {errorState && (
+            <ErrorBanner
+              tone={errorTone}
+              onDismiss={() => setErrorState(null)}
+              action={
+                errorState.code === 'email_not_confirmed' ? (
+                  <button
+                    type="button"
+                    onClick={handleResendConfirmation}
+                    disabled={resending || !email}
+                    className="text-xs font-semibold underline underline-offset-2 disabled:opacity-50"
+                  >
+                    {resending ? '재전송 중…' : '확인 메일 재전송'}
+                  </button>
+                ) : undefined
+              }
+            >
+              {errorState.message}
             </ErrorBanner>
           )}
 
