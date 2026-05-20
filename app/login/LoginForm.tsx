@@ -62,8 +62,8 @@ export default function LoginForm() {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-fg">NYC Trip Planner</h1>
-          <p className="text-sm text-fg-subtle mt-1">2026년 7월 뉴욕 여행</p>
+          <h1 className="text-2xl font-bold text-fg">trip-planner</h1>
+          <p className="text-sm text-fg-subtle mt-1">로그인하여 여행을 계획하세요</p>
         </div>
 
         <form
