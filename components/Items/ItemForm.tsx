@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import type { Category, ReservationStatus, TripItem, TripPriority, Link as TripLink } from '@/types'
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip, useTripPath } from '@/lib/hooks/useTripContext'
@@ -39,19 +39,25 @@ interface ItemFormProps {
 
 export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const tripPath = useTripPath()
   const trip = useTrip()
   const dateMin = trip.startDate ?? undefined
   const dateMax = trip.endDate ?? undefined
   const { createItem, updateItem, deleteItem } = useItems()
+
+  // 지도에서 좌표 프리필 (create 모드에서만)
+  const queryLat = mode === 'create' ? searchParams.get('lat') : null
+  const queryLng = mode === 'create' ? searchParams.get('lng') : null
+
   const [form, setForm] = useState<FormData>({
     name: initialData?.name ?? '',
     category: initialData?.category ?? '명소',
     trip_priority: initialData?.trip_priority ?? '검토 필요',
     reservation_status: initialData?.reservation_status ?? '확인 필요',
     address: initialData?.address ?? '',
-    lat: initialData?.lat?.toString() ?? '',
-    lng: initialData?.lng?.toString() ?? '',
+    lat: queryLat ?? initialData?.lat?.toString() ?? '',
+    lng: queryLng ?? initialData?.lng?.toString() ?? '',
     budget: initialData?.budget?.toString() ?? '',
     memo: initialData?.memo ?? '',
     date: initialData?.date ?? '',
@@ -74,6 +80,29 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     el.style.height = 'auto'
     el.style.height = `${el.scrollHeight}px`
   }, [form.memo])
+
+  // 지도에서 좌표만 받아왔을 때 주소 자동 역지오코딩
+  useEffect(() => {
+    if (mode !== 'create') return
+    if (!queryLat || !queryLng) return
+    if (initialData?.address) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/geocode?lat=${queryLat}&lng=${queryLng}`)
+        const data = await res.json()
+        if (!cancelled && data?.address && typeof data.address === 'string') {
+          setForm((prev) => (prev.address ? prev : { ...prev, address: data.address }))
+        }
+      } catch {
+        // 역지오코딩 실패는 조용히 무시 (좌표는 이미 채워짐)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     if (key === 'name') setNameError('')
