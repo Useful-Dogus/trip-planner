@@ -10,7 +10,7 @@ import Button from '@/components/UI/Button'
 import EmptyState from '@/components/UI/EmptyState'
 import { useConfirm } from '@/components/UI/ConfirmDialog'
 import { useToast } from '@/components/UI/Toast'
-import { clearAppCache } from '@/lib/clearAppCache'
+import { logout } from '@/lib/auth-client'
 import type { TripSummary } from '@/lib/trips'
 
 type SortKey = 'created_desc' | 'start_date' | 'name'
@@ -44,11 +44,7 @@ function formatRange(start: string | null, end: string | null): string | null {
   return `${formatDateShort(end!)} 까지`
 }
 
-async function handleLogout() {
-  await fetch('/api/auth/logout', { method: 'POST' })
-  clearAppCache()
-  window.location.href = '/login'
-}
+const handleLogout = logout
 
 interface Props {
   initialTrips: TripSummary[]
