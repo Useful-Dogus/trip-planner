@@ -35,6 +35,11 @@ export default function ResearchPage() {
   )
 }
 
+function parseCsv(v: string | null): string[] {
+  if (!v) return []
+  return v.split(',').filter(Boolean)
+}
+
 function ResearchPageContent() {
   const router = useRouter()
   const pathname = usePathname()
@@ -49,13 +54,13 @@ function ResearchPageContent() {
   )
   const [highlightedIds, setHighlightedIds] = useState<Set<string>>(new Set())
 
-  const [query, setQuery] = useState('')
-  const [filterState, setFilterState] = useState<FilterState>({
-    categories: [],
-    tripPriorities: [],
-    reservationStatuses: [],
-    showExcluded: false,
-  })
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '')
+  const [filterState, setFilterState] = useState<FilterState>(() => ({
+    categories: parseCsv(searchParams.get('cat')) as Category[],
+    tripPriorities: parseCsv(searchParams.get('pri')) as TripPriority[],
+    reservationStatuses: parseCsv(searchParams.get('res')) as ReservationStatus[],
+    showExcluded: searchParams.get('excl') === '1',
+  }))
   const [filterPanelOpen, setFilterPanelOpen] = useState(false)
   const activeCount = useMemo(() => getActiveFilterCount(filterState), [filterState])
 
@@ -159,6 +164,25 @@ function ResearchPageContent() {
     const timer = setTimeout(() => setHighlightedIds(new Set()), 1000)
     return () => clearTimeout(timer)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 검색·필터 상태를 URL search params 와 동기화 (디바운스 없이 즉시; replace 라 history 미오염)
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    const setOrDel = (k: string, v: string) => {
+      if (v) params.set(k, v)
+      else params.delete(k)
+    }
+    setOrDel('q', query.trim())
+    setOrDel('cat', filterState.categories.join(','))
+    setOrDel('pri', filterState.tripPriorities.join(','))
+    setOrDel('res', filterState.reservationStatuses.join(','))
+    setOrDel('excl', filterState.showExcluded ? '1' : '')
+    const next = buildUrl(params)
+    if (next !== `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`) {
+      router.replace(next, { scroll: false })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, filterState])
 
   useEffect(() => {
     if (isLoading || !selectedItemId) return

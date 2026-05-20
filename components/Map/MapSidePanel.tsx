@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Search, MapPin, CalendarRange } from 'lucide-react'
 import type { Category, TripItem } from '@/types'
 import { CATEGORY_META, CATEGORY_OPTIONS, TRIP_PRIORITY_META } from '@/lib/itemOptions'
@@ -221,8 +222,21 @@ function CandidatesView({
   selectedItemId: string | null
   onSelectItem: (id: string) => void
 }) {
-  const [query, setQuery] = useState('')
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '')
   const [categoryFilter, setCategoryFilter] = useState<Category | null>(null)
+
+  // 검색어를 URL ?q 로 동기화 — list 와 공유 (뷰 전환 시 검색 유지)
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (query.trim()) params.set('q', query.trim())
+    else params.delete('q')
+    const next = params.toString() ? `${pathname}?${params.toString()}` : pathname
+    router.replace(next, { scroll: false })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query])
 
   const counts = useMemo(() => categoryCounts(items), [items])
   const filtered = useMemo(() => {
