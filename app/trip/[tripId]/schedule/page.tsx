@@ -10,6 +10,7 @@ import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { useItems } from '@/lib/hooks/useItems'
 import { useToast } from '@/components/UI/Toast'
 import TripPageTitle from '@/components/UI/TripPageTitle'
+import FAB from '@/components/UI/FAB'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
@@ -92,6 +93,8 @@ function SchedulePageContent() {
       )}
 
       <Navigation />
+
+      <FAB className="md:hidden" />
 
       <ItemPanel
         item={selectedItem}

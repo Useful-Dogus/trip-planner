@@ -174,9 +174,21 @@ export default function ResearchTable({
         <p className="text-sm font-medium text-fg mb-1">
           {hasActiveSearch ? '검색 결과가 없어요' : '아직 등록된 항목이 없어요'}
         </p>
-        <p className="text-xs text-fg-subtle">
+        <p className="text-xs text-fg-subtle mb-4">
           {hasActiveSearch ? '필터 조건을 바꿔보세요' : '항목을 추가하면 여기에 표시됩니다'}
         </p>
+        {!hasActiveSearch && (
+          <button
+            type="button"
+            onClick={() => { setAddingRow(true); setNewItemName('') }}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-accent text-accent-fg px-4 py-2 text-sm font-medium hover:bg-accent-hover transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            새 항목 추가
+          </button>
+        )}
       </div>
     )
   }
