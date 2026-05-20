@@ -5,6 +5,7 @@ import { Copy, Plus, Trash2, Check, AlertCircle } from 'lucide-react'
 import Sheet from '@/components/UI/Sheet'
 import Button from '@/components/UI/Button'
 import { useToast } from '@/components/UI/Toast'
+import { useConfirm } from '@/components/UI/ConfirmDialog'
 import type { Share } from '@/lib/share'
 import { isShareActive } from '@/lib/share'
 import { buildShareUrl } from '@/lib/sharedTrip'
@@ -22,6 +23,7 @@ export default function ShareDialog({ open, onClose, tripId }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [copiedToken, setCopiedToken] = useState<string | null>(null)
   const { showToast } = useToast()
+  const confirm = useConfirm()
 
   const origin = useMemo(() => (typeof window !== 'undefined' ? window.location.origin : ''), [])
 
@@ -64,7 +66,13 @@ export default function ShareDialog({ open, onClose, tripId }: Props) {
   }
 
   const handleRevoke = async (token: string) => {
-    if (!window.confirm('이 링크를 회수하시겠어요? 이후로 접속이 차단됩니다.')) return
+    const ok = await confirm({
+      title: '공유 링크 회수',
+      description: '이 링크를 회수하시겠어요? 이후로 접속이 차단됩니다.',
+      confirmLabel: '회수',
+      tone: 'destructive',
+    })
+    if (!ok) return
     try {
       const res = await fetch(`/api/trips/${tripId}/shares/${token}/revoke`, { method: 'POST' })
       if (!res.ok) throw new Error('회수에 실패했습니다.')

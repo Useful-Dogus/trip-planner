@@ -6,6 +6,7 @@ import type { TripItem } from '@/types'
 import PanelItemForm from './PanelItemForm'
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip } from '@/lib/hooks/useTripContext'
+import { useConfirm } from '@/components/UI/ConfirmDialog'
 import {
   CATEGORY_OPTIONS,
   CHIP_TONE,
@@ -29,6 +30,7 @@ export interface ItemPanelProps {
 
 export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: ItemPanelProps) {
   const { deleteItem, updateItem } = useItems()
+  const confirm = useConfirm()
   const [mode, setMode] = useState<'view' | 'edit'>('view')
   const [isDirty, setIsDirty] = useState(false)
   const [confirmingClose, setConfirmingClose] = useState(false)
@@ -118,7 +120,13 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('이 항목을 삭제하시겠습니까?')) return
+    const ok = await confirm({
+      title: '항목 삭제',
+      description: '이 항목을 삭제하시겠습니까?',
+      confirmLabel: '삭제',
+      tone: 'destructive',
+    })
+    if (!ok) return
     await deleteItem(id)
     onDelete(id)
     onClose()
