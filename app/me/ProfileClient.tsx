@@ -6,13 +6,9 @@ import { ArrowLeft, LogOut } from 'lucide-react'
 import Button from '@/components/UI/Button'
 import { Input } from '@/components/UI/Input'
 import { useToast } from '@/components/UI/Toast'
-import { clearAppCache } from '@/lib/clearAppCache'
+import { logout } from '@/lib/auth-client'
 
-async function handleLogout() {
-  await fetch('/api/auth/logout', { method: 'POST' })
-  clearAppCache()
-  window.location.href = '/login'
-}
+const handleLogout = logout
 
 interface Props {
   email: string

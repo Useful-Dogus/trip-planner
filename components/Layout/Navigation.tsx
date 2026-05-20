@@ -7,7 +7,7 @@ import { ArrowLeft, List, Map, CalendarDays, Download, LogOut, MoreHorizontal, U
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import Sheet, { SheetSection } from '@/components/UI/Sheet'
 import { cn } from '@/lib/cn'
-import { clearAppCache } from '@/lib/clearAppCache'
+import { logout } from '@/lib/auth-client'
 import { useOptionalTripId, buildTripPath } from '@/lib/hooks/useTripContext'
 
 interface NavItem {
@@ -22,11 +22,7 @@ const NAV_ITEMS: NavItem[] = [
   { sub: 'schedule', label: '일정', icon: CalendarDays },
 ]
 
-async function handleLogout() {
-  await fetch('/api/auth/logout', { method: 'POST' })
-  clearAppCache()
-  window.location.href = '/login'
-}
+const handleLogout = logout
 
 function legacyHref(sub: string): string {
   return `/${sub}`
