@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ArrowLeft, List, Map, CalendarDays, Download, LogOut } from 'lucide-react'
+import { ArrowLeft, List, Map, CalendarDays, Download, LogOut, User } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { cn } from '@/lib/cn'
 import { clearAppCache } from '@/lib/clearAppCache'
@@ -120,6 +120,17 @@ export default function Navigation() {
             <span className="text-xs text-fg-subtle whitespace-nowrap">테마</span>
             <ThemeToggle />
           </div>
+          <Link
+            href="/me"
+            className={cn(
+              'flex items-center gap-2 px-3 py-2 text-sm rounded-lg',
+              'text-fg-subtle hover:text-fg hover:bg-bg-subtle transition-colors duration-150',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+            )}
+          >
+            <User className="size-4 shrink-0" aria-hidden="true" />
+            <span>프로필</span>
+          </Link>
           <Link
             href={hrefFor('gmaps-import')}
             className={cn(

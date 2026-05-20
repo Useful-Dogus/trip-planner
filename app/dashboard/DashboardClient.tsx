@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { LogOut, MapPin, Plus, Search } from 'lucide-react'
+import { LogOut, MapPin, Plus, Search, User } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { Input } from '@/components/UI/Input'
 import Button from '@/components/UI/Button'
@@ -92,6 +92,13 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            <Link
+              href="/me"
+              aria-label="프로필"
+              className="p-2 rounded-lg text-fg-subtle hover:text-fg hover:bg-bg-subtle transition-colors"
+            >
+              <User className="size-4" aria-hidden="true" />
+            </Link>
             <button
               type="button"
               onClick={handleLogout}
