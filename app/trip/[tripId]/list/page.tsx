@@ -12,7 +12,7 @@ import Navigation from '@/components/Layout/Navigation'
 import ItemList from '@/components/Items/ItemList'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
 import ResearchTableSkeleton from '@/components/UI/ResearchTableSkeleton'
-import ResearchTable from '@/components/Research/ResearchTable'
+import ResearchTable, { type SortDir, type SortKey } from '@/components/Research/ResearchTable'
 import FAB from '@/components/UI/FAB'
 import FilterButton from '@/components/Research/FilterButton'
 import FilterPanel from '@/components/Research/FilterPanel'
@@ -55,6 +55,12 @@ function ResearchPageContent() {
   const [highlightedIds, setHighlightedIds] = useState<Set<string>>(new Set())
 
   const [query, setQuery] = useState(() => searchParams.get('q') ?? '')
+  const [sortKey, setSortKey] = useState<SortKey>(
+    () => (searchParams.get('sort') as SortKey | null) ?? 'trip_priority',
+  )
+  const [sortDir, setSortDir] = useState<SortDir>(
+    () => (searchParams.get('dir') === 'desc' ? 'desc' : 'asc'),
+  )
   const [filterState, setFilterState] = useState<FilterState>(() => ({
     categories: parseCsv(searchParams.get('cat')) as Category[],
     tripPriorities: parseCsv(searchParams.get('pri')) as TripPriority[],
@@ -177,12 +183,14 @@ function ResearchPageContent() {
     setOrDel('pri', filterState.tripPriorities.join(','))
     setOrDel('res', filterState.reservationStatuses.join(','))
     setOrDel('excl', filterState.showExcluded ? '1' : '')
+    setOrDel('sort', sortKey !== 'trip_priority' ? sortKey : '')
+    setOrDel('dir', sortDir !== 'asc' ? sortDir : '')
     const next = buildUrl(params)
     if (next !== `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`) {
       router.replace(next, { scroll: false })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, filterState])
+  }, [query, filterState, sortKey, sortDir])
 
   useEffect(() => {
     if (isLoading || !selectedItemId) return
@@ -305,6 +313,12 @@ function ResearchPageContent() {
               onCreateItem={createItem}
               onOpenPanel={handleSelectItem}
               hasActiveSearch={query.trim().length > 0 || activeCount > 0}
+              sortKey={sortKey}
+              sortDir={sortDir}
+              onSortChange={(k, d) => {
+                setSortKey(k)
+                setSortDir(d)
+              }}
             />
           </div>
         </>
