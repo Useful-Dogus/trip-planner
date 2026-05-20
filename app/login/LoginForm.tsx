@@ -35,7 +35,7 @@ export default function LoginForm() {
       clearAppCache()
       // 로그인 후에는 풀 페이지 리로드: Next.js 라우터 캐시가 미인증 상태를
       // 캐시하고 있어서 router.push를 쓰면 쿠키가 설정돼도 기존 캐시를 재사용.
-      window.location.href = '/'
+      window.location.href = '/dashboard'
       return
     } else {
       const data = await res.json()

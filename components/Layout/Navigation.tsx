@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { List, Map, CalendarDays, Download, LogOut } from 'lucide-react'
+import { ArrowLeft, List, Map, CalendarDays, Download, LogOut } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { cn } from '@/lib/cn'
 import { clearAppCache } from '@/lib/clearAppCache'
@@ -83,8 +83,13 @@ export default function Navigation() {
         aria-label="기본 네비게이션"
       >
         <div className="mb-6 px-3">
-          <p className="text-sm font-bold text-fg">NYC Trip</p>
-          <p className="text-xs text-fg-subtle mt-0.5">2026년 7월</p>
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 text-xs text-fg-subtle hover:text-fg transition-colors"
+          >
+            <ArrowLeft className="size-3.5" aria-hidden="true" />
+            내 여행 목록
+          </Link>
         </div>
         <ul className="flex-1 space-y-0.5">
           {NAV_ITEMS.map(({ sub, label, icon: Icon }) => {

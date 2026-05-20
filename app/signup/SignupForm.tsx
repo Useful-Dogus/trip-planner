@@ -30,7 +30,7 @@ export default function SignupForm() {
         return
       }
       clearAppCache()
-      window.location.href = '/'
+      window.location.href = '/dashboard'
       return
     }
     setError(data.error || '회원가입에 실패했습니다.')
