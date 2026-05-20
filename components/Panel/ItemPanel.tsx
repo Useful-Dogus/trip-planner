@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { TripItem } from '@/types'
 import PanelItemForm from './PanelItemForm'
+import Sheet from '@/components/UI/Sheet'
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip } from '@/lib/hooks/useTripContext'
 import { useConfirm } from '@/components/UI/ConfirmDialog'
@@ -155,72 +156,64 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
     keyboardHeight > 0 ? { bottom: `${keyboardHeight}px`, maxHeight: `${window.innerHeight - keyboardHeight}px` } : {}
 
   return (
-    <>
-      <div className={`fixed inset-0 bg-overlay z-[1000] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={confirmingClose ? () => setConfirmingClose(false) : tryClose} aria-hidden="true" />
+    <Sheet
+      open={isOpen}
+      onClose={tryClose}
+      side="auto"
+      rightWidthPx={520}
+      title={mode === 'edit' ? '편집' : '상세 정보'}
+      headerActions={
+        mode === 'edit' && displayItem ? (
+          <button
+            onClick={() => handleDelete(displayItem.id)}
+            aria-label="항목 삭제"
+            className="px-3 py-1.5 text-xs font-medium text-critical-fg border border-critical-border rounded-lg hover:bg-critical-bg transition-colors"
+          >
+            삭제
+          </button>
+        ) : null
+      }
+      dismissibleBackdrop={!isDirty || mode !== 'edit'}
+    >
+      <div ref={panelRef} className="flex-1 flex flex-col overflow-hidden">
+        {displayItem && mode === 'view' && (
+          <ItemDetailView
+            item={displayItem}
+            openField={openField}
+            savingField={savingField}
+            onOpenField={setOpenField}
+            onQuickUpdate={handleQuickUpdate}
+            onFieldSave={handleFieldSave}
+            onDeleteRequest={() => handleDelete(displayItem.id)}
+          />
+        )}
+        {displayItem && mode === 'edit' && (
+          <PanelItemForm
+            item={displayItem}
+            onSave={() => {
+              onSave()
+              setMode('view')
+            }}
+            onCancel={() => setMode('view')}
+            onDirtyChange={setIsDirty}
+          />
+        )}
+      </div>
 
-      <div
-        ref={panelRef}
-        aria-label="항목 상세 패널"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        style={panelStyle}
-        className={`fixed z-[1010] bg-bg-elevated shadow-2xl transition-transform duration-300 ease-in-out flex flex-col bottom-0 left-0 right-0 rounded-t-2xl h-[80vh] md:h-screen md:bottom-auto md:right-0 md:top-0 md:left-auto md:w-[520px] md:rounded-none md:rounded-l-2xl ${
-          isOpen ? 'translate-y-0 md:translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-y-0 md:translate-x-full'
-        }`}
-      >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0">
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-border rounded-full md:hidden" />
-          <span className="text-sm font-semibold text-fg">{mode === 'edit' ? '편집' : '상세 정보'}</span>
-          <div className="flex items-center gap-2">
-            {mode === 'edit' && displayItem && (
-              <button onClick={() => handleDelete(displayItem.id)} aria-label="항목 삭제" className="px-3 py-1.5 text-xs font-medium text-critical-fg border border-critical-border rounded-lg hover:bg-critical-bg transition-colors">
-                삭제
-              </button>
-            )}
-            <button onClick={tryClose} aria-label="패널 닫기" className="p-1.5 text-fg-subtle hover:text-fg-muted transition-colors rounded-lg hover:bg-bg-subtle">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
+      {confirmingClose && (
+        <div className="absolute bottom-0 left-0 right-0 bg-bg-elevated border-t-2 border-warning-border px-5 pt-4 pb-6 z-10">
+          <p className="text-sm font-medium text-fg mb-3">변경사항이 있습니다. 저장하지 않고 나가시겠습니까?</p>
+          <div className="flex gap-3">
+            <button onClick={handleDiscardAndClose} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-accent-fg bg-accent hover:bg-accent-hover transition-colors">
+              나가기
+            </button>
+            <button onClick={() => setConfirmingClose(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-fg-muted border border-border hover:bg-bg-subtle transition-colors">
+              계속 편집
             </button>
           </div>
         </div>
-
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {displayItem && mode === 'view' && (
-            <ItemDetailView
-              item={displayItem}
-              openField={openField}
-              savingField={savingField}
-              onOpenField={setOpenField}
-              onQuickUpdate={handleQuickUpdate}
-              onFieldSave={handleFieldSave}
-              onDeleteRequest={() => handleDelete(displayItem.id)}
-            />
-          )}
-          {displayItem && mode === 'edit' && (
-            <PanelItemForm
-              item={displayItem}
-              onSave={() => {
-                onSave()
-                setMode('view')
-              }}
-              onCancel={() => setMode('view')}
-              onDirtyChange={setIsDirty}
-            />
-          )}
-        </div>
-
-        {confirmingClose && (
-          <div className="absolute bottom-0 left-0 right-0 bg-bg-elevated border-t-2 border-warning-border px-5 pt-4 pb-6 z-10">
-            <p className="text-sm font-medium text-fg mb-3">변경사항이 있습니다. 저장하지 않고 나가시겠습니까?</p>
-            <div className="flex gap-3">
-              <button onClick={handleDiscardAndClose} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-accent-fg bg-accent hover:bg-accent-hover transition-colors">나가기</button>
-              <button onClick={() => setConfirmingClose(false)} className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-fg-muted border border-border hover:bg-bg-subtle transition-colors">계속 편집</button>
-            </div>
-          </div>
-        )}
-      </div>
-    </>
+      )}
+    </Sheet>
   )
 }
 
