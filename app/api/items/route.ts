@@ -90,9 +90,23 @@ function validateItem(body: Record<string, unknown>): string | null {
 }
 
 export async function GET() {
-  const client = createRouteHandlerSupabase()
-  const items = await readItems(client)
-  return NextResponse.json({ items })
+  try {
+    const client = createRouteHandlerSupabase()
+    const items = await readItems(client)
+    return NextResponse.json({ items })
+  } catch (e) {
+    const err = e as { message?: string; code?: string; details?: string; hint?: string }
+    console.error('[GET /api/items] failed:', {
+      message: err?.message,
+      code: err?.code,
+      details: err?.details,
+      hint: err?.hint,
+    })
+    return NextResponse.json(
+      { error: '항목을 불러오지 못했습니다.' },
+      { status: 500 },
+    )
+  }
 }
 
 export async function POST(request: NextRequest) {

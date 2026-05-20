@@ -20,25 +20,23 @@ export async function ensureActiveTrip(client: TripSupabaseClient): Promise<stri
   const existing = await getActiveTripId(client)
   if (existing) return existing
 
-  const { data: userData, error: userErr } = await client.auth.getUser()
-  if (userErr) throw userErr
-  const userId = userData.user?.id
-  if (!userId) throw new Error('로그인된 사용자가 없습니다.')
-
-  const { data: trip, error: tripErr } = await client
-    .from('trips')
-    .insert({ owner_user_id: userId, title: '내 여행' })
-    .select('id')
-    .single()
-  if (tripErr) throw tripErr
-  const tripId = trip.id as string
-
-  const { error: memberErr } = await client
-    .from('trip_members')
-    .insert({ trip_id: tripId, user_id: userId, role: 'owner' })
-  if (memberErr) throw memberErr
-
-  return tripId
+  // SECURITY DEFINER RPC 로 trip + 멤버십을 원자 생성한다.
+  // 두 단계 insert 로 분리하면 trips_select RLS(is_trip_member 기반) 가
+  // INSERT..RETURNING 시점에 막아 403 을 반환할 수 있어 RPC 로 회피.
+  const { data, error } = await client.rpc('create_user_trip')
+  if (error) {
+    console.error('[ensureActiveTrip] create_user_trip RPC failed:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    })
+    throw error
+  }
+  if (typeof data !== 'string') {
+    throw new Error('create_user_trip 가 trip id 를 반환하지 않았습니다.')
+  }
+  return data
 }
 
 export async function getUserRole(

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { List, Map, CalendarDays, Download, LogOut } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { cn } from '@/lib/cn'
+import { clearAppCache } from '@/lib/clearAppCache'
 
 interface NavItem {
   href: string
@@ -20,6 +21,7 @@ const NAV_ITEMS: NavItem[] = [
 
 async function handleLogout() {
   await fetch('/api/auth/logout', { method: 'POST' })
+  clearAppCache()
   window.location.href = '/login'
 }
 

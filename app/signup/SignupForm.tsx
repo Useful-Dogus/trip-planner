@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { clearAppCache } from '@/lib/clearAppCache'
 
 export default function SignupForm() {
   const [email, setEmail] = useState('')
@@ -28,6 +29,7 @@ export default function SignupForm() {
         setLoading(false)
         return
       }
+      clearAppCache()
       window.location.href = '/list'
       return
     }
