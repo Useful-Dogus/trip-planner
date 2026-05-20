@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Polyline, Tooltip } from 'react-leaflet'
+import MapAddOnLongPress from './MapAddOnLongPress'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
@@ -145,6 +146,8 @@ export default function TripPlannerMap({
       {polyline.length > 1 && (
         <Polyline positions={polyline} pathOptions={{ className: 'tp-day-route' }} weight={2.5} opacity={0.6} />
       )}
+
+      <MapAddOnLongPress />
     </MapContainer>
   )
 }
