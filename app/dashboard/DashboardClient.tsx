@@ -2,21 +2,19 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { LogOut, Plus, Search } from 'lucide-react'
+import { LogOut, MapPin, Plus, Search } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { Input } from '@/components/UI/Input'
 import Button from '@/components/UI/Button'
 import EmptyState from '@/components/UI/EmptyState'
-import { useToast } from '@/components/UI/Toast'
 import { clearAppCache } from '@/lib/clearAppCache'
 import type { TripSummary } from '@/lib/trips'
 
-type SortKey = 'created_desc' | 'created_asc' | 'name'
+type SortKey = 'created_desc' | 'start_date' | 'name'
 
 const SORT_LABELS: Record<SortKey, string> = {
   created_desc: '최근 생성순',
-  created_asc: '오래된 순',
+  start_date: '기간 시작일순',
   name: '이름순',
 }
 
@@ -26,6 +24,21 @@ function formatDate(iso: string): string {
   } catch {
     return iso
   }
+}
+
+function formatDateShort(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
+  } catch {
+    return iso
+  }
+}
+
+function formatRange(start: string | null, end: string | null): string | null {
+  if (!start && !end) return null
+  if (start && end) return `${formatDateShort(start)} – ${formatDateShort(end)}`
+  if (start) return `${formatDateShort(start)} 부터`
+  return `${formatDateShort(end!)} 까지`
 }
 
 async function handleLogout() {
@@ -40,43 +53,32 @@ interface Props {
 }
 
 export default function DashboardClient({ initialTrips, userEmail }: Props) {
-  const router = useRouter()
-  const { showToast } = useToast()
-  const [trips, setTrips] = useState<TripSummary[]>(initialTrips)
+  const [trips] = useState<TripSummary[]>(initialTrips)
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('created_desc')
-  const [creating, setCreating] = useState(false)
 
   const visibleTrips = useMemo(() => {
     const q = query.trim().toLowerCase()
     const filtered = q
-      ? trips.filter(t => t.title.toLowerCase().includes(q))
+      ? trips.filter(t =>
+          t.title.toLowerCase().includes(q) ||
+          (t.region ?? '').toLowerCase().includes(q),
+        )
       : trips
     const sorted = [...filtered].sort((a, b) => {
       if (sort === 'name') return a.title.localeCompare(b.title, 'ko')
-      const cmp = a.created_at.localeCompare(b.created_at)
-      return sort === 'created_asc' ? cmp : -cmp
+      if (sort === 'start_date') {
+        const av = a.start_date ?? ''
+        const bv = b.start_date ?? ''
+        if (av && bv) return av.localeCompare(bv)
+        if (av) return -1
+        if (bv) return 1
+        return b.created_at.localeCompare(a.created_at)
+      }
+      return b.created_at.localeCompare(a.created_at)
     })
     return sorted
   }, [trips, query, sort])
-
-  async function handleCreate() {
-    if (creating) return
-    setCreating(true)
-    try {
-      const res = await fetch('/api/trips', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      })
-      if (!res.ok) throw new Error('create failed')
-      const data = (await res.json()) as { tripId: string; title: string }
-      router.push(`/trip/${data.tripId}/map`)
-    } catch {
-      showToast({ type: 'error', message: '여행 생성에 실패했습니다.' })
-      setCreating(false)
-    }
-  }
 
   return (
     <div className="min-h-screen bg-bg text-fg">
@@ -112,7 +114,7 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
                 label="여행 검색"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder="여행 이름으로 검색"
+                placeholder="이름·지역으로 검색"
                 leading={<Search className="size-4" aria-hidden="true" />}
               />
             </div>
@@ -130,10 +132,12 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
                   </option>
                 ))}
               </select>
-              <Button onClick={handleCreate} disabled={creating}>
-                <Plus className="size-4 mr-1" aria-hidden="true" />
-                {creating ? '생성 중…' : '새 여행'}
-              </Button>
+              <Link href="/dashboard/new">
+                <Button>
+                  <Plus className="size-4 mr-1" aria-hidden="true" />
+                  새 여행
+                </Button>
+              </Link>
             </div>
           </div>
         )}
@@ -144,10 +148,12 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
               title="아직 여행이 없어요"
               description="첫 여행을 만들어 일정을 정리해 보세요."
               action={
-                <Button onClick={handleCreate} disabled={creating}>
-                  <Plus className="size-4 mr-1" aria-hidden="true" />
-                  {creating ? '생성 중…' : '첫 여행 만들기'}
-                </Button>
+                <Link href="/dashboard/new">
+                  <Button>
+                    <Plus className="size-4 mr-1" aria-hidden="true" />
+                    첫 여행 만들기
+                  </Button>
+                </Link>
               }
             />
           </div>
@@ -160,19 +166,35 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
           </div>
         ) : (
           <ul className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleTrips.map(trip => (
-              <li key={trip.id}>
-                <Link
-                  href={`/trip/${trip.id}/map`}
-                  className="block bg-bg-elevated border border-border rounded-xl p-4 hover:border-border-strong hover:shadow-sm transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                >
-                  <h2 className="text-base font-semibold text-fg mb-1 truncate">{trip.title}</h2>
-                  <p className="text-xs text-fg-subtle">
-                    {formatDate(trip.created_at)} · 항목 {trip.itemCount}개
-                  </p>
-                </Link>
-              </li>
-            ))}
+            {visibleTrips.map(trip => {
+              const range = formatRange(trip.start_date, trip.end_date)
+              return (
+                <li key={trip.id}>
+                  <Link
+                    href={`/trip/${trip.id}/map`}
+                    className="block bg-bg-elevated border border-border rounded-xl p-4 hover:border-border-strong hover:shadow-sm transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  >
+                    <h2 className="text-base font-semibold text-fg mb-2 truncate">{trip.title}</h2>
+                    <div className="space-y-1 text-xs text-fg-muted">
+                      {range ? (
+                        <p>{range}</p>
+                      ) : (
+                        <p className="text-fg-subtle">기간 미정</p>
+                      )}
+                      {trip.region && (
+                        <p className="flex items-center gap-1 truncate">
+                          <MapPin className="size-3 shrink-0" aria-hidden="true" />
+                          <span className="truncate">{trip.region}</span>
+                        </p>
+                      )}
+                      <p className="text-fg-subtle">
+                        {formatDate(trip.created_at)} 생성 · 항목 {trip.itemCount}개
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              )
+            })}
           </ul>
         )}
       </main>

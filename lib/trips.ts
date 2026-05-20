@@ -4,16 +4,28 @@ export type TripSummary = {
   id: string
   title: string
   created_at: string
+  start_date: string | null
+  end_date: string | null
+  region: string | null
+  basecamp_address: string | null
   itemCount: number
 }
 
 export async function listUserTrips(client: SupabaseClient): Promise<TripSummary[]> {
   const { data: trips, error } = await client
     .from('trips')
-    .select('id, title, created_at')
+    .select('id, title, created_at, start_date, end_date, region, basecamp_address')
     .order('created_at', { ascending: false })
   if (error) throw error
-  const rows = (trips ?? []) as Array<{ id: string; title: string; created_at: string }>
+  const rows = (trips ?? []) as Array<{
+    id: string
+    title: string
+    created_at: string
+    start_date: string | null
+    end_date: string | null
+    region: string | null
+    basecamp_address: string | null
+  }>
 
   if (rows.length === 0) return []
 
@@ -33,6 +45,10 @@ export async function listUserTrips(client: SupabaseClient): Promise<TripSummary
     id: t.id,
     title: t.title,
     created_at: t.created_at,
+    start_date: t.start_date,
+    end_date: t.end_date,
+    region: t.region,
+    basecamp_address: t.basecamp_address,
     itemCount: counts.get(t.id) ?? 0,
   }))
 }

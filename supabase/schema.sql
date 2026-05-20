@@ -7,11 +7,15 @@
 -- ============================================================================
 
 create table if not exists public.trips (
-  id            uuid        primary key default gen_random_uuid(),
-  owner_user_id uuid        not null references auth.users(id) on delete cascade,
-  title         text        not null default '내 여행',
-  created_at    timestamptz not null default now(),
-  updated_at    timestamptz not null default now()
+  id               uuid        primary key default gen_random_uuid(),
+  owner_user_id    uuid        not null references auth.users(id) on delete cascade,
+  title            text        not null default '내 여행',
+  start_date       date,
+  end_date         date,
+  region           text,
+  basecamp_address text,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
 );
 
 create index if not exists idx_trips_owner on public.trips(owner_user_id);
