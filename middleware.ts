@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getSessionFromMiddleware } from '@/lib/auth'
 
-const PROTECTED_PAGES = ['/list', '/map', '/schedule', '/items', '/gmaps-import', '/trip', '/dashboard']
+const PROTECTED_PAGES = ['/list', '/map', '/schedule', '/items', '/gmaps-import', '/trip', '/dashboard', '/me']
 const PROTECTED_API = ['/api/items', '/api/geocode', '/api/gmaps', '/api/trips']
 
 export async function middleware(request: NextRequest) {
@@ -50,6 +50,7 @@ export const config = {
     '/gmaps-import/:path*',
     '/trip/:path*',
     '/dashboard/:path*',
+    '/me/:path*',
     '/api/items/:path*',
     '/api/geocode',
     '/api/gmaps/:path*',
