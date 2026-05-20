@@ -3,7 +3,9 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { Search } from 'lucide-react'
+import { Search, Share2 } from 'lucide-react'
+import ShareDialog from '@/components/Share/ShareDialog'
+import { useTripId } from '@/lib/hooks/useTripContext'
 import Navigation from '@/components/Layout/Navigation'
 import ItemList from '@/components/Items/ItemList'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
@@ -37,6 +39,8 @@ function ResearchPageContent() {
   const searchParams = useSearchParams()
   const { items, isLoading, updateItem, createItem } = useItems()
   const { showToast } = useToast()
+  const tripId = useTripId()
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
     searchParams.get('item'),
@@ -185,8 +189,19 @@ function ResearchPageContent() {
       <header className="px-4 md:px-8 pt-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-fg">목록</h1>
-          <div className="md:hidden">
-            <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShareDialogOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-bg px-2.5 py-1.5 text-xs font-medium text-fg-muted hover:bg-bg-subtle"
+              aria-label="공유 링크 관리"
+            >
+              <Share2 className="size-3.5" aria-hidden />
+              공유
+            </button>
+            <div className="md:hidden">
+              <ThemeToggle />
+            </div>
           </div>
         </div>
 
@@ -273,6 +288,12 @@ function ResearchPageContent() {
           handleClosePanel()
           showToast({ type: 'success', message: '삭제했어요' })
         }}
+      />
+
+      <ShareDialog
+        open={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
+        tripId={tripId}
       />
     </div>
   )
