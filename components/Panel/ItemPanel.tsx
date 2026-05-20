@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import type { TripItem } from '@/types'
 import PanelItemForm from './PanelItemForm'
 import { useItems } from '@/lib/hooks/useItems'
+import { useTrip } from '@/lib/hooks/useTripContext'
 import {
   CATEGORY_OPTIONS,
   CHIP_TONE,
@@ -14,8 +15,6 @@ import {
   TRIP_PRIORITY_OPTIONS,
   RESERVATION_STATUS_META,
   RESERVATION_STATUS_OPTIONS,
-  TRIP_DATE_MAX,
-  TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
 import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 import ReservationStatusBadge from '@/components/UI/ReservationStatusBadge'
@@ -238,6 +237,9 @@ function ItemDetailView({
   onFieldSave: (changes: Record<string, unknown>) => Promise<void>
   onDeleteRequest: () => void
 }) {
+  const trip = useTrip()
+  const dateMin = trip.startDate ?? undefined
+  const dateMax = trip.endDate ?? undefined
   const [editing, setEditing] = useState<InlineField | null>(null)
   const [vals, setVals] = useState({
     name: item.name,
@@ -461,7 +463,7 @@ function ItemDetailView({
 
         <InlineRow label="시작 날짜">
           {editing === 'date'
-            ? inlineInput('date', { type: 'date', min: TRIP_DATE_MIN, max: TRIP_DATE_MAX })
+            ? inlineInput('date', { type: 'date', min: dateMin, max: dateMax })
             : <span className={vals.date ? 'text-sm text-fg cursor-text' : emptyClass} onClick={() => activate('date')}>{vals.date || '날짜 선택'}</span>
           }
         </InlineRow>
@@ -475,7 +477,7 @@ function ItemDetailView({
 
         <InlineRow label="종료 날짜">
           {editing === 'end_date'
-            ? inlineInput('end_date', { type: 'date', min: TRIP_DATE_MIN, max: TRIP_DATE_MAX })
+            ? inlineInput('end_date', { type: 'date', min: dateMin, max: dateMax })
             : <span className={vals.end_date ? 'text-sm text-fg cursor-text' : emptyClass} onClick={() => activate('end_date')}>{vals.end_date || '날짜 선택'}</span>
           }
         </InlineRow>

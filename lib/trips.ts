@@ -1,5 +1,41 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+export type TripBounds = {
+  start: string | null
+  end: string | null
+}
+
+/**
+ * 주어진 trip 의 시작·종료일을 조회한다. RLS 가 멤버 권한을 검증.
+ * 둘 다 null 이면 검증 생략 의미.
+ */
+export async function fetchTripBounds(
+  client: SupabaseClient,
+  tripId: string,
+): Promise<TripBounds | null> {
+  const { data, error } = await client
+    .from('trips')
+    .select('start_date, end_date')
+    .eq('id', tripId)
+    .maybeSingle()
+  if (error || !data) return null
+  return { start: data.start_date as string | null, end: data.end_date as string | null }
+}
+
+export function isDateWithinBounds(date: string, bounds: TripBounds | null): boolean {
+  if (!bounds) return true
+  if (bounds.start && date < bounds.start) return false
+  if (bounds.end && date > bounds.end) return false
+  return true
+}
+
+export function formatBoundsLabel(bounds: TripBounds | null): string {
+  if (!bounds || (!bounds.start && !bounds.end)) return '기간이 설정되지 않은 여행'
+  const start = bounds.start ?? '~'
+  const end = bounds.end ?? '~'
+  return `${start} ~ ${end}`
+}
+
 export type TripSummary = {
   id: string
   title: string

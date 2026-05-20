@@ -29,7 +29,13 @@ export const RESERVATION_STATUS_OPTIONS: ReservationStatus[] = [
   '예약완료',
 ]
 
+/**
+ * @deprecated 단일 NYC trip 시대 잔재. 신규 코드는 사용 금지.
+ * trip 기간은 항상 현재 trip context(useTrip().startDate/endDate) 또는
+ * `fetchTripBounds(client, tripId)` 로 동적으로 가져온다.
+ */
 export const TRIP_DATE_MIN = '2026-07-01'
+/** @deprecated 단일 NYC trip 시대 잔재. */
 export const TRIP_DATE_MAX = '2026-07-31'
 
 export const ITEM_FIELD_LABELS = {

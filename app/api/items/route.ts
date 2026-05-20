@@ -7,11 +7,15 @@ import {
   CATEGORY_OPTIONS,
   RESERVATION_STATUS_OPTIONS,
   TRIP_PRIORITY_OPTIONS,
-  TRIP_DATE_MAX,
-  TRIP_DATE_MIN,
 } from '@/lib/itemOptions'
+import {
+  fetchTripBounds,
+  formatBoundsLabel,
+  isDateWithinBounds,
+  type TripBounds,
+} from '@/lib/trips'
 
-function validateItem(body: Record<string, unknown>): string | null {
+function validateItem(body: Record<string, unknown>, bounds: TripBounds | null): string | null {
   if (!body.name || typeof body.name !== 'string' || !body.name.trim()) {
     return 'name은 필수입니다.'
   }
@@ -31,15 +35,15 @@ function validateItem(body: Record<string, unknown>): string | null {
   if (body.budget !== undefined && body.budget !== null && (typeof body.budget !== 'number' || body.budget < 0)) {
     return 'budget은 0 이상의 숫자여야 합니다.'
   }
-  if (body.date !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(body.date as string)) {
+  if (body.date !== undefined && body.date !== null && !/^\d{4}-\d{2}-\d{2}$/.test(body.date as string)) {
     return 'date는 YYYY-MM-DD 형식이어야 합니다.'
   }
   if (
     body.date !== undefined &&
     body.date !== null &&
-    ((body.date as string) < TRIP_DATE_MIN || (body.date as string) > TRIP_DATE_MAX)
+    !isDateWithinBounds(body.date as string, bounds)
   ) {
-    return 'date는 2026-07-01부터 2026-07-31 사이여야 합니다.'
+    return `date는 여행 기간(${formatBoundsLabel(bounds)}) 내여야 합니다.`
   }
   if (
     body.end_date !== undefined &&
@@ -51,9 +55,9 @@ function validateItem(body: Record<string, unknown>): string | null {
   if (
     body.end_date !== undefined &&
     body.end_date !== null &&
-    ((body.end_date as string) < TRIP_DATE_MIN || (body.end_date as string) > TRIP_DATE_MAX)
+    !isDateWithinBounds(body.end_date as string, bounds)
   ) {
-    return 'end_date는 2026-07-01부터 2026-07-31 사이여야 합니다.'
+    return `end_date는 여행 기간(${formatBoundsLabel(bounds)}) 내여야 합니다.`
   }
   if (
     body.date !== undefined &&
@@ -118,7 +122,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const body = await request.json()
 
-  const error = validateItem(body)
+  const client = createRouteHandlerSupabase()
+  const tripId = getTripIdFromRequest(request)
+  const bounds = tripId ? await fetchTripBounds(client, tripId) : null
+
+  const error = validateItem(body, bounds)
   if (error) return NextResponse.json({ error }, { status: 400 })
 
   const now = new Date().toISOString()
@@ -143,8 +151,6 @@ export async function POST(request: NextRequest) {
   if (body.time_start !== undefined) item.time_start = body.time_start as string
   if (body.time_end !== undefined && body.time_end !== null) item.time_end = body.time_end as string
 
-  const client = createRouteHandlerSupabase()
-  const tripId = getTripIdFromRequest(request)
   const items = await readItems(client, tripId)
   items.push(item)
   await writeItems(client, items, tripId)
