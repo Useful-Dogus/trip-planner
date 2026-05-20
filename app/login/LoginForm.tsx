@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { clearAppCache } from '@/lib/clearAppCache'
+import { ErrorBanner } from '@/components/UI'
 
 export default function LoginForm() {
   const router = useRouter()
@@ -99,9 +100,9 @@ export default function LoginForm() {
           </div>
 
           {error && (
-            <div className="bg-critical-bg border border-critical-border rounded-lg px-3 py-2">
-              <p className="text-critical-fg text-sm">{error}</p>
-            </div>
+            <ErrorBanner tone="critical" onDismiss={() => setError('')}>
+              {error}
+            </ErrorBanner>
           )}
 
           <button
