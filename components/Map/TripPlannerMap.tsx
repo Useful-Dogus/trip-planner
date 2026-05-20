@@ -1,12 +1,13 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Polyline, Tooltip } from 'react-leaflet'
 import MapAddOnLongPress from './MapAddOnLongPress'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
 import { getEndLodging, getStartLodging, isStayItem } from '@/lib/lodging'
+import { useOptionalTrip } from '@/lib/hooks/useTripContext'
 
 interface TripPlannerMapProps {
   items: TripItem[]
@@ -58,6 +59,32 @@ export default function TripPlannerMap({
   selectedItemId,
   onSelectItem,
 }: TripPlannerMapProps) {
+  const trip = useOptionalTrip()
+  const [basecampCoord, setBasecampCoord] = useState<[number, number] | null>(null)
+
+  useEffect(() => {
+    const addr = trip?.basecampAddress?.trim()
+    if (!addr) {
+      setBasecampCoord(null)
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/geocode?q=${encodeURIComponent(addr)}`)
+        const data = await res.json()
+        if (!cancelled && typeof data?.lat === 'number' && typeof data?.lng === 'number') {
+          setBasecampCoord([data.lat, data.lng])
+        }
+      } catch {
+        // 베이스캠프 좌표 실패는 silent — lodging item 만으로 동작
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [trip?.basecampAddress])
+
   const visibleItems = useMemo(
     () =>
       items.filter(
@@ -85,17 +112,17 @@ export default function TripPlannerMap({
     const startCoord: [number, number] | null =
       startStay && startStay.lat != null && startStay.lng != null
         ? [startStay.lat, startStay.lng]
-        : null
+        : basecampCoord
     const endCoord: [number, number] | null =
       endStay && endStay.lat != null && endStay.lng != null
         ? [endStay.lat, endStay.lng]
-        : null
+        : basecampCoord
     return [
       ...(startCoord ? [startCoord] : []),
       ...activityCoords,
       ...(endCoord ? [endCoord] : []),
     ]
-  }, [dayItems, items, selectedDate])
+  }, [dayItems, items, selectedDate, basecampCoord])
 
   return (
     <MapContainer
@@ -145,6 +172,23 @@ export default function TripPlannerMap({
 
       {polyline.length > 1 && (
         <Polyline positions={polyline} pathOptions={{ className: 'tp-day-route' }} weight={2.5} opacity={0.6} />
+      )}
+
+      {basecampCoord && (
+        <Marker
+          position={basecampCoord}
+          icon={L.divIcon({
+            html: `<div class="tp-basecamp-marker">🏠</div>`,
+            className: '',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+          })}
+          interactive={false}
+        >
+          <Tooltip direction="top" offset={[0, -16]} opacity={0.9}>
+            <span className="text-xs font-medium">베이스캠프</span>
+          </Tooltip>
+        </Marker>
       )}
 
       <MapAddOnLongPress />
