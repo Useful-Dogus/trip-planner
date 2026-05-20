@@ -2,28 +2,48 @@
 
 import { createContext, useContext, type ReactNode } from 'react'
 
-const TripIdContext = createContext<string | null>(null)
+export type TripRole = 'owner' | 'editor' | 'viewer'
 
-export function TripIdProvider({
-  tripId,
+export type TripContextValue = {
+  id: string
+  title: string
+  startDate: string | null
+  endDate: string | null
+  region: string | null
+  basecampAddress: string | null
+  role: TripRole
+}
+
+const TripContext = createContext<TripContextValue | null>(null)
+
+export function TripProvider({
+  value,
   children,
 }: {
-  tripId: string
+  value: TripContextValue
   children: ReactNode
 }) {
-  return <TripIdContext.Provider value={tripId}>{children}</TripIdContext.Provider>
+  return <TripContext.Provider value={value}>{children}</TripContext.Provider>
+}
+
+export function useTrip(): TripContextValue {
+  const value = useContext(TripContext)
+  if (!value) {
+    throw new Error('useTrip 은 TripProvider 내부에서만 사용할 수 있습니다.')
+  }
+  return value
+}
+
+export function useOptionalTrip(): TripContextValue | null {
+  return useContext(TripContext)
 }
 
 export function useTripId(): string {
-  const id = useContext(TripIdContext)
-  if (!id) {
-    throw new Error('useTripId 는 TripIdProvider 내부에서만 사용할 수 있습니다.')
-  }
-  return id
+  return useTrip().id
 }
 
 export function useOptionalTripId(): string | null {
-  return useContext(TripIdContext)
+  return useContext(TripContext)?.id ?? null
 }
 
 export function buildTripPath(tripId: string, sub: string): string {

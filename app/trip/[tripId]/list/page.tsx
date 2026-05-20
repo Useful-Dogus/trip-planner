@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import { Search, Share2 } from 'lucide-react'
 import ShareDialog from '@/components/Share/ShareDialog'
 import { useTripId } from '@/lib/hooks/useTripContext'
+import TripPageTitle from '@/components/UI/TripPageTitle'
 import Navigation from '@/components/Layout/Navigation'
 import ItemList from '@/components/Items/ItemList'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
@@ -188,7 +189,7 @@ function ResearchPageContent() {
     <div className="md:pl-44 bg-bg text-fg min-h-screen">
       <header className="px-4 md:px-8 pt-4">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-bold text-fg">목록</h1>
+          <TripPageTitle section="목록" />
           <div className="flex items-center gap-2">
             <button
               type="button"

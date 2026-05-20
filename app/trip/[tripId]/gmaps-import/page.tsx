@@ -6,6 +6,7 @@ import Navigation from '@/components/Layout/Navigation'
 import UrlInput from '@/components/GmapsImport/UrlInput'
 import CandidateList from '@/components/GmapsImport/CandidateList'
 import { useTripPath } from '@/lib/hooks/useTripContext'
+import TripPageTitle from '@/components/UI/TripPageTitle'
 import type { ImportCandidate } from '@/types'
 
 type PageState = 'idle' | 'loading' | 'review' | 'importing' | 'done'
@@ -108,7 +109,7 @@ export default function GmapsImportPage() {
     <div className="md:pl-44 min-h-screen bg-bg-elevated">
       <div className="max-w-2xl mx-auto px-4 py-8 pb-24 md:pb-8">
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-fg">구글맵 연동</h1>
+          <TripPageTitle section="구글맵 연동" />
           <p className="text-sm text-fg-muted mt-1">
             구글맵 공개 리스트에서 장소를 가져와 추가합니다.
           </p>
