@@ -179,20 +179,41 @@ export default function ShareDialog({ open, onClose, tripId }: Props) {
         </section>
 
         {revokedShares.length > 0 && (
-          <section>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-subtle">비활성</h3>
-            <ul className="space-y-1.5">
-              {revokedShares.slice(0, 10).map((s) => (
-                <li key={s.token} className="text-xs text-fg-subtle">
-                  <code className="truncate">{s.token.slice(0, 8)}…</code>
-                  {' · '}
-                  {s.revoked_at ? '회수됨' : '만료됨'}
-                </li>
-              ))}
-            </ul>
-          </section>
+          <RevokedSharesSection shares={revokedShares} />
         )}
       </div>
     </Sheet>
+  )
+}
+
+function RevokedSharesSection({ shares }: { shares: Share[] }) {
+  const PAGE = 10
+  const [visible, setVisible] = useState(PAGE)
+  const display = shares.slice(0, visible)
+  const hasMore = visible < shares.length
+  return (
+    <section>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-subtle">
+        비활성 ({shares.length})
+      </h3>
+      <ul className="space-y-1.5">
+        {display.map((s) => (
+          <li key={s.token} className="text-xs text-fg-subtle">
+            <code className="truncate">{s.token.slice(0, 8)}…</code>
+            {' · '}
+            {s.revoked_at ? '회수됨' : '만료됨'}
+          </li>
+        ))}
+      </ul>
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setVisible((v) => v + PAGE)}
+          className="mt-2 text-xs text-accent hover:underline"
+        >
+          더 보기 ({shares.length - visible}개 남음)
+        </button>
+      )}
+    </section>
   )
 }
