@@ -23,8 +23,14 @@ interface SheetProps {
    * 'auto' = md 브레이크포인트 기준 자동 (모바일 bottom, 데스크톱 right)
    */
   side?: Side
-  /** 모바일 바텀시트 높이 (vh). 기본 80. */
+  /**
+   * @deprecated 콘텐츠 적응형(height auto, max-height 90vh) 가 기본. 명시하면 max-height 로 사용된다.
+   */
   bottomHeightVh?: number
+  /** 모바일 바텀시트 최대 높이 (vh). 기본 90. 콘텐츠가 짧으면 줄어들고 길면 내부 스크롤. */
+  maxBottomHeightVh?: number
+  /** 모바일 바텀시트 최소 높이 (vh). 기본 0 (콘텐츠 적응). */
+  minBottomHeightVh?: number
   /** 데스크톱 우측 드로어 폭 (px). 기본 480. */
   rightWidthPx?: number
   title?: string
@@ -53,7 +59,9 @@ export default function Sheet({
   open,
   onClose,
   side = 'auto',
-  bottomHeightVh = 80,
+  bottomHeightVh,
+  maxBottomHeightVh = 90,
+  minBottomHeightVh = 0,
   rightWidthPx = 480,
   title,
   description,
@@ -159,7 +167,14 @@ export default function Sheet({
           className,
         )}
         style={{
-          height: side === 'right' ? '100vh' : `${bottomHeightVh}vh`,
+          height: side === 'right' ? '100vh' : 'auto',
+          maxHeight:
+            side === 'right'
+              ? undefined
+              : bottomHeightVh != null
+                ? `${bottomHeightVh}vh`
+                : `${maxBottomHeightVh}vh`,
+          minHeight: side === 'right' ? undefined : minBottomHeightVh ? `${minBottomHeightVh}vh` : undefined,
           width: side === 'right' ? `${rightWidthPx}px` : undefined,
           ...(side === 'auto'
             ? ({ '--md-width': `${rightWidthPx}px` } as React.CSSProperties)
