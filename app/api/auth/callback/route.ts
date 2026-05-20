@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { exchangeCodeForSession } from '@/lib/auth'
 
 function safeNext(next: string | null): string {
-  if (!next) return '/list'
-  if (!next.startsWith('/') || next.startsWith('//')) return '/list'
+  if (!next) return '/'
+  if (!next.startsWith('/') || next.startsWith('//')) return '/'
   return next
 }
 

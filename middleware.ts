@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getSessionFromMiddleware } from '@/lib/auth'
 
-const PROTECTED_PAGES = ['/list', '/map', '/schedule', '/items', '/gmaps-import']
+const PROTECTED_PAGES = ['/list', '/map', '/schedule', '/items', '/gmaps-import', '/trip']
 const PROTECTED_API = ['/api/items', '/api/geocode', '/api/gmaps']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  const isProtectedPage = PROTECTED_PAGES.some(p => pathname.startsWith(p))
+  const isProtectedPage =
+    pathname === '/' || PROTECTED_PAGES.some(p => pathname.startsWith(p))
   const isProtectedApi = PROTECTED_API.some(p => pathname.startsWith(p))
   const isAuthPage =
     pathname === '/login' || pathname === '/signup' || pathname === '/forgot'
@@ -19,7 +20,7 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthPage) {
     if (isAuthenticated) {
-      return NextResponse.redirect(new URL('/list', request.url))
+      return NextResponse.redirect(new URL('/', request.url))
     }
     return response
   }
@@ -38,6 +39,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     '/login',
     '/signup',
     '/forgot',
@@ -46,6 +48,7 @@ export const config = {
     '/schedule/:path*',
     '/items/:path*',
     '/gmaps-import/:path*',
+    '/trip/:path*',
     '/api/items/:path*',
     '/api/geocode',
     '/api/gmaps/:path*',

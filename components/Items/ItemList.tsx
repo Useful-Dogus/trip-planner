@@ -14,6 +14,7 @@ import EmptyState from '@/components/UI/EmptyState'
 import Button from '@/components/UI/Button'
 import { Input } from '@/components/UI/Input'
 import { TRIP_PRIORITY_META } from '@/lib/itemOptions'
+import { useTripPath } from '@/lib/hooks/useTripContext'
 
 export type SortKey = 'name' | 'date' | 'budget' | 'trip_priority'
 export type SortDir = 'asc' | 'desc'
@@ -60,6 +61,7 @@ export default function ItemList({
   highlightedIds,
 }: ItemListProps) {
   const router = useRouter()
+  const tripPath = useTripPath()
   const [filterState, setFilterState] = useState<FilterState>({
     categories: [],
     tripPriorities: [],
@@ -302,7 +304,7 @@ export default function ItemList({
             title="아직 장소가 없어요"
             description="가고 싶은 장소를 추가하면 여기에 모입니다."
             action={
-              <Button onClick={() => router.push('/items/new')}>
+              <Button onClick={() => router.push(tripPath('items/new'))}>
                 첫 장소 추가하기
               </Button>
             }

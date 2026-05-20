@@ -6,17 +6,18 @@ import { List, Map, CalendarDays, Download, LogOut } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { cn } from '@/lib/cn'
 import { clearAppCache } from '@/lib/clearAppCache'
+import { useOptionalTripId, buildTripPath } from '@/lib/hooks/useTripContext'
 
 interface NavItem {
-  href: string
+  sub: string
   label: string
   icon: typeof List
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/list', label: '목록', icon: List },
-  { href: '/map', label: '지도', icon: Map },
-  { href: '/schedule', label: '일정', icon: CalendarDays },
+  { sub: 'list', label: '목록', icon: List },
+  { sub: 'map', label: '지도', icon: Map },
+  { sub: 'schedule', label: '일정', icon: CalendarDays },
 ]
 
 async function handleLogout() {
@@ -25,9 +26,21 @@ async function handleLogout() {
   window.location.href = '/login'
 }
 
+function legacyHref(sub: string): string {
+  return `/${sub}`
+}
+
 export default function Navigation() {
   const pathname = usePathname()
-  const isActive = (href: string) => pathname.startsWith(href)
+  const tripId = useOptionalTripId()
+
+  const hrefFor = (sub: string): string =>
+    tripId ? buildTripPath(tripId, sub) : legacyHref(sub)
+
+  const isActive = (sub: string): boolean => {
+    const href = hrefFor(sub)
+    return pathname.startsWith(href)
+  }
 
   return (
     <>
@@ -41,12 +54,12 @@ export default function Navigation() {
         aria-label="기본 네비게이션"
       >
         <ul className="flex">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = isActive(href)
+          {NAV_ITEMS.map(({ sub, label, icon: Icon }) => {
+            const active = isActive(sub)
             return (
-              <li key={href} className="flex-1">
+              <li key={sub} className="flex-1">
                 <Link
-                  href={href}
+                  href={hrefFor(sub)}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
                     'flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-11',
@@ -74,12 +87,12 @@ export default function Navigation() {
           <p className="text-xs text-fg-subtle mt-0.5">2026년 7월</p>
         </div>
         <ul className="flex-1 space-y-0.5">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = isActive(href)
+          {NAV_ITEMS.map(({ sub, label, icon: Icon }) => {
+            const active = isActive(sub)
             return (
-              <li key={href}>
+              <li key={sub}>
                 <Link
-                  href={href}
+                  href={hrefFor(sub)}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
                     'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium',
@@ -103,7 +116,7 @@ export default function Navigation() {
             <ThemeToggle />
           </div>
           <Link
-            href="/gmaps-import"
+            href={hrefFor('gmaps-import')}
             className={cn(
               'flex items-center gap-2 px-3 py-2 text-sm rounded-lg',
               'text-fg-subtle hover:text-fg hover:bg-bg-subtle transition-colors duration-150',

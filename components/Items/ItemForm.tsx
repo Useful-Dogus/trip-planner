@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Category, ReservationStatus, TripItem, TripPriority, Link as TripLink } from '@/types'
 import { useItems } from '@/lib/hooks/useItems'
+import { useTripPath } from '@/lib/hooks/useTripContext'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
@@ -40,6 +41,7 @@ interface ItemFormProps {
 
 export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   const router = useRouter()
+  const tripPath = useTripPath()
   const { createItem, updateItem, deleteItem } = useItems()
   const [form, setForm] = useState<FormData>({
     name: initialData?.name ?? '',
@@ -165,10 +167,10 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     try {
       if (mode === 'create') {
         await createItem(body as Omit<TripItem, 'id' | 'created_at' | 'updated_at'>)
-        router.push('/list')
+        router.push(tripPath('list'))
       } else if (itemId) {
         await updateItem(itemId, body)
-        router.push(`/items/${itemId}`)
+        router.push(tripPath(`items/${itemId}`))
       }
     } catch {
       setError('저장에 실패했습니다.')
@@ -181,7 +183,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
     setLoading(true)
     if (itemId) {
       await deleteItem(itemId)
-      router.push('/list')
+      router.push(tripPath('list'))
     }
   }
 

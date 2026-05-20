@@ -10,43 +10,52 @@ import { ensureActiveTrip } from '@/lib/trip'
 
 type Client = SupabaseClient
 
-export async function readItems(client: Client): Promise<TripItem[]> {
-  const tripId = await ensureActiveTrip(client)
+async function resolveTripId(client: Client, tripId?: string | null): Promise<string> {
+  if (tripId) return tripId
+  return ensureActiveTrip(client)
+}
+
+export async function readItems(client: Client, tripId?: string | null): Promise<TripItem[]> {
+  const resolvedTripId = await resolveTripId(client, tripId)
   const { data, error } = await client
     .from('items')
     .select('*')
-    .eq('trip_id', tripId)
+    .eq('trip_id', resolvedTripId)
     .order('created_at', { ascending: true })
   if (error) throw error
   const normalized = (data ?? []).map(rowToItem).map(normalizeTripItem)
   const items = normalized.map(entry => entry.item)
   if (normalized.some(entry => entry.changed)) {
-    await writeItems(client, items)
+    await writeItems(client, items, resolvedTripId)
   }
   return items
 }
 
-export async function writeItems(client: Client, items: TripItem[]): Promise<void> {
+export async function writeItems(
+  client: Client,
+  items: TripItem[],
+  tripId?: string | null,
+): Promise<void> {
   items.forEach(validateItem)
-  const tripId = await ensureActiveTrip(client)
+  const resolvedTripId = await resolveTripId(client, tripId)
 
   const { data: existing, error: fetchError } = await client
     .from('items')
     .select('id')
-    .eq('trip_id', tripId)
+    .eq('trip_id', resolvedTripId)
   if (fetchError) throw fetchError
 
   const existingIds = new Set((existing ?? []).map((r: { id: string }) => r.id))
   const incomingIds = new Set(items.map(i => i.id))
 
   const toDelete = Array.from(existingIds).filter(id => !incomingIds.has(id))
-  const toUpsert = items.map(item => itemToRow(item, tripId))
+  const toUpsert = items.map(item => itemToRow(item, resolvedTripId))
 
   if (toDelete.length > 0) {
     const { error } = await client
       .from('items')
       .delete()
-      .eq('trip_id', tripId)
+      .eq('trip_id', resolvedTripId)
       .in('id', toDelete)
     if (error) throw error
   }

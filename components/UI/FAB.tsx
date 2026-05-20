@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { useTripPath } from '@/lib/hooks/useTripContext'
 
 interface FABProps {
   href?: string
@@ -13,18 +14,20 @@ interface FABProps {
 
 /** 모바일 우측 하단 떠 있는 주요 액션 버튼. */
 export default function FAB({
-  href = '/items/new',
+  href,
   onClick,
   label = '새 장소 추가',
   className,
 }: FABProps) {
   const router = useRouter()
+  const tripPath = useTripPath()
+  const resolvedHref = href ?? tripPath('items/new')
 
   function handleClick() {
     if (onClick) {
       onClick()
-    } else if (href) {
-      router.push(href)
+    } else if (resolvedHref) {
+      router.push(resolvedHref)
     }
   }
 
@@ -40,7 +43,6 @@ export default function FAB({
         'hover:bg-accent-hover active:bg-accent-hover',
         'transition-colors duration-150 ease-out-soft',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-        // 기본 위치 (className 으로 override 가능)
         !className?.includes('bottom-') && 'bottom-20',
         !className?.includes('right-') && !className?.includes('left-') && 'right-4',
         className,
