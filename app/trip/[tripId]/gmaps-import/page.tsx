@@ -6,7 +6,7 @@ import Navigation from '@/components/Layout/Navigation'
 import UrlInput from '@/components/GmapsImport/UrlInput'
 import CandidateList from '@/components/GmapsImport/CandidateList'
 import { useTripPath } from '@/lib/hooks/useTripContext'
-import TripPageTitle from '@/components/UI/TripPageTitle'
+import TripPageHeader from '@/components/Layout/TripPageHeader'
 import type { ImportCandidate } from '@/types'
 
 type PageState = 'idle' | 'loading' | 'review' | 'importing' | 'done'
@@ -107,13 +107,13 @@ export default function GmapsImportPage() {
 
   return (
     <div className="md:pl-44 min-h-screen bg-bg-elevated">
-      <div className="max-w-2xl mx-auto px-4 py-8 pb-24 md:pb-8">
-        <div className="mb-6">
-          <TripPageTitle section="구글맵 연동" />
-          <p className="text-sm text-fg-muted mt-1">
-            구글맵 공개 리스트에서 장소를 가져와 추가합니다.
-          </p>
-        </div>
+      <div className="max-w-2xl mx-auto pb-24 md:pb-8">
+        <TripPageHeader
+          section="구글맵 연동"
+          body={<p className="text-sm text-fg-muted mt-1">구글맵 공개 리스트에서 장소를 가져와 추가합니다.</p>}
+          className="mb-6"
+        />
+        <div className="px-4">
 
         {(state === 'idle' || state === 'loading') && (
           <div className="bg-bg-elevated rounded-xl border border-border p-6">
@@ -175,6 +175,7 @@ export default function GmapsImportPage() {
             <p className="text-sm text-fg-muted">전체 탭으로 이동 중…</p>
           </div>
         )}
+        </div>
       </div>
       <Navigation />
     </div>

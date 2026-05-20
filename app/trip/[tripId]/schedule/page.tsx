@@ -9,7 +9,7 @@ import ScheduleTable from '@/components/Schedule/ScheduleTable'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { useItems } from '@/lib/hooks/useItems'
 import { useToast } from '@/components/UI/Toast'
-import TripPageTitle from '@/components/UI/TripPageTitle'
+import TripPageHeader from '@/components/Layout/TripPageHeader'
 import FAB from '@/components/UI/FAB'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
@@ -66,14 +66,9 @@ function SchedulePageContent() {
 
   return (
     <div className="md:pl-44 bg-bg text-fg min-h-screen">
-      <header className="max-w-3xl mx-auto px-4 pt-4">
-        <div className="flex items-center justify-between mb-4">
-          <TripPageTitle section="일정" />
-          <div className="md:hidden">
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+      <div className="max-w-3xl mx-auto">
+        <TripPageHeader section="일정" />
+      </div>
 
       {isLoading ? (
         <div className="max-w-3xl mx-auto px-4 space-y-2">
