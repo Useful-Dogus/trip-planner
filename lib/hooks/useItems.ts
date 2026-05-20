@@ -106,10 +106,12 @@ export function useItems() {
     }
   }
 
-  async function createItem(item: Omit<TripItem, 'id' | 'created_at' | 'updated_at'>) {
+  async function createItem(
+    item: Omit<TripItem, 'id' | 'created_at' | 'updated_at'>,
+  ): Promise<TripItem | null> {
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       showToast({ type: 'info', message: '오프라인 상태입니다. 인터넷 연결 후 다시 시도해주세요.' })
-      return
+      return null
     }
     const tmpId = `tmp_${Date.now()}`
     const now = new Date().toISOString()
@@ -126,7 +128,9 @@ export function useItems() {
         body: JSON.stringify(item),
       })
       if (!res.ok) throw new Error('Create failed')
+      const payload = (await res.json()) as { item?: TripItem }
       mutate()
+      return payload?.item ?? null
     } catch {
       mutate(snapshot, { revalidate: false })
       showToast({
@@ -134,6 +138,7 @@ export function useItems() {
         message: '추가에 실패했습니다.',
         action: { label: '재시도', onClick: () => createItem(item) },
       })
+      return null
     }
   }
 

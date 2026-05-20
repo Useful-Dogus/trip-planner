@@ -13,7 +13,7 @@ import ItemList from '@/components/Items/ItemList'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
 import ResearchTableSkeleton from '@/components/UI/ResearchTableSkeleton'
 import ResearchTable, { type SortDir, type SortKey } from '@/components/Research/ResearchTable'
-import FAB from '@/components/UI/FAB'
+import StickyAddBar from '@/components/UI/StickyAddBar'
 import FilterButton from '@/components/Research/FilterButton'
 import FilterPanel from '@/components/Research/FilterPanel'
 import ActiveFilterChips from '@/components/Research/ActiveFilterChips'
@@ -160,15 +160,44 @@ function ResearchPageContent() {
     const imported = searchParams.get('imported')
     if (!imported) return
 
-    const ids = new Set(imported.split(',').filter(Boolean))
+    const idList = imported.split(',').filter(Boolean)
+    const ids = new Set(idList)
     setHighlightedIds(ids)
 
     const params = new URLSearchParams(searchParams.toString())
     params.delete('imported')
     router.replace(buildUrl(params), { scroll: false })
 
-    const timer = setTimeout(() => setHighlightedIds(new Set()), 1000)
-    return () => clearTimeout(timer)
+    const firstId = idList[0]
+    const scrollToFirst = () => {
+      if (!firstId) return false
+      const el = document.querySelector<HTMLElement>(
+        `[data-item-id="${firstId}"]`,
+      )
+      if (!el) return false
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return true
+    }
+
+    // DOM 렌더 직후엔 카드가 없을 수 있으므로 다음 프레임에 시도, 실패 시 토스트로 폴백.
+    const raf = requestAnimationFrame(() => {
+      const scrolled = scrollToFirst()
+      if (idList.length === 1) {
+        showToast({
+          type: 'success',
+          message: scrolled ? '추가했어요' : '추가했어요. 목록에서 확인할 수 있어요.',
+          ...(scrolled
+            ? {}
+            : { action: { label: '보기', onClick: () => scrollToFirst() } }),
+        })
+      }
+    })
+
+    const timer = setTimeout(() => setHighlightedIds(new Set()), 1500)
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(timer)
+    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 검색·필터 상태를 URL search params 와 동기화 (디바운스 없이 즉시; replace 라 history 미오염)
@@ -304,7 +333,7 @@ function ResearchPageContent() {
               onUpdateItem={updateItem}
               highlightedIds={highlightedIds}
             />
-            <FAB />
+            <StickyAddBar />
           </div>
           <div className="hidden md:block px-8 pb-6">
             <ResearchTable

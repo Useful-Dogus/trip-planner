@@ -216,8 +216,13 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
 
     try {
       if (mode === 'create') {
-        await createItem(body as Omit<TripItem, 'id' | 'created_at' | 'updated_at'>)
-        router.push(tripPath('list'))
+        const created = await createItem(
+          body as Omit<TripItem, 'id' | 'created_at' | 'updated_at'>,
+        )
+        const target = created
+          ? `${tripPath('list')}?imported=${created.id}`
+          : tripPath('list')
+        router.push(target)
       } else if (itemId) {
         await updateItem(itemId, body)
         router.push(tripPath(`items/${itemId}`))
