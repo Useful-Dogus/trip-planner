@@ -447,7 +447,84 @@ Key + Ambient 2종 합성, 14% opacity 기본. trip-planner 매핑:
 
 ---
 
-## 14. 적용 우선순위 (현재 코드 기준)
+## 14. 피드백 · 에러 패턴
+
+### 14.1 컴포넌트 선택 매트릭스
+
+| 상황 | 컴포넌트 | 위치 / 수명 |
+|---|---|---|
+| 폼 필드 검증 실패 | inline 텍스트 (`text-critical-fg text-xs`) | 필드 바로 아래, 입력 수정 시 사라짐 |
+| 폼 제출/액션 실패 (회복 가능) | **`<ErrorBanner tone="critical">`** | 폼 상단 또는 액션 컨텍스트 내부, 사용자가 닫거나 재시도 |
+| 페이지 차원 경고 (만료 등) | **`<ErrorBanner tone="warning">`** 또는 `info` | 페이지 최상단 |
+| 일시적 성공/실패 알림 | **`<Toast>`** | 화면 하단, 3-5초 후 자동 dismiss |
+| 비파괴 안내 (팁·전환 가능 정보) | **`<ErrorBanner tone="info">`** | 컨텍스트 근처 |
+| 데이터 0건 / 필터 결과 없음 | **`<EmptyState>`** | 콘텐츠 영역 중앙 |
+| 오프라인 | `<OfflineBanner>` | 최상단 고정 배너 (전역) |
+
+### 14.2 톤(심각도) → 시맨틱 토큰
+
+| 톤 | 토큰 prefix | 아이콘 (lucide) | 사용 |
+|---|---|---|---|
+| `critical` | `--critical-*` | `AlertCircle` | 사용자 액션 실패, 데이터 손실 위험 |
+| `warning` | `--warning-*` | `AlertTriangle` | 주의 필요, 진행은 가능 |
+| `info` | `--info-*` | `Info` | 중립 안내, 팁 |
+| `success` | `--success-*` | `CheckCircle2` | 액션 성공 |
+
+> hex 직접 사용 금지. 위 토큰만 사용하면 light/dark 모드 자동 대응.
+
+### 14.3 메시지 카피 규칙
+
+- **사실 진술 우선**. "왜 실패했고 다음에 무엇을 할 수 있는가" 를 명시. 사과·자책 회피.
+- **길이 가이드**: 제목 ≤ 20자, 본문 ≤ 60자 (한 줄 권장). 길어지면 인라인 배너로.
+- **재시도/해제 라벨**: "다시 시도", "취소", "확인". "OK" 같은 영어 잔재 금지.
+- **금지**:
+  - "알 수 없는 오류가 발생했습니다." → 원인을 좁히거나 사용자에게 다음 행동 제시.
+  - "Oops!", "앗!" 같은 의태어 — 제품 보이스와 불일치.
+  - 책임 회피("서버가 잠시 휴식 중입니다") — 사실 진술로 대체.
+- **재시도 가능한 실패**는 항상 `action` 슬롯에 "다시 시도" 버튼 또는 toast `action` 제공.
+
+### 14.4 접근성
+
+- `<ErrorBanner tone="critical">` → `role="alert"` + `aria-live="assertive"` (자동 설정됨).
+- 그 외 톤 → `role="status"` + `aria-live="polite"` (자동 설정됨).
+- 토스트는 `aria-live="polite"`, 비차단. 모달로 만들지 않는다.
+- 인라인 필드 에러는 `<input aria-invalid aria-describedby="...">` 로 연결.
+
+### 14.5 적용 예시 코드
+
+```tsx
+import { ErrorBanner } from '@/components/UI'
+import { useToast } from '@/components/UI/Toast'
+
+// 1) 폼 제출 실패 — 인라인 배너
+{error && (
+  <ErrorBanner tone="critical" onDismiss={() => setError('')}>
+    {error}
+  </ErrorBanner>
+)}
+
+// 2) 일시적 성공 — 토스트
+const { showToast } = useToast()
+showToast({ type: 'success', message: '저장했어요' })
+
+// 3) 재시도 액션이 있는 토스트
+showToast({
+  type: 'error',
+  message: '저장에 실패했어요',
+  action: { label: '다시 시도', onClick: handleSave },
+})
+```
+
+### 14.6 후속 surface 적용 우선순위
+
+1. `/login`, `/signup`, `/forgot` — 인증 실패 분기 (#128).
+2. `/gmaps-import` — 가져오기 실패/부분 성공.
+3. ItemForm 저장 실패 / 충돌.
+4. geocode 실패 폴백.
+
+---
+
+## 15. 적용 우선순위 (현재 코드 기준)
 
 현재 `tailwind.config.ts` 가 비어있고 hex 가 하드코딩되어 있어 토큰화가 가장 큰 갭. 다음 순서로 점진적으로 마이그레이션:
 
@@ -465,7 +542,7 @@ Key + Ambient 2종 합성, 14% opacity 기본. trip-planner 매핑:
 
 ---
 
-## 15. 참고 코드 위치
+## 16. 참고 코드 위치
 
 | 영역 | 파일 |
 |---|---|
@@ -480,7 +557,7 @@ Key + Ambient 2종 합성, 14% opacity 기본. trip-planner 매핑:
 
 ---
 
-## 16. 신규 화면 디자인 체크리스트
+## 17. 신규 화면 디자인 체크리스트
 
 새 화면/컴포넌트를 만들기 전 이 체크리스트를 통과시킨다.
 
