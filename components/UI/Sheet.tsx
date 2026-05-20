@@ -164,6 +164,11 @@ export default function Sheet({
           'absolute bg-bg-elevated text-fg shadow-e28 flex flex-col',
           'border border-border',
           sideClasses,
+          // side='auto' 는 모바일=bottom / 데스크톱=right 로 전환되므로,
+          // 인라인 style 의 바텀시트 사이징(height:auto/maxHeight:Xvh/no width)을
+          // 데스크톱에서는 right 드로어 사이징으로 덮어쓴다.
+          side === 'auto' &&
+            'md:!h-screen md:!max-h-none md:!min-h-0 md:w-[var(--md-width)]',
           className,
         )}
         style={{
