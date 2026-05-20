@@ -5,6 +5,7 @@ import type { ReservationStatus, TripItem } from '@/types'
 import { CATEGORY_META, RESERVATION_STATUS_META } from '@/lib/itemOptions'
 import { haversineKm } from '@/lib/distance'
 import { getLodgingForDate, isLodgingMidStay } from '@/lib/lodging'
+import { useOptionalTripId } from '@/lib/hooks/useTripContext'
 import { EDITABLE_FIELDS, type EditableField } from './TableRow'
 import TableRow from './TableRow'
 import DateGroupHeader from './DateGroupHeader'
@@ -166,9 +167,45 @@ export default function ScheduleTable({
   onCreateItem,
   onOpenPanel,
 }: ScheduleTableProps) {
+  const tripId = useOptionalTripId()
+  const storageKey = tripId ? `schedule:collapsed:${tripId}` : null
+
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
-  const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set())
-  const [undatedCollapsed, setUndatedCollapsed] = useState(false)
+  const [collapsedDates, setCollapsedDates] = useState<Set<string>>(() => {
+    if (typeof window === 'undefined' || !storageKey) return new Set()
+    try {
+      const raw = window.sessionStorage.getItem(storageKey)
+      if (!raw) return new Set()
+      const parsed = JSON.parse(raw) as { dates?: string[]; undated?: boolean }
+      return new Set(parsed.dates ?? [])
+    } catch {
+      return new Set()
+    }
+  })
+  const [undatedCollapsed, setUndatedCollapsed] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || !storageKey) return false
+    try {
+      const raw = window.sessionStorage.getItem(storageKey)
+      if (!raw) return false
+      const parsed = JSON.parse(raw) as { dates?: string[]; undated?: boolean }
+      return !!parsed.undated
+    } catch {
+      return false
+    }
+  })
+
+  // trip 별 sessionStorage 에 접기 상태 영속화 — 새로고침·뷰 전환 후에도 유지
+  useEffect(() => {
+    if (typeof window === 'undefined' || !storageKey) return
+    try {
+      window.sessionStorage.setItem(
+        storageKey,
+        JSON.stringify({ dates: Array.from(collapsedDates), undated: undatedCollapsed }),
+      )
+    } catch {
+      // 저장 실패는 silent — sessionStorage 비활성/quota 등
+    }
+  }, [storageKey, collapsedDates, undatedCollapsed])
   const [addingToDate, setAddingToDate] = useState<string | null>(null)
   const [newItemName, setNewItemName] = useState('')
   const cancelNewItemRef = useRef(false)
