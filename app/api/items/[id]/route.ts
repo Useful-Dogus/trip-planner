@@ -106,7 +106,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
   return NextResponse.json({ item })
 }
 
-export async function PUT(request: NextRequest, { params }: RouteContext) {
+export async function PATCH(request: NextRequest, { params }: RouteContext) {
   const client = createRouteHandlerSupabase()
   const tripId = getTripIdFromRequest(request)
   const items = await readItems(client, tripId)
@@ -140,6 +140,9 @@ export async function PUT(request: NextRequest, { params }: RouteContext) {
 
   return NextResponse.json({ item: updated })
 }
+
+/** @deprecated PUT 은 호환용 alias. 신규 호출은 PATCH 사용. 다음 메이저에서 제거 예정. */
+export const PUT = PATCH
 
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
   const client = createRouteHandlerSupabase()

@@ -66,7 +66,7 @@ export function useItems() {
     )
     try {
       const res = await fetch(withTripId(`/api/items/${id}`, tripId), {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(changes),
       })
