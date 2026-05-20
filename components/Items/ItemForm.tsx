@@ -75,6 +75,24 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
   const [geocodeError, setGeocodeError] = useState('')
   const memoRef = useRef<HTMLTextAreaElement>(null)
   const nameRef = useRef<HTMLInputElement>(null)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
+
+  // visualViewport 기반 키보드 인지 — 저장 바가 가려지지 않도록
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const handler = () => {
+      const offset = window.innerHeight - vv.height - vv.offsetTop
+      setKeyboardHeight(Math.max(0, offset))
+    }
+    handler()
+    vv.addEventListener('resize', handler)
+    vv.addEventListener('scroll', handler)
+    return () => {
+      vv.removeEventListener('resize', handler)
+      vv.removeEventListener('scroll', handler)
+    }
+  }, [])
 
   useEffect(() => {
     const el = memoRef.current
@@ -356,8 +374,13 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
       {error && <p className="text-sm text-critical-fg">{error}</p>}
 
       <div
-        className="fixed left-0 right-0 md:static bg-bg-elevated/95 backdrop-blur border-t md:border-t-0 px-4 py-3 md:px-0 md:py-0 z-40"
-        style={{ bottom: 'calc(3.5rem + env(safe-area-inset-bottom))' }}
+        className="fixed left-0 right-0 md:static bg-bg-elevated/95 backdrop-blur border-t md:border-t-0 px-4 py-3 md:px-0 md:py-0 z-40 transition-[bottom] duration-150"
+        style={{
+          bottom:
+            keyboardHeight > 0
+              ? `${keyboardHeight}px`
+              : 'calc(3.5rem + env(safe-area-inset-bottom))',
+        }}
       >
         <div className="max-w-lg mx-auto md:max-w-none flex gap-3">
           {mode === 'edit' && (
