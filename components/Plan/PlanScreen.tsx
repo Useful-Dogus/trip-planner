@@ -13,6 +13,7 @@ import {
   useMobilePanelHeight,
 } from '@/lib/hooks/useMobilePanelHeight'
 import { useToast } from '@/components/UI/Toast'
+import TripContextLabel from '@/components/UI/TripContextLabel'
 import { CATEGORY_OPTIONS } from '@/lib/itemOptions'
 import type { Category, TripItem } from '@/types'
 
@@ -170,6 +171,9 @@ export default function PlanScreen({ basePath }: PlanScreenProps) {
             selectedItemId={selectedItemId}
             onSelectItem={handleSelectItem}
           />
+          <div className="pointer-events-none absolute top-3 left-3 z-[600] max-w-[60%] rounded-md bg-bg-elevated/90 px-2.5 py-1.5 shadow-sm backdrop-blur">
+            <TripContextLabel />
+          </div>
         </div>
       </div>
 
@@ -185,6 +189,10 @@ export default function PlanScreen({ basePath }: PlanScreenProps) {
             selectedItemId={selectedItemId}
             onSelectItem={handleSelectItem}
           />
+          {/* 모바일 좌측 상단 trip 컨텍스트 라벨 */}
+          <div className="pointer-events-none absolute top-3 left-3 z-[600] max-w-[60%] rounded-md bg-bg-elevated/90 px-2.5 py-1.5 shadow-sm backdrop-blur">
+            <TripContextLabel />
+          </div>
           {/* 모바일 우측 상단 떠있는 테마 토글 + FAB */}
           <div className="absolute top-3 right-3 z-[600]">
             <ThemeToggle />

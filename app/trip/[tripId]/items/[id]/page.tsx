@@ -5,6 +5,7 @@ import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 import Navigation from '@/components/Layout/Navigation'
 import ItemMetadataChips from '@/components/UI/ItemMetadataChips'
 import { buildTripPath } from '@/lib/hooks/useTripContext'
+import TripContextLabel from '@/components/UI/TripContextLabel'
 import type { TripItem } from '@/types'
 
 export default async function ItemDetailPage({
@@ -37,6 +38,7 @@ export default async function ItemDetailPage({
         </div>
 
         <div className="mb-6">
+          <TripContextLabel className="mb-1.5" />
           <h1 className="text-2xl font-bold text-fg mb-2">{item.name}</h1>
           <ItemMetadataChips item={item} />
         </div>
