@@ -63,6 +63,7 @@ export default function ItemCard({
     <div
       role="button"
       tabIndex={0}
+      data-item-id={item.id}
       aria-pressed={isActive}
       aria-label={item.name}
       onClick={() => editingName === null && onSelect?.(item.id)}

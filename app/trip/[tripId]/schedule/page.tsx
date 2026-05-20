@@ -10,7 +10,7 @@ import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { useItems } from '@/lib/hooks/useItems'
 import { useToast } from '@/components/UI/Toast'
 import TripPageHeader from '@/components/Layout/TripPageHeader'
-import FAB from '@/components/UI/FAB'
+import StickyAddBar from '@/components/UI/StickyAddBar'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
@@ -77,7 +77,7 @@ function SchedulePageContent() {
           ))}
         </div>
       ) : (
-        <div className="max-w-3xl mx-auto px-4 pb-24 md:pb-6">
+        <div className="max-w-3xl mx-auto px-4 pb-32 md:pb-6">
           <ScheduleTable
             items={items}
             onUpdateItem={updateItem}
@@ -89,7 +89,7 @@ function SchedulePageContent() {
 
       <Navigation />
 
-      <FAB className="md:hidden" />
+      <StickyAddBar />
 
       <ItemPanel
         item={selectedItem}
