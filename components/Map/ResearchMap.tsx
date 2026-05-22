@@ -1,6 +1,6 @@
 'use client'
 
-import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Tooltip, ZoomControl } from 'react-leaflet'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
@@ -31,9 +31,11 @@ export default function ResearchMap({ items, onSelectItem }: ResearchMapProps) {
     <MapContainer
       center={[36.2048, 138.2529]}
       zoom={5}
+      zoomControl={false}
       style={{ height: '100%', width: '100%' }}
       className="touch-none"
     >
+      <ZoomControl position="bottomright" />
       <MapInitialCenter
         items={mapItems}
         basecampCoord={null}

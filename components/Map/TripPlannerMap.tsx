@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Polyline, Tooltip } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Polyline, Tooltip, ZoomControl } from 'react-leaflet'
 import MapAddOnLongPress from './MapAddOnLongPress'
 import MapInitialCenter from './MapInitialCenter'
 import L from 'leaflet'
@@ -129,9 +129,11 @@ export default function TripPlannerMap({
     <MapContainer
       center={[36.2048, 138.2529]}
       zoom={5}
+      zoomControl={false}
       style={{ height: '100%', width: '100%' }}
       className="touch-none"
     >
+      <ZoomControl position="bottomright" />
       <MapInitialCenter
         items={visibleItems}
         basecampCoord={basecampCoord}
