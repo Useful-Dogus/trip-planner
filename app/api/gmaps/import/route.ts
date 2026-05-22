@@ -4,6 +4,48 @@ import { mapGoogleCategory } from '@/services/gmaps/categoryMap'
 import type { GooglePlace, TripItem } from '@/types'
 import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 import { ensureActiveTrip } from '@/lib/trip'
+import { reverseGeocode } from '@/lib/geocode'
+
+// "34°39'53.7\"N 135°29'58.3\"E" 또는 "34.123, 135.456" 같이 좌표 자체가 이름인 경우를 감지.
+const DMS_RE = /\d+°\d+['′]/
+const DECIMAL_COORD_RE = /^-?\d{1,3}\.\d+\s*,\s*-?\d{1,3}\.\d+$/
+
+function isCoordinateName(name: string): boolean {
+  const trimmed = name.trim()
+  if (!trimmed) return true
+  if (DMS_RE.test(trimmed)) return true
+  if (DECIMAL_COORD_RE.test(trimmed)) return true
+  return false
+}
+
+async function resolvePinName(
+  place: GooglePlace,
+  regionLabel: string | null,
+  fallbackIndex: number,
+): Promise<string> {
+  if (!isCoordinateName(place.name)) return place.name
+
+  // 1차: reverse geocode
+  if (typeof place.lat === 'number' && typeof place.lng === 'number') {
+    try {
+      const result = await reverseGeocode(place.lat, place.lng)
+      if (result?.address) {
+        // 너무 긴 address 는 앞 2-3 토큰만.
+        const parts = result.address.split(',').map(s => s.trim()).filter(Boolean)
+        const short = parts.slice(0, 2).join(', ')
+        if (short) return `📍 ${short}`
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // 2차: region 폴백
+  if (regionLabel?.trim()) return `📍 핀 (${regionLabel.trim()} 근처)`
+
+  // 3차: 순번
+  return `📍 저장한 장소 ${fallbackIndex + 1}`
+}
 
 function placeToItem(
   place: GooglePlace,
@@ -58,7 +100,23 @@ export async function POST(request: NextRequest) {
       ? queryTripId
       : await ensureActiveTrip(supabase)
 
-    const rows = places.map(p => {
+    // trip region 을 한 번 fetch — 좌표만 있는 핀의 폴백 라벨에 사용.
+    const { data: tripRow } = await supabase
+      .from('trips')
+      .select('region')
+      .eq('id', tripId)
+      .maybeSingle<{ region: string | null }>()
+    const regionLabel = tripRow?.region ?? null
+
+    // 좌표만 있는 핀의 이름을 reverse geocode → region 폴백 → 순번 으로 정규화.
+    const resolvedPlaces = await Promise.all(
+      places.map(async (p, idx) => ({
+        ...p,
+        name: await resolvePinName(p, regionLabel, idx),
+      })),
+    )
+
+    const rows = resolvedPlaces.map(p => {
       const override = p.googlePlaceId ? categoryOverrides[p.googlePlaceId] : undefined
       const item = placeToItem(p, override)
       return {
