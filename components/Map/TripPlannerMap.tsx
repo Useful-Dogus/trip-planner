@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Polyline, Tooltip, ZoomControl } from 'react-leaflet'
 import MapAddOnLongPress from './MapAddOnLongPress'
 import MapInitialCenter from './MapInitialCenter'
+import SelectedItemPan from './SelectedItemPan'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
@@ -138,6 +139,11 @@ export default function TripPlannerMap({
         items={visibleItems}
         basecampCoord={basecampCoord}
         region={trip?.region ?? null}
+      />
+      <SelectedItemPan
+        selectedItem={
+          (selectedItemId && visibleItems.find(i => i.id === selectedItemId)) || null
+        }
       />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'

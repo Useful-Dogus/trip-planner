@@ -247,6 +247,7 @@ export default function PlanScreen({ basePath }: PlanScreenProps) {
         onClose={handleClosePanel}
         onSave={handleSaved}
         onDelete={handleDeleted}
+        nonModal
       />
     </div>
   )

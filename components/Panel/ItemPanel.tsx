@@ -27,9 +27,11 @@ export interface ItemPanelProps {
   onClose: () => void
   onSave: () => void
   onDelete: (id: string) => void
+  /** non-modal: 백드롭 dim 제거, 뒤쪽 지도와 상호작용 가능. 지도 뷰에서 사용. */
+  nonModal?: boolean
 }
 
-export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: ItemPanelProps) {
+export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete, nonModal }: ItemPanelProps) {
   const { deleteItem, updateItem } = useItems()
   const confirm = useConfirm()
   const [mode, setMode] = useState<'view' | 'edit'>('view')
@@ -138,6 +140,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
       onClose={tryClose}
       side="auto"
       rightWidthPx={520}
+      transparentBackdrop={nonModal}
       title={mode === 'edit' ? '편집' : '상세 정보'}
       headerActions={
         mode === 'edit' && displayItem ? (
