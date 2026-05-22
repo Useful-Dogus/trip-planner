@@ -263,10 +263,10 @@ function ResearchPageContent() {
             <button
               type="button"
               onClick={() => setShareDialogOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-bg px-2.5 py-1.5 text-xs font-medium text-fg-muted hover:bg-bg-subtle"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-bg px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-bg-subtle"
               aria-label="공유 링크 관리"
             >
-              <Share2 className="size-3.5" aria-hidden />
+              <Share2 className="size-4" aria-hidden />
               공유
             </button>
             <div className="md:hidden">
