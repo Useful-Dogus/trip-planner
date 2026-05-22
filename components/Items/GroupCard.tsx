@@ -39,7 +39,7 @@ export default function GroupCard({
     if (editingName !== null) inputRef.current?.select()
   }, [editingName])
 
-  const emoji = CATEGORY_META[visibleItems[0]?.category]?.emoji ?? '📌'
+  const HeaderIcon = CATEGORY_META[visibleItems[0]?.category]?.Icon
   const visibleCount = visibleItems.length
   const badgeLabel =
     visibleCount === totalCount ? `${totalCount}곳` : `${visibleCount}/${totalCount}곳`
@@ -88,9 +88,9 @@ export default function GroupCard({
         )}
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className="flex-shrink-0 text-base leading-none" aria-hidden="true">
-            {emoji}
-          </span>
+          {HeaderIcon ? (
+            <HeaderIcon size={16} className="flex-shrink-0 text-fg-muted" aria-hidden="true" />
+          ) : null}
           {editingName !== null ? (
             <input
               ref={inputRef}

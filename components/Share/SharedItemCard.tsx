@@ -10,7 +10,7 @@ function formatTimeRange(item: TripItem): string | null {
 }
 
 export default function SharedItemCard({ item }: Props) {
-  const meta = CATEGORY_META[item.category]
+  const Icon = CATEGORY_META[item.category]?.Icon
   const time = formatTimeRange(item)
 
   return (
@@ -19,7 +19,7 @@ export default function SharedItemCard({ item }: Props) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="inline-flex items-center gap-1 rounded-full border border-border bg-bg px-2 py-0.5 text-xs font-medium text-fg-subtle">
-              <span aria-hidden="true">{meta?.emoji}</span>
+              {Icon ? <Icon size={12} aria-hidden="true" /> : null}
               {item.category}
             </span>
             {time && <span className="text-xs text-fg-subtle tabular">{time}</span>}

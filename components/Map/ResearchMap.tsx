@@ -2,14 +2,15 @@
 
 import { MapContainer, TileLayer, Marker, Tooltip, ZoomControl } from 'react-leaflet'
 import L from 'leaflet'
-import type { TripItem } from '@/types'
-import { CATEGORY_META } from '@/lib/itemOptions'
+import type { TripItem, Category } from '@/types'
+import { categoryIconSvg } from '@/lib/categoryIcon'
 import MapInitialCenter from './MapInitialCenter'
 import { useOptionalTrip } from '@/lib/hooks/useTripContext'
 
-function createEmojiChipIcon(emoji: string) {
+function createCategoryChipIcon(category: Category) {
+  const svg = categoryIconSvg(category, { size: 14, color: 'currentColor', strokeWidth: 2 })
   return L.divIcon({
-    html: `<div class="tp-chip-marker">${emoji}</div>`,
+    html: `<div class="tp-chip-marker">${svg}</div>`,
     className: '',
     iconSize: [28, 24],
     iconAnchor: [14, 12],
@@ -49,7 +50,7 @@ export default function ResearchMap({ items, onSelectItem }: ResearchMapProps) {
         <Marker
           key={item.id}
           position={[item.lat!, item.lng!]}
-          icon={createEmojiChipIcon(CATEGORY_META[item.category]?.emoji ?? '📌')}
+          icon={createCategoryChipIcon(item.category)}
           eventHandlers={
             onSelectItem
               ? {

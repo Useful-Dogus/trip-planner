@@ -7,9 +7,10 @@ import MapInitialCenter from './MapInitialCenter'
 import SelectedItemPan from './SelectedItemPan'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
-import { CATEGORY_META } from '@/lib/itemOptions'
+import { categoryIconSvg } from '@/lib/categoryIcon'
 import { getEndLodging, getStartLodging, isStayItem } from '@/lib/lodging'
 import { useOptionalTrip } from '@/lib/hooks/useTripContext'
+import type { Category } from '@/types'
 
 interface TripPlannerMapProps {
   items: TripItem[]
@@ -18,7 +19,7 @@ interface TripPlannerMapProps {
   onSelectItem: (id: string) => void
 }
 
-function chipIcon(emoji: string, opts: { dim?: boolean; selected?: boolean }) {
+function chipIcon(category: Category, opts: { dim?: boolean; selected?: boolean }) {
   const cls = [
     'tp-chip-marker',
     opts.selected && 'is-selected',
@@ -26,8 +27,9 @@ function chipIcon(emoji: string, opts: { dim?: boolean; selected?: boolean }) {
   ]
     .filter(Boolean)
     .join(' ')
+  const svg = categoryIconSvg(category, { size: 14, color: 'currentColor', strokeWidth: 2 })
   return L.divIcon({
-    html: `<div class="${cls}">${emoji}</div>`,
+    html: `<div class="${cls}">${svg}</div>`,
     className: '',
     iconSize: [28, 24],
     iconAnchor: [14, 12],
@@ -156,7 +158,7 @@ export default function TripPlannerMap({
           <Marker
             key={item.id}
             position={[item.lat!, item.lng!]}
-            icon={chipIcon(CATEGORY_META[item.category]?.emoji ?? '📌', {
+            icon={chipIcon(item.category, {
               dim: selectedDate !== null,
               selected: item.id === selectedItemId,
             })}

@@ -60,7 +60,7 @@ export default function CategoryCell({
     }
   }, [position])
 
-  const emoji = CATEGORY_META[value]?.emoji ?? '🔖'
+  const CurrentIcon = CATEGORY_META[value]?.Icon
 
   return (
     <>
@@ -68,10 +68,11 @@ export default function CategoryCell({
         ref={buttonRef}
         type="button"
         onClick={onClick}
-        className="text-base leading-none select-none cursor-pointer hover:opacity-70 transition-opacity"
+        className="inline-flex items-center justify-center leading-none select-none cursor-pointer text-fg-muted hover:text-fg transition-colors"
         title={value}
+        aria-label={value}
       >
-        {emoji}
+        {CurrentIcon ? <CurrentIcon size={16} /> : null}
       </button>
 
       {isEditing &&
@@ -84,22 +85,25 @@ export default function CategoryCell({
             style={{ top: position.top, left: position.left }}
           >
             <div className="grid grid-cols-4 gap-1">
-              {CATEGORY_OPTIONS.map(cat => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => {
-                    onSelect(cat)
-                  }}
-                  title={cat}
-                  className={`flex flex-col items-center gap-0.5 p-2 rounded-lg hover:bg-bg-subtle transition-colors text-xs ${
-                    cat === value ? 'bg-bg-subtle ring-1 ring-border-strong' : ''
-                  }`}
-                >
-                  <span className="text-base">{CATEGORY_META[cat].emoji}</span>
-                  <span className="text-fg-muted whitespace-nowrap">{cat}</span>
-                </button>
-              ))}
+              {CATEGORY_OPTIONS.map(cat => {
+                const ItemIcon = CATEGORY_META[cat].Icon
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => {
+                      onSelect(cat)
+                    }}
+                    title={cat}
+                    className={`flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-bg-subtle transition-colors text-xs ${
+                      cat === value ? 'bg-bg-subtle ring-1 ring-border-strong' : ''
+                    }`}
+                  >
+                    <ItemIcon size={18} className="text-fg-muted" />
+                    <span className="text-fg-muted whitespace-nowrap">{cat}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>,
           document.body

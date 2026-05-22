@@ -1,4 +1,18 @@
 import type { Category, ReservationStatus, TripItem, TripPriority } from '@/types'
+import {
+  Bus,
+  Hotel,
+  Landmark,
+  UtensilsCrossed,
+  Coffee,
+  ShoppingBag,
+  Palette,
+  Drama,
+  Target,
+  Palmtree,
+  Bookmark,
+  type LucideIcon,
+} from 'lucide-react'
 
 export const CATEGORY_OPTIONS: Category[] = [
   '교통',
@@ -49,18 +63,18 @@ export const CHIP_BASE_TONE = 'bg-bg-elevated border border-border'
 export const CHIP_TONE = `${CHIP_BASE_TONE} text-fg-muted`
 export const PLACEHOLDER_TONE = `${CHIP_BASE_TONE} text-fg-subtle`
 
-export const CATEGORY_META: Record<Category, { emoji: string; color: string }> = {
-  교통: { emoji: '🚌', color: '#94a3b8' },
-  숙박: { emoji: '🏨', color: '#0ea5e9' },
-  명소: { emoji: '🏛️', color: '#f97316' },
-  식당: { emoji: '🍽️', color: '#ef4444' },
-  카페: { emoji: '☕', color: '#a16207' },
-  쇼핑: { emoji: '🛍️', color: '#ec4899' },
-  문화시설: { emoji: '🎨', color: '#8b5cf6' },
-  '공연·스포츠': { emoji: '🎭', color: '#10b981' },
-  액티비티: { emoji: '🎯', color: '#f59e0b' },
-  휴양: { emoji: '🌴', color: '#22c55e' },
-  기타: { emoji: '🔖', color: '#cbd5e1' },
+export const CATEGORY_META: Record<Category, { Icon: LucideIcon; color: string }> = {
+  교통: { Icon: Bus, color: '#94a3b8' },
+  숙박: { Icon: Hotel, color: '#0ea5e9' },
+  명소: { Icon: Landmark, color: '#f97316' },
+  식당: { Icon: UtensilsCrossed, color: '#ef4444' },
+  카페: { Icon: Coffee, color: '#a16207' },
+  쇼핑: { Icon: ShoppingBag, color: '#ec4899' },
+  문화시설: { Icon: Palette, color: '#8b5cf6' },
+  '공연·스포츠': { Icon: Drama, color: '#10b981' },
+  액티비티: { Icon: Target, color: '#f59e0b' },
+  휴양: { Icon: Palmtree, color: '#22c55e' },
+  기타: { Icon: Bookmark, color: '#cbd5e1' },
 }
 
 interface PriorityMeta {
