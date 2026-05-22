@@ -1,11 +1,13 @@
 'use client'
 
+import { useRef } from 'react'
 import type { Category, ReservationStatus, TripItem } from '@/types'
 import NameCell from './cells/NameCell'
 import TimeCell from './cells/TimeCell'
 import CategoryCell from './cells/CategoryCell'
 import StatusCell from './cells/StatusCell'
 import BudgetCell from './cells/BudgetCell'
+import { useOptionalTrip } from '@/lib/hooks/useTripContext'
 
 export type EditableField = 'time_start' | 'name' | 'category' | 'reservation_status' | 'budget'
 export const EDITABLE_FIELDS: EditableField[] = [
@@ -144,8 +146,12 @@ export default function TableRow({
         />
       </div>
 
-      {/* 상세 버튼 */}
-      <div className="w-8 flex-shrink-0 flex items-center justify-center py-2.5 opacity-0 group-hover:opacity-100 transition-opacity">
+      {/* 날짜 이동 + 상세 버튼 */}
+      <div className="w-16 flex-shrink-0 flex items-center justify-end gap-1 pr-2 py-2.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+        <DateChangeButton
+          currentDate={item.date ?? null}
+          onChange={(next) => onCellSave('date', next)}
+        />
         <button
           type="button"
           onClick={() => onOpenPanel(item.id)}
@@ -158,6 +164,56 @@ export default function TableRow({
           </svg>
         </button>
       </div>
+    </div>
+  )
+}
+
+function DateChangeButton({
+  currentDate,
+  onChange,
+}: {
+  currentDate: string | null
+  onChange: (next: string | null) => void
+}) {
+  const trip = useOptionalTrip()
+  const inputRef = useRef<HTMLInputElement>(null)
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => {
+          const el = inputRef.current
+          if (!el) return
+          // showPicker 는 신규 브라우저 지원, 폴백으로 focus+click
+          if (typeof (el as HTMLInputElement & { showPicker?: () => void }).showPicker === 'function') {
+            ;(el as HTMLInputElement & { showPicker: () => void }).showPicker()
+          } else {
+            el.focus()
+            el.click()
+          }
+        }}
+        className="p-1 text-fg-subtle hover:text-fg rounded transition-colors"
+        aria-label="다른 날짜로 이동"
+        title="다른 날짜로 이동"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M6 2a1 1 0 011 1v1h6V3a1 1 0 112 0v1h1a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 011-1zM4 8v8h12V8H4z" clipRule="evenodd" />
+        </svg>
+      </button>
+      <input
+        ref={inputRef}
+        type="date"
+        value={currentDate ?? ''}
+        min={trip?.startDate ?? undefined}
+        max={trip?.endDate ?? undefined}
+        onChange={(e) => {
+          const next = e.target.value || null
+          if (next !== currentDate) onChange(next)
+        }}
+        className="absolute inset-0 opacity-0 pointer-events-none"
+        tabIndex={-1}
+        aria-hidden
+      />
     </div>
   )
 }

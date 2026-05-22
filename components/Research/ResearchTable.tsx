@@ -179,7 +179,7 @@ export default function ResearchTable({
     }
   }
 
-  if (items.length === 0) {
+  if (items.length === 0 && !addingRow) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="text-4xl mb-3">{hasActiveSearch ? '🔍' : '📍'}</div>

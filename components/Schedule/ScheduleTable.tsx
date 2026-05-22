@@ -437,7 +437,18 @@ export default function ScheduleTable({
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="text-4xl mb-3">🗓️</div>
         <p className="text-sm font-medium text-fg mb-1">아직 등록된 항목이 없어요</p>
-        <p className="text-xs text-fg-subtle">전체 탭에서 장소를 추가하면<br />여기에 날짜별로 표시됩니다</p>
+        <p className="text-xs text-fg-subtle mb-4">장소를 추가하면 여기에 날짜별로 표시됩니다</p>
+        {tripId && (
+          <a
+            href={`/trip/${tripId}/items/new`}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-accent text-accent-fg px-4 py-2 text-sm font-medium hover:bg-accent-hover transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+            새 항목 추가
+          </a>
+        )}
       </div>
     )
   }
