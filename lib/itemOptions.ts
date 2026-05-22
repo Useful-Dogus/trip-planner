@@ -55,26 +55,19 @@ export const PLACEHOLDER_LABELS = {
   reservation_status: '예약 정보 없음',
 } as const
 
-/**
- * Tailwind className 기반 배지 톤 (다크모드 자동 적용).
- * 기존 inline style 객체는 legacy 호환을 위해 유지.
- */
-export const CHIP_BASE_TONE = 'bg-bg-elevated border border-border'
-export const CHIP_TONE = `${CHIP_BASE_TONE} text-fg-muted`
-export const PLACEHOLDER_TONE = `${CHIP_BASE_TONE} text-fg-subtle`
-
+// 색은 카테고리 dot 보조용. 채도 한 단계 낮춤 (Tailwind 400 톤 정렬) — 무지개 인상 완화.
 export const CATEGORY_META: Record<Category, { Icon: LucideIcon; color: string }> = {
-  교통: { Icon: Bus, color: '#94a3b8' },
-  숙박: { Icon: Hotel, color: '#0ea5e9' },
-  명소: { Icon: Landmark, color: '#f97316' },
-  식당: { Icon: UtensilsCrossed, color: '#ef4444' },
-  카페: { Icon: Coffee, color: '#a16207' },
-  쇼핑: { Icon: ShoppingBag, color: '#ec4899' },
-  문화시설: { Icon: Palette, color: '#8b5cf6' },
-  '공연·스포츠': { Icon: Drama, color: '#10b981' },
-  액티비티: { Icon: Target, color: '#f59e0b' },
-  휴양: { Icon: Palmtree, color: '#22c55e' },
-  기타: { Icon: Bookmark, color: '#cbd5e1' },
+  교통: { Icon: Bus, color: '#94a3b8' },           // slate-400 (유지)
+  숙박: { Icon: Hotel, color: '#38bdf8' },         // sky-400
+  명소: { Icon: Landmark, color: '#fb923c' },      // orange-400
+  식당: { Icon: UtensilsCrossed, color: '#f87171' }, // red-400
+  카페: { Icon: Coffee, color: '#b45309' },        // amber-700 (밝게)
+  쇼핑: { Icon: ShoppingBag, color: '#f472b6' },   // pink-400
+  문화시설: { Icon: Palette, color: '#a78bfa' },   // violet-400
+  '공연·스포츠': { Icon: Drama, color: '#34d399' }, // emerald-400
+  액티비티: { Icon: Target, color: '#fbbf24' },    // amber-400
+  휴양: { Icon: Palmtree, color: '#4ade80' },      // green-400
+  기타: { Icon: Bookmark, color: '#cbd5e1' },      // slate-300 (유지)
 }
 
 interface PriorityMeta {

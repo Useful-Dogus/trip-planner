@@ -1,5 +1,5 @@
 import type { TripItem } from '@/types'
-import { CATEGORY_META } from '@/lib/itemOptions'
+import { Chip } from '@/components/UI/Chip'
 
 type Props = { item: TripItem }
 
@@ -10,7 +10,6 @@ function formatTimeRange(item: TripItem): string | null {
 }
 
 export default function SharedItemCard({ item }: Props) {
-  const Icon = CATEGORY_META[item.category]?.Icon
   const time = formatTimeRange(item)
 
   return (
@@ -18,10 +17,9 @@ export default function SharedItemCard({ item }: Props) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-bg px-2 py-0.5 text-xs font-medium text-fg-subtle">
-              {Icon ? <Icon size={12} aria-hidden="true" /> : null}
+            <Chip variant="category" size="sm" category={item.category}>
               {item.category}
-            </span>
+            </Chip>
             {time && <span className="text-xs text-fg-subtle tabular">{time}</span>}
           </div>
           <h3 className="text-base font-semibold text-fg break-words">{item.name}</h3>

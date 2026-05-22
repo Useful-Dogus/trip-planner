@@ -2,36 +2,57 @@ import { forwardRef } from 'react'
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import type { Category } from '@/types'
+import { CATEGORY_META } from '@/lib/itemOptions'
 
 type Size = 'sm' | 'md'
+type Variant = 'neutral' | 'accent' | 'category'
 
 const SIZE: Record<Size, string> = {
   sm: 'h-6 px-2 text-[11px] gap-1 rounded',
   md: 'h-7 px-2.5 text-xs gap-1.5 rounded-full',
 }
 
+const VARIANT: Record<Variant, string> = {
+  neutral: 'bg-bg-subtle text-fg-muted border-border',
+  accent: 'bg-accent-subtle text-accent border-accent/30',
+  // category 의 색 강조는 leading dot 으로만. 배경/테두리는 중립.
+  category: 'bg-bg-subtle text-fg border-border',
+}
+
 interface ChipProps extends HTMLAttributes<HTMLSpanElement> {
   size?: Size
+  variant?: Variant
   leading?: ReactNode
+  /** variant='category' 일 때 카테고리 색 dot + lucide 아이콘을 자동 leading 으로 사용 */
+  category?: Category
 }
 
 /** 비-인터랙티브 정보 칩. 카테고리·메타 표시. */
 export const Chip = forwardRef<HTMLSpanElement, ChipProps>(function Chip(
-  { size = 'md', leading, className, children, ...rest },
+  { size = 'md', variant = 'neutral', leading, category, className, children, ...rest },
   ref,
 ) {
+  const autoLeading =
+    leading ??
+    (variant === 'category' && category
+      ? (() => {
+          const Icon = CATEGORY_META[category]?.Icon
+          return Icon ? <Icon size={size === 'sm' ? 11 : 12} aria-hidden="true" /> : null
+        })()
+      : null)
   return (
     <span
       ref={ref}
       className={cn(
-        'inline-flex items-center font-medium select-none',
-        'bg-bg-subtle text-fg-muted border border-border',
+        'inline-flex items-center font-medium select-none border',
+        VARIANT[variant],
         SIZE[size],
         className,
       )}
       {...rest}
     >
-      {leading && <span className="inline-flex shrink-0">{leading}</span>}
+      {autoLeading && <span className="inline-flex shrink-0">{autoLeading}</span>}
       {children}
     </span>
   )
