@@ -6,8 +6,14 @@ import Providers from './providers'
 export const metadata: Metadata = {
   title: 'Trip Planner',
   description: '지도와 함께 만드는 여행 계획',
-  icons: {
-    icon: '/icon.svg',
+  applicationName: 'Trip Planner',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Trip Planner',
+  },
+  formatDetection: {
+    telephone: false,
   },
   openGraph: {
     title: 'Trip Planner',
