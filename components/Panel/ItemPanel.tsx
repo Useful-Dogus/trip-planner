@@ -11,9 +11,7 @@ import { useConfirm } from '@/components/UI/ConfirmDialog'
 import { formatBudget, currencyFieldLabel, normalizeCurrency } from '@/lib/currency'
 import {
   CATEGORY_OPTIONS,
-  CHIP_TONE,
   ITEM_FIELD_LABELS,
-  PLACEHOLDER_TONE,
   TRIP_PRIORITY_META,
   TRIP_PRIORITY_OPTIONS,
   RESERVATION_STATUS_META,
@@ -21,6 +19,7 @@ import {
 } from '@/lib/itemOptions'
 import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 import ReservationStatusBadge from '@/components/UI/ReservationStatusBadge'
+import { Chip } from '@/components/UI/Chip'
 
 export interface ItemPanelProps {
   item: TripItem | null
@@ -395,7 +394,7 @@ function ItemDetailView({
             isOpen={openField === 'category'}
             saving={savingField === 'category'}
             onToggle={() => onOpenField(openField === 'category' ? null : 'category')}
-            currentNode={<span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${CHIP_TONE}`}>{item.category}</span>}
+            currentNode={<Chip variant="category" category={item.category}>{item.category}</Chip>}
             options={CATEGORY_OPTIONS}
             onSelect={v => onQuickUpdate('category', v)}
           />
@@ -417,7 +416,7 @@ function ItemDetailView({
             currentNode={
               item.reservation_status
                 ? <ReservationStatusBadge reservationStatus={item.reservation_status} />
-                : <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${PLACEHOLDER_TONE}`}>예약 정보 없음</span>
+                : <Chip variant="neutral" className="text-fg-subtle">예약 정보 없음</Chip>
             }
             options={RESERVATION_STATUS_OPTIONS}
             descriptions={RESERVATION_STATUS_META}

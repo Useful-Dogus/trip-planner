@@ -1,41 +1,23 @@
 import type { TripItem } from '@/types'
-import {
-  CATEGORY_META,
-  CHIP_TONE,
-  ITEM_FIELD_LABELS,
-  PLACEHOLDER_LABELS,
-  PLACEHOLDER_TONE,
-} from '@/lib/itemOptions'
+import { ITEM_FIELD_LABELS, PLACEHOLDER_LABELS } from '@/lib/itemOptions'
 import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 import ReservationStatusBadge from '@/components/UI/ReservationStatusBadge'
-import { cn } from '@/lib/cn'
+import { Chip } from '@/components/UI/Chip'
 
 function PlaceholderChip({ label }: { label: string }) {
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border',
-        PLACEHOLDER_TONE,
-      )}
-    >
+    <Chip variant="neutral" size="sm" className="text-fg-subtle">
       {label}
-    </span>
+    </Chip>
   )
 }
 
 function CategoryChip({ category }: { category: TripItem['category'] | undefined }) {
   if (!category) return <PlaceholderChip label={PLACEHOLDER_LABELS.category} />
-  const Icon = CATEGORY_META[category]?.Icon
   return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium border',
-        CHIP_TONE,
-      )}
-    >
-      {Icon ? <Icon size={12} aria-hidden="true" className="flex-shrink-0" /> : null}
+    <Chip variant="category" size="sm" category={category}>
       {category}
-    </span>
+    </Chip>
   )
 }
 
