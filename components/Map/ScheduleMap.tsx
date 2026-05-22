@@ -1,11 +1,14 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Polyline, ZoomControl } from 'react-leaflet'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
 import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 import { getEndLodging, getStartLodging, isStayItem } from '@/lib/lodging'
+import MapInitialCenter from './MapInitialCenter'
+import { useOptionalTrip } from '@/lib/hooks/useTripContext'
+import { formatBudget, normalizeCurrency } from '@/lib/currency'
 
 interface ScheduleMapProps {
   items: TripItem[]
@@ -22,6 +25,7 @@ function createNumberIcon(num: number) {
 }
 
 export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
+  const trip = useOptionalTrip()
   const confirmedDates = useMemo(() => {
     return collectScheduleDates(items.filter(i => i.trip_priority === '확정'))
   }, [items])
@@ -72,7 +76,7 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
       {/* Date chips */}
       {confirmedDates.length > 0 && (
         <div
-          className="absolute top-2 left-12 right-2 z-[1000] flex gap-2 overflow-x-auto pb-1"
+          className="absolute top-2 left-3 right-2 z-[1000] flex gap-2 overflow-x-auto pb-1"
           style={{ scrollbarWidth: 'none' }}
         >
           {confirmedDates.map(date => (
@@ -92,11 +96,18 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
       )}
 
       <MapContainer
-        center={[40.7128, -74.006]}
-        zoom={13}
+        center={[36.2048, 138.2529]}
+        zoom={5}
+        zoomControl={false}
         style={{ height: '100%', width: '100%' }}
         className="touch-none"
       >
+        <ZoomControl position="bottomright" />
+        <MapInitialCenter
+          items={dayItems}
+          basecampCoord={null}
+          region={trip?.region ?? null}
+        />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -122,7 +133,7 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
                 </p>
                 {item.time_start && <p className="text-xs text-fg-muted">{item.time_start}</p>}
                 {item.budget !== undefined && (
-                  <p className="text-xs text-fg-muted">${item.budget}</p>
+                  <p className="text-xs text-fg-muted">{formatBudget(item.budget, normalizeCurrency(trip?.currency))}</p>
                 )}
                 <TripPriorityBadge tripPriority={item.trip_priority} />
               </div>

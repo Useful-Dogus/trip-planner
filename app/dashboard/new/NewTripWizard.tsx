@@ -8,14 +8,16 @@ import Button from '@/components/UI/Button'
 import { Input } from '@/components/UI/Input'
 import { useToast } from '@/components/UI/Toast'
 import { cn } from '@/lib/cn'
+import { SUPPORTED_CURRENCIES, type CurrencyCode } from '@/lib/currency'
 
-type Step = 1 | 2 | 3 | 4
+type Step = 1 | 2 | 3 | 4 | 5
 
 const STEP_TITLES: Record<Step, string> = {
   1: '여행 이름',
   2: '기간',
   3: '지역',
   4: '베이스캠프',
+  5: '확인',
 }
 
 export default function NewTripWizard() {
@@ -27,6 +29,8 @@ export default function NewTripWizard() {
   const [endDate, setEndDate] = useState('')
   const [region, setRegion] = useState('')
   const [basecamp, setBasecamp] = useState('')
+  const [basecampSkipped, setBasecampSkipped] = useState(false)
+  const [currency, setCurrency] = useState<CurrencyCode>('KRW')
   const [submitting, setSubmitting] = useState(false)
 
   const canProceed = useMemo(() => {
@@ -40,11 +44,21 @@ export default function NewTripWizard() {
 
   function next() {
     if (!canProceed) return
-    if (step < 4) setStep((s) => (s + 1) as Step)
+    if (step < 5) setStep((s) => (s + 1) as Step)
   }
 
   function prev() {
     if (step > 1) setStep((s) => (s - 1) as Step)
+  }
+
+  function skipBasecamp() {
+    setBasecamp('')
+    setBasecampSkipped(true)
+    if (step === 4) setStep(5)
+  }
+
+  function jumpToStep(target: Step) {
+    setStep(target)
   }
 
   async function handleSubmit() {
@@ -60,6 +74,7 @@ export default function NewTripWizard() {
           end_date: endDate || null,
           region: region.trim() || null,
           basecamp_address: basecamp.trim() || null,
+          currency,
         }),
       })
       if (!res.ok) {
@@ -92,7 +107,7 @@ export default function NewTripWizard() {
 
       <main className="max-w-2xl mx-auto px-4 md:px-8 py-6 pb-32">
         <ol className="flex items-center gap-2 mb-8" aria-label="단계 표시">
-          {[1, 2, 3, 4].map((n) => {
+          {[1, 2, 3, 4, 5].map((n) => {
             const done = n < step
             const current = n === step
             return (
@@ -107,7 +122,7 @@ export default function NewTripWizard() {
                 >
                   {done ? <Check className="size-4" aria-hidden="true" /> : n}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="hidden sm:block flex-1 min-w-0">
                   <p className={cn('text-xs truncate', current ? 'text-fg font-medium' : 'text-fg-subtle')}>
                     {STEP_TITLES[n as Step]}
                   </p>
@@ -128,7 +143,11 @@ export default function NewTripWizard() {
             <Step2
               startDate={startDate}
               endDate={endDate}
-              setStartDate={setStartDate}
+              setStartDate={(v) => {
+                setStartDate(v)
+                // 종료일이 비어있거나 시작일보다 이전이면 시작일로 맞춘다 — 종료일 picker 가 시작일 월에서 열리도록.
+                if (!endDate || (v && endDate < v)) setEndDate(v)
+              }}
               setEndDate={setEndDate}
             />
           )}
@@ -138,8 +157,21 @@ export default function NewTripWizard() {
           {step === 4 && (
             <Step4
               basecamp={basecamp}
-              setBasecamp={setBasecamp}
-              summary={{ title, startDate, endDate, region }}
+              setBasecamp={(v) => {
+                setBasecamp(v)
+                if (v.trim()) setBasecampSkipped(false)
+              }}
+              onSkip={skipBasecamp}
+              skipped={basecampSkipped}
+              currency={currency}
+              setCurrency={setCurrency}
+            />
+          )}
+          {step === 5 && (
+            <Step5
+              summary={{ title, startDate, endDate, region, basecamp, currency }}
+              basecampSkipped={basecampSkipped && !basecamp.trim()}
+              onEdit={jumpToStep}
             />
           )}
         </section>
@@ -152,7 +184,7 @@ export default function NewTripWizard() {
           >
             이전
           </Button>
-          {step < 4 ? (
+          {step < 5 ? (
             <Button onClick={next} disabled={!canProceed}>
               다음
             </Button>
@@ -180,7 +212,7 @@ function Step1({
         label="여행 이름"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="예: 뉴욕 여름 휴가"
+        placeholder="예: 오사카 가을 여행"
         autoFocus
         required
       />
@@ -216,6 +248,7 @@ function Step2({
           label="종료일"
           type="date"
           value={endDate}
+          min={startDate || undefined}
           onChange={(e) => setEndDate(e.target.value)}
         />
       </div>
@@ -240,7 +273,7 @@ function Step3({
         label="지역"
         value={region}
         onChange={(e) => setRegion(e.target.value)}
-        placeholder="예: 미국 뉴욕"
+        placeholder="예: 일본 오사카"
         autoFocus
       />
       <p className="text-xs text-fg-subtle">국가·도시·테마 등 자유롭게.</p>
@@ -251,46 +284,144 @@ function Step3({
 function Step4({
   basecamp,
   setBasecamp,
-  summary,
+  onSkip,
+  skipped,
+  currency,
+  setCurrency,
 }: {
   basecamp: string
   setBasecamp: (v: string) => void
-  summary: { title: string; startDate: string; endDate: string; region: string }
+  onSkip: () => void
+  skipped: boolean
+  currency: CurrencyCode
+  setCurrency: (c: CurrencyCode) => void
 }) {
   return (
     <div className="space-y-4">
-      <Input
-        label="베이스캠프 (숙소)"
-        value={basecamp}
-        onChange={(e) => setBasecamp(e.target.value)}
-        placeholder="예: 맨해튼 미드타운 호텔"
-        autoFocus
-      />
-      <p className="text-xs text-fg-subtle">선택사항. 동선의 기준점이 돼요.</p>
+      <div>
+        <Input
+          label="베이스캠프 (숙소)"
+          value={basecamp}
+          onChange={(e) => setBasecamp(e.target.value)}
+          placeholder="예: 난바 인근 호텔"
+          autoFocus
+        />
+        <p className="text-xs text-fg-subtle mt-1">
+          선택사항. 동선의 기준점이 돼요. 보통은 숙소 주소를 적어요.
+        </p>
+        <div className="flex items-center justify-between pt-2">
+          <button
+            type="button"
+            onClick={onSkip}
+            className="text-xs text-fg-muted underline-offset-2 hover:underline"
+          >
+            {skipped ? '나중에 정하기로 설정됨' : '나중에 정하기'}
+          </button>
+          {skipped && !basecamp.trim() && (
+            <span className="text-xs text-fg-subtle">여행을 만든 뒤 설정에서 추가할 수 있어요.</span>
+          )}
+        </div>
+      </div>
       <div className="border-t border-border pt-4">
-        <p className="text-xs font-semibold text-fg-subtle uppercase tracking-wider mb-2">미리 보기</p>
-        <dl className="text-sm space-y-1">
-          <SummaryRow label="이름" value={summary.title} />
-          <SummaryRow
-            label="기간"
-            value={
-              summary.startDate || summary.endDate
-                ? `${summary.startDate || '?'} – ${summary.endDate || '?'}`
-                : '미정'
-            }
-          />
-          <SummaryRow label="지역" value={summary.region || '미설정'} />
-        </dl>
+        <label className="block text-sm font-medium text-fg mb-1.5">통화</label>
+        <select
+          value={currency}
+          onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
+          className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-fg focus-visible:outline-2 focus-visible:outline-accent"
+        >
+          {SUPPORTED_CURRENCIES.map((c) => (
+            <option key={c.code} value={c.code}>
+              {c.symbol} {c.code} — {c.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-fg-subtle mt-1">
+          예산을 입력·표시할 통화를 정해요. 여행 설정에서 나중에 바꿀 수 있어요.
+        </p>
       </div>
     </div>
   )
 }
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
+function Step5({
+  summary,
+  basecampSkipped,
+  onEdit,
+}: {
+  summary: { title: string; startDate: string; endDate: string; region: string; basecamp: string; currency: CurrencyCode }
+  basecampSkipped: boolean
+  onEdit: (step: Step) => void
+}) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <dt className="text-xs text-fg-muted">{label}</dt>
-      <dd className="text-sm text-fg truncate">{value}</dd>
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm font-semibold text-fg mb-1">아래 내용으로 여행을 만들어요</p>
+        <p className="text-xs text-fg-subtle">각 항목 오른쪽 ‘수정’ 으로 돌아가 바꿀 수 있어요.</p>
+      </div>
+      <dl className="divide-y divide-border rounded-lg border border-border overflow-hidden">
+        <SummaryEditRow
+          label="이름"
+          value={summary.title}
+          onEdit={() => onEdit(1)}
+        />
+        <SummaryEditRow
+          label="기간"
+          value={
+            summary.startDate || summary.endDate
+              ? `${summary.startDate || '?'} – ${summary.endDate || '?'}`
+              : '미정'
+          }
+          onEdit={() => onEdit(2)}
+        />
+        <SummaryEditRow
+          label="지역"
+          value={summary.region || '미설정'}
+          onEdit={() => onEdit(3)}
+        />
+        <SummaryEditRow
+          label="베이스캠프"
+          value={
+            summary.basecamp.trim()
+              ? summary.basecamp
+              : basecampSkipped
+                ? '나중에 정하기'
+                : '미설정'
+          }
+          onEdit={() => onEdit(4)}
+        />
+        <SummaryEditRow
+          label="통화"
+          value={(() => {
+            const c = SUPPORTED_CURRENCIES.find((x) => x.code === summary.currency)
+            return c ? `${c.symbol} ${c.code} — ${c.label}` : summary.currency
+          })()}
+          onEdit={() => onEdit(4)}
+        />
+      </dl>
+    </div>
+  )
+}
+
+function SummaryEditRow({
+  label,
+  value,
+  onEdit,
+}: {
+  label: string
+  value: string
+  onEdit: () => void
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 px-3 py-2.5 bg-bg-elevated">
+      <dt className="text-xs text-fg-muted w-20 flex-shrink-0">{label}</dt>
+      <dd className="text-sm text-fg flex-1 min-w-0 truncate">{value}</dd>
+      <button
+        type="button"
+        onClick={onEdit}
+        className="text-xs text-accent hover:underline underline-offset-2"
+      >
+        수정
+      </button>
     </div>
   )
 }

@@ -8,6 +8,7 @@ import Sheet from '@/components/UI/Sheet'
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip } from '@/lib/hooks/useTripContext'
 import { useConfirm } from '@/components/UI/ConfirmDialog'
+import { formatBudget, currencyFieldLabel, normalizeCurrency } from '@/lib/currency'
 import {
   CATEGORY_OPTIONS,
   CHIP_TONE,
@@ -27,9 +28,11 @@ export interface ItemPanelProps {
   onClose: () => void
   onSave: () => void
   onDelete: (id: string) => void
+  /** non-modal: 백드롭 dim 제거, 뒤쪽 지도와 상호작용 가능. 지도 뷰에서 사용. */
+  nonModal?: boolean
 }
 
-export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: ItemPanelProps) {
+export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete, nonModal }: ItemPanelProps) {
   const { deleteItem, updateItem } = useItems()
   const confirm = useConfirm()
   const [mode, setMode] = useState<'view' | 'edit'>('view')
@@ -138,6 +141,7 @@ export default function ItemPanel({ item, isOpen, onClose, onSave, onDelete }: I
       onClose={tryClose}
       side="auto"
       rightWidthPx={520}
+      transparentBackdrop={nonModal}
       title={mode === 'edit' ? '편집' : '상세 정보'}
       headerActions={
         mode === 'edit' && displayItem ? (
@@ -204,6 +208,7 @@ function ItemDetailView({
   const trip = useTrip()
   const dateMin = trip.startDate ?? undefined
   const dateMax = trip.endDate ?? undefined
+  const tripCurrency = normalizeCurrency(trip.currency)
   const [editing, setEditing] = useState<InlineField | null>(null)
   const [vals, setVals] = useState({
     name: item.name,
@@ -453,7 +458,7 @@ function ItemDetailView({
           }
         </InlineRow>
 
-        <InlineRow label="예산 (USD)">
+        <InlineRow label={currencyFieldLabel('예산', tripCurrency)}>
           {editing === 'budget'
             ? <input
                 autoFocus
@@ -470,7 +475,7 @@ function ItemDetailView({
                 placeholder="0"
               />
             : <span className={vals.budget ? 'text-sm font-medium text-fg cursor-text' : emptyClass} onClick={() => activate('budget')}>
-                {vals.budget ? `$${parseInt(vals.budget).toLocaleString()}` : '입력'}
+                {vals.budget ? formatBudget(parseInt(vals.budget), tripCurrency) : '입력'}
               </span>
           }
         </InlineRow>

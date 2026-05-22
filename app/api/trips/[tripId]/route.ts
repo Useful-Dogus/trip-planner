@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerSupabase } from '@/lib/supabase-server'
+import { isCurrencyCode } from '@/lib/currency'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -33,6 +34,14 @@ export async function PATCH(
   }
 
   const patch: Record<string, string | null> = {}
+
+  if ('currency' in body) {
+    if (!isCurrencyCode(body.currency)) {
+      return NextResponse.json({ error: '지원하지 않는 통화 코드' }, { status: 400 })
+    }
+    patch.currency = body.currency
+  }
+
   for (const key of FIELD_KEYS) {
     if (!(key in body)) continue
     const raw = body[key]
@@ -81,7 +90,7 @@ export async function PATCH(
     .from('trips')
     .update(patch)
     .eq('id', tripId)
-    .select('id, title, start_date, end_date, region, basecamp_address')
+    .select('id, title, start_date, end_date, region, basecamp_address, currency')
     .maybeSingle()
 
   if (error) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 import { listUserTrips } from '@/lib/trips'
+import { isCurrencyCode } from '@/lib/currency'
 
 export async function GET() {
   try {
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
     const endDate = sanitizeDate(body?.end_date)
     const region = sanitizeText(body?.region)
     const basecamp = sanitizeText(body?.basecamp_address)
+    const currency = isCurrencyCode(body?.currency) ? body.currency : 'KRW'
 
     if (startDate && endDate && endDate < startDate) {
       return NextResponse.json(
@@ -59,6 +61,12 @@ export async function POST(request: NextRequest) {
     if (typeof tripId !== 'string') {
       return NextResponse.json({ error: '여행 생성에 실패했습니다.' }, { status: 500 })
     }
+
+    // currency 는 RPC 시그니처 변경을 피하기 위해 별도 UPDATE 로 반영.
+    if (currency !== 'KRW') {
+      await client.from('trips').update({ currency }).eq('id', tripId)
+    }
+
     return NextResponse.json({ tripId, title }, { status: 201 })
   } catch (e) {
     console.error('[POST /api/trips] unexpected:', e)

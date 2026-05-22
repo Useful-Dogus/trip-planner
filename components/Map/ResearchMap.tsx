@@ -1,9 +1,11 @@
 'use client'
 
-import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Tooltip, ZoomControl } from 'react-leaflet'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
+import MapInitialCenter from './MapInitialCenter'
+import { useOptionalTrip } from '@/lib/hooks/useTripContext'
 
 function createEmojiChipIcon(emoji: string) {
   return L.divIcon({
@@ -20,17 +22,25 @@ interface ResearchMapProps {
 }
 
 export default function ResearchMap({ items, onSelectItem }: ResearchMapProps) {
+  const trip = useOptionalTrip()
   const mapItems = items.filter(
     item => item.trip_priority !== '제외' && item.lat !== undefined && item.lng !== undefined
   )
 
   return (
     <MapContainer
-      center={[40.7128, -74.006]}
-      zoom={13}
+      center={[36.2048, 138.2529]}
+      zoom={5}
+      zoomControl={false}
       style={{ height: '100%', width: '100%' }}
       className="touch-none"
     >
+      <ZoomControl position="bottomright" />
+      <MapInitialCenter
+        items={mapItems}
+        basecampCoord={null}
+        region={trip?.region ?? null}
+      />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"

@@ -46,6 +46,11 @@ interface SheetProps {
   contentClassName?: string
   /** 백드롭 클릭 시 닫기 (기본 true) */
   dismissibleBackdrop?: boolean
+  /**
+   * 백드롭 dim 을 제거하고 클릭이 뒤로 통과되도록 한다 (non-modal 모드).
+   * 지도 뷰의 아이템 패널처럼, 패널이 열려있어도 뒤쪽 지도와 상호작용해야 할 때 사용.
+   */
+  transparentBackdrop?: boolean
 }
 
 /**
@@ -72,6 +77,7 @@ export default function Sheet({
   className,
   contentClassName,
   dismissibleBackdrop = true,
+  transparentBackdrop = false,
 }: SheetProps) {
   const sheetRef = useRef<HTMLDivElement | null>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
@@ -145,24 +151,30 @@ export default function Sheet({
   return createPortal(
     <div
       role="dialog"
-      aria-modal="true"
+      aria-modal={transparentBackdrop ? undefined : 'true'}
       aria-labelledby={title ? 'sheet-title' : undefined}
       aria-describedby={description ? 'sheet-desc' : undefined}
-      className="fixed inset-0 z-[1100]"
+      className={cn(
+        'fixed inset-0 z-[1100]',
+        transparentBackdrop && 'pointer-events-none',
+      )}
     >
       {/* backdrop */}
-      <button
-        type="button"
-        aria-label={closeLabel}
-        onClick={handleBackdropClick}
-        className="absolute inset-0 bg-overlay animate-fade-in cursor-default"
-      />
+      {transparentBackdrop ? null : (
+        <button
+          type="button"
+          aria-label={closeLabel}
+          onClick={handleBackdropClick}
+          className="absolute inset-0 bg-overlay animate-fade-in cursor-default"
+        />
+      )}
       {/* sheet */}
       <div
         ref={sheetRef}
         className={cn(
           'absolute bg-bg-elevated text-fg shadow-e28 flex flex-col',
           'border border-border',
+          transparentBackdrop && 'pointer-events-auto',
           sideClasses,
           // side='auto' 는 모바일=bottom / 데스크톱=right 로 전환되므로,
           // 인라인 style 의 바텀시트 사이징(height:auto/maxHeight:Xvh/no width)을

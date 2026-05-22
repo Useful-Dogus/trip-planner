@@ -6,6 +6,8 @@ import { CATEGORY_META } from '@/lib/itemOptions'
 import ItemMetadataChips from '@/components/UI/ItemMetadataChips'
 import LinkButton from './LinkButton'
 import { cn } from '@/lib/cn'
+import { useOptionalTrip } from '@/lib/hooks/useTripContext'
+import { formatBudget, normalizeCurrency } from '@/lib/currency'
 
 interface ItemCardProps {
   item: TripItem
@@ -24,6 +26,8 @@ export default function ItemCard({
 }: ItemCardProps) {
   const [editingName, setEditingName] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const trip = useOptionalTrip()
+  const tripCurrency = normalizeCurrency(trip?.currency)
   const scheduleLabel = formatScheduleLabel(item)
   const accentColor = CATEGORY_META[item.category]?.color ?? '#cbd5e1'
 
@@ -134,7 +138,7 @@ export default function ItemCard({
         <div className="mt-2.5 flex items-center gap-2 text-xs text-fg-muted pl-[22px] flex-wrap tabular">
           {scheduleLabel && <span>{scheduleLabel}</span>}
           {item.budget !== undefined && (
-            <span className="font-medium">${item.budget.toLocaleString()}</span>
+            <span className="font-medium">{formatBudget(item.budget, tripCurrency)}</span>
           )}
         </div>
       )}

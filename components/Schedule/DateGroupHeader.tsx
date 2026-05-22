@@ -1,5 +1,8 @@
 'use client'
 
+import { useOptionalTrip } from '@/lib/hooks/useTripContext'
+import { formatBudget, normalizeCurrency } from '@/lib/currency'
+
 interface DateGroupHeaderProps {
   date: string
   dayOffset: number | null
@@ -30,6 +33,7 @@ export default function DateGroupHeader({
   onToggleCollapse,
   onAddItem,
 }: DateGroupHeaderProps) {
+  const trip = useOptionalTrip()
   const isUndated = date === '__undated__'
 
   return (
@@ -77,7 +81,7 @@ export default function DateGroupHeader({
         )}
         {totalBudget > 0 && (
           <span className="text-xs text-fg-muted tabular-nums">
-            ${totalBudget.toLocaleString()}
+            {formatBudget(totalBudget, normalizeCurrency(trip?.currency))}
           </span>
         )}
         <button
