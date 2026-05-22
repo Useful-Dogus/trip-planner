@@ -96,14 +96,32 @@ export default function Navigation() {
         side="bottom"
         title="더보기"
       >
-        <SheetSection>
-          <div className="flex items-center justify-between py-1">
-            <span className="text-sm text-fg">테마</span>
-            <ThemeToggle />
-          </div>
-        </SheetSection>
-        <SheetSection>
+        <SheetSection title="이 여행">
           <ul className="space-y-0.5">
+            <li>
+              <Link
+                href={hrefFor('gmaps-import')}
+                onClick={() => setMoreOpen(false)}
+                className="flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm text-fg hover:bg-bg-subtle"
+              >
+                <Download className="size-4 shrink-0" aria-hidden />
+                구글맵 가져오기
+              </Link>
+            </li>
+          </ul>
+        </SheetSection>
+        <SheetSection title="내 계정">
+          <ul className="space-y-0.5">
+            <li>
+              <Link
+                href="/dashboard"
+                onClick={() => setMoreOpen(false)}
+                className="flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm text-fg hover:bg-bg-subtle"
+              >
+                <ArrowLeft className="size-4 shrink-0" aria-hidden />
+                내 여행 목록
+              </Link>
+            </li>
             <li>
               <Link
                 href="/me"
@@ -115,24 +133,10 @@ export default function Navigation() {
               </Link>
             </li>
             <li>
-              <Link
-                href={hrefFor('gmaps-import')}
-                onClick={() => setMoreOpen(false)}
-                className="flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm text-fg hover:bg-bg-subtle"
-              >
-                <Download className="size-4 shrink-0" aria-hidden />
-                구글맵 가져오기
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/dashboard"
-                onClick={() => setMoreOpen(false)}
-                className="flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm text-fg hover:bg-bg-subtle"
-              >
-                <ArrowLeft className="size-4 shrink-0" aria-hidden />
-                내 여행 목록
-              </Link>
+              <div className="flex items-center justify-between gap-3 px-2 py-2 rounded-lg text-sm text-fg">
+                <span>테마</span>
+                <ThemeToggle />
+              </div>
             </li>
             <li>
               <button
@@ -188,8 +192,23 @@ export default function Navigation() {
               </li>
             )
           })}
+          <li>
+            <Link
+              href={hrefFor('gmaps-import')}
+              className={cn(
+                'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium',
+                'transition-colors duration-150',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+                'text-fg-muted hover:bg-bg-subtle hover:text-fg',
+              )}
+            >
+              <Download className="size-4 shrink-0" aria-hidden="true" />
+              <span>구글맵 가져오기</span>
+            </Link>
+          </li>
         </ul>
         <div className="border-t border-border pt-3 mt-2 space-y-0.5">
+          <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-fg-subtle">내 계정</p>
           <div className="px-3 py-2 flex items-center justify-between gap-2">
             <span className="text-xs text-fg-subtle whitespace-nowrap">테마</span>
             <ThemeToggle />
@@ -204,17 +223,6 @@ export default function Navigation() {
           >
             <User className="size-4 shrink-0" aria-hidden="true" />
             <span>프로필</span>
-          </Link>
-          <Link
-            href={hrefFor('gmaps-import')}
-            className={cn(
-              'flex items-center gap-2 px-3 py-2 text-sm rounded-lg',
-              'text-fg-subtle hover:text-fg hover:bg-bg-subtle transition-colors duration-150',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-            )}
-          >
-            <Download className="size-4 shrink-0" aria-hidden="true" />
-            <span>구글맵 가져오기</span>
           </Link>
           <button
             type="button"
