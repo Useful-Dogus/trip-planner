@@ -6,6 +6,8 @@ import L from 'leaflet'
 import type { TripItem } from '@/types'
 import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 import { getEndLodging, getStartLodging, isStayItem } from '@/lib/lodging'
+import MapInitialCenter from './MapInitialCenter'
+import { useOptionalTrip } from '@/lib/hooks/useTripContext'
 
 interface ScheduleMapProps {
   items: TripItem[]
@@ -22,6 +24,7 @@ function createNumberIcon(num: number) {
 }
 
 export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
+  const trip = useOptionalTrip()
   const confirmedDates = useMemo(() => {
     return collectScheduleDates(items.filter(i => i.trip_priority === '확정'))
   }, [items])
@@ -92,11 +95,16 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
       )}
 
       <MapContainer
-        center={[40.7128, -74.006]}
-        zoom={13}
+        center={[36.2048, 138.2529]}
+        zoom={5}
         style={{ height: '100%', width: '100%' }}
         className="touch-none"
       >
+        <MapInitialCenter
+          items={dayItems}
+          basecampCoord={null}
+          region={trip?.region ?? null}
+        />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"

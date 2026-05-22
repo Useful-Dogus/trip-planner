@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Polyline, Tooltip } from 'react-leaflet'
 import MapAddOnLongPress from './MapAddOnLongPress'
+import MapInitialCenter from './MapInitialCenter'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
@@ -126,11 +127,16 @@ export default function TripPlannerMap({
 
   return (
     <MapContainer
-      center={[40.7128, -74.006]}
-      zoom={13}
+      center={[36.2048, 138.2529]}
+      zoom={5}
       style={{ height: '100%', width: '100%' }}
       className="touch-none"
     >
+      <MapInitialCenter
+        items={visibleItems}
+        basecampCoord={basecampCoord}
+        region={trip?.region ?? null}
+      />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
