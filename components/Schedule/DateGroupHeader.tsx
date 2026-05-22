@@ -1,5 +1,6 @@
 'use client'
 
+import { useDroppable } from '@dnd-kit/core'
 import { useOptionalTrip } from '@/lib/hooks/useTripContext'
 import { formatBudget, normalizeCurrency } from '@/lib/currency'
 
@@ -12,6 +13,7 @@ interface DateGroupHeaderProps {
   lodgingName?: string | null
   onToggleCollapse: () => void
   onAddItem: () => void
+  dndVariant: 'mobile' | 'desktop'
 }
 
 function formatDate(dateStr: string): string {
@@ -32,12 +34,25 @@ export default function DateGroupHeader({
   lodgingName = null,
   onToggleCollapse,
   onAddItem,
+  dndVariant,
 }: DateGroupHeaderProps) {
   const trip = useOptionalTrip()
   const isUndated = date === '__undated__'
+  const { setNodeRef, isOver, active } = useDroppable({
+    id: `drop:date:${date}:${dndVariant}`,
+    data: { date },
+  })
+  const activeItemDate =
+    (active?.data?.current as { sourceDate?: string } | undefined)?.sourceDate ?? null
+  const isDropTarget = isOver && activeItemDate !== date
 
   return (
-    <div className="bg-bg-elevated border-b border-border sticky top-0 z-10">
+    <div
+      ref={setNodeRef}
+      className={`bg-bg-elevated border-b border-border sticky top-0 z-10 transition-colors ${
+        isDropTarget ? 'bg-accent-subtle ring-2 ring-accent ring-inset' : ''
+      }`}
+    >
       <div className="flex items-center gap-2 px-3 py-3">
       <button
         type="button"

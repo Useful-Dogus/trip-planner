@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
+import { useDraggable } from '@dnd-kit/core'
 import type { Category, ReservationStatus, TripItem } from '@/types'
 import NameCell from './cells/NameCell'
 import TimeCell from './cells/TimeCell'
@@ -37,6 +38,11 @@ export default function TableRow({
   onNavigate,
   onOpenPanel,
 }: TableRowProps) {
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
+    id: `drag:item:${item.id}`,
+    data: { itemId: item.id, sourceDate: item.date ?? null },
+  })
+
   function handleTextKeyDown(
     e: React.KeyboardEvent<HTMLInputElement>,
     field: EditableField,
@@ -57,7 +63,26 @@ export default function TableRow({
   }
 
   return (
-    <div className="flex min-w-[720px] items-center gap-0 border-b border-border hover:bg-bg-subtle group transition-colors">
+    <div
+      ref={setNodeRef}
+      className={`flex min-w-[744px] items-center gap-0 border-b border-border hover:bg-bg-subtle group transition-colors ${
+        isDragging ? 'opacity-40' : ''
+      }`}
+    >
+      {/* 드래그 핸들 */}
+      <button
+        type="button"
+        {...listeners}
+        {...attributes}
+        aria-label="드래그하여 다른 날짜로 이동"
+        title="드래그하여 다른 날짜로 이동"
+        className="w-6 flex-shrink-0 flex items-center justify-center self-stretch text-fg-subtle opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing touch-none"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zM7 10a1 1 0 11-2 0 1 1 0 012 0zM7 16a1 1 0 11-2 0 1 1 0 012 0zM15 4a1 1 0 11-2 0 1 1 0 012 0zM15 10a1 1 0 11-2 0 1 1 0 012 0zM15 16a1 1 0 11-2 0 1 1 0 012 0z" />
+        </svg>
+      </button>
+
       {/* 시간 */}
       <div className="w-16 flex-shrink-0 px-3 py-2.5">
         <TimeCell

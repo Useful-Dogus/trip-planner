@@ -1,6 +1,16 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState, Fragment } from 'react'
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
 import type { ReservationStatus, TripItem } from '@/types'
 import { CATEGORY_META, RESERVATION_STATUS_META } from '@/lib/itemOptions'
 import { haversineKm } from '@/lib/distance'
@@ -10,7 +20,9 @@ import { formatBudget as fmtBudget, normalizeCurrency } from '@/lib/currency'
 import { EDITABLE_FIELDS, type EditableField } from './TableRow'
 import TableRow from './TableRow'
 import DateGroupHeader from './DateGroupHeader'
+import UndatedGroupHeader from './UndatedGroupHeader'
 import DistanceSeparator from './DistanceSeparator'
+import { useDraggable } from '@dnd-kit/core'
 
 interface EditingCell {
   itemId: string
@@ -25,7 +37,22 @@ interface ScheduleTableProps {
 }
 
 const UNDATED_KEY = '__undated__'
-const TABLE_MIN_WIDTH = 'min-w-[720px]'
+const TABLE_MIN_WIDTH = 'min-w-[744px]'
+
+function parseDropTarget(id: string | number | undefined): string | null {
+  if (typeof id !== 'string') return null
+  // drop:date:${date}:${variant}
+  if (!id.startsWith('drop:date:')) return null
+  const rest = id.slice('drop:date:'.length)
+  const lastColon = rest.lastIndexOf(':')
+  return lastColon === -1 ? rest : rest.slice(0, lastColon)
+}
+
+function parseDragSource(id: string | number | undefined): string | null {
+  if (typeof id !== 'string') return null
+  if (!id.startsWith('drag:item:')) return null
+  return id.slice('drag:item:'.length)
+}
 
 function daysBetween(a: string, b: string): number {
   const da = new Date(a).getTime()
@@ -98,36 +125,75 @@ function MobileScheduleItemCard({
   const budget = formatBudget(item.budget, trip?.currency ?? 'KRW')
   const time = formatTimeRange(item)
   const emoji = CATEGORY_META[item.category]?.emoji ?? '📌'
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
+    id: `drag:item:${item.id}`,
+    data: { itemId: item.id, sourceDate: item.date ?? null },
+  })
 
   return (
-    <button
-      type="button"
-      onClick={() => onOpenPanel(item.id)}
-      className="w-full rounded-2xl border border-border bg-bg-elevated p-4 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md active:scale-[0.99]"
-    >
-      <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-bg-subtle text-lg">
+    <div ref={setNodeRef} className={`relative ${isDragging ? 'opacity-40' : ''}`}>
+      <button
+        type="button"
+        onClick={() => onOpenPanel(item.id)}
+        className="w-full rounded-2xl border border-border bg-bg-elevated p-4 pl-10 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md active:scale-[0.99]"
+      >
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-bg-subtle text-lg">
+            {emoji}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-fg">{item.name}</p>
+                <p className="mt-0.5 text-xs text-fg-muted">{item.category}</p>
+              </div>
+              <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-border bg-bg-subtle px-2 py-0.5 text-xs text-fg-muted">
+                <span className={`h-2 w-2 rounded-full ${status.dotClass}`} />
+                {status.label}
+              </span>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between gap-3 text-xs text-fg-muted">
+              <span className="tabular-nums">{time}</span>
+              {budget ? <span className="tabular-nums font-medium text-fg">{budget}</span> : <span />}
+            </div>
+          </div>
+        </div>
+      </button>
+      <span
+        {...listeners}
+        {...attributes}
+        role="button"
+        aria-label="길게 눌러 다른 날짜로 이동"
+        className="absolute top-0 left-0 bottom-0 w-8 flex items-center justify-center text-fg-subtle touch-none cursor-grab active:cursor-grabbing rounded-l-2xl"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zM7 10a1 1 0 11-2 0 1 1 0 012 0zM7 16a1 1 0 11-2 0 1 1 0 012 0zM15 4a1 1 0 11-2 0 1 1 0 012 0zM15 10a1 1 0 11-2 0 1 1 0 012 0zM15 16a1 1 0 11-2 0 1 1 0 012 0z" />
+        </svg>
+      </span>
+    </div>
+  )
+}
+
+function DragPreviewCard({ item }: { item: TripItem }) {
+  const trip = useOptionalTrip()
+  const emoji = CATEGORY_META[item.category]?.emoji ?? '📌'
+  const budget = formatBudget(item.budget, trip?.currency ?? 'KRW')
+  return (
+    <div className="pointer-events-none w-72 rounded-2xl border border-accent bg-bg-elevated p-3 shadow-2xl rotate-1">
+      <div className="flex items-center gap-2">
+        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-bg-subtle text-base">
           {emoji}
         </span>
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-fg">{item.name}</p>
-              <p className="mt-0.5 text-xs text-fg-muted">{item.category}</p>
-            </div>
-            <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full border border-border bg-bg-subtle px-2 py-0.5 text-xs text-fg-muted">
-              <span className={`h-2 w-2 rounded-full ${status.dotClass}`} />
-              {status.label}
-            </span>
-          </div>
-
-          <div className="mt-3 flex items-center justify-between gap-3 text-xs text-fg-muted">
-            <span className="tabular-nums">{time}</span>
-            {budget ? <span className="tabular-nums font-medium text-fg">{budget}</span> : <span />}
-          </div>
+          <p className="truncate text-sm font-semibold text-fg">{item.name}</p>
+          <p className="text-xs text-fg-muted">
+            {item.category}
+            {budget ? ` · ${budget}` : ''}
+          </p>
         </div>
       </div>
-    </button>
+    </div>
   )
 }
 
@@ -171,6 +237,36 @@ export default function ScheduleTable({
 }: ScheduleTableProps) {
   const tripId = useOptionalTripId()
   const storageKey = tripId ? `schedule:collapsed:${tripId}` : null
+
+  const [activeItemId, setActiveItemId] = useState<string | null>(null)
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: { distance: 6 },
+  })
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: { delay: 250, tolerance: 8 },
+  })
+  const sensors = useSensors(pointerSensor, touchSensor)
+
+  function handleDragStart(e: DragStartEvent) {
+    const itemId = parseDragSource(e.active.id)
+    setActiveItemId(itemId)
+  }
+
+  function handleDragEnd(e: DragEndEvent) {
+    setActiveItemId(null)
+    const itemId = parseDragSource(e.active.id)
+    const targetDate = parseDropTarget(e.over?.id)
+    if (!itemId || targetDate === null) return
+    const item = items.find(i => i.id === itemId)
+    if (!item) return
+    const currentDate = item.date ?? UNDATED_KEY
+    if (currentDate === targetDate) return
+    onUpdateItem(itemId, { date: targetDate === UNDATED_KEY ? null : targetDate })
+  }
+
+  function handleDragCancel() {
+    setActiveItemId(null)
+  }
 
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(() => {
@@ -355,7 +451,8 @@ export default function ScheduleTable({
           )
         })}
         {addingToDate === date ? (
-          <div className="flex min-w-[720px] items-center border-b border-border bg-info-bg/30">
+          <div className="flex min-w-[744px] items-center border-b border-border bg-info-bg/30">
+            <div className="w-6 flex-shrink-0" />
             <div className="w-16 flex-shrink-0 px-3 py-2.5" />
             <div className="min-w-[220px] flex-1 px-3 py-2.5">
               <input
@@ -372,7 +469,7 @@ export default function ScheduleTable({
             <div className="w-12 flex-shrink-0" />
             <div className="w-28 flex-shrink-0" />
             <div className="w-24 flex-shrink-0" />
-            <div className="w-8 flex-shrink-0" />
+            <div className="w-16 flex-shrink-0" />
           </div>
         ) : (
           <button
@@ -381,7 +478,7 @@ export default function ScheduleTable({
               setAddingToDate(date)
               setNewItemName('')
             }}
-            className="flex min-w-[720px] items-center w-full px-3 py-2 text-xs text-fg-subtle hover:text-fg-muted hover:bg-bg-subtle transition-colors text-left gap-1.5"
+            className="flex min-w-[744px] items-center w-full px-3 py-2 text-xs text-fg-subtle hover:text-fg-muted hover:bg-bg-subtle transition-colors text-left gap-1.5"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -460,7 +557,15 @@ export default function ScheduleTable({
     .filter(([key]) => key !== UNDATED_KEY)
     .sort(([a], [b]) => a.localeCompare(b))
 
+  const activeItem = activeItemId ? items.find(i => i.id === activeItemId) ?? null : null
+
   return (
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
     <div className="space-y-4">
       <div className="md:hidden space-y-4">
         {datedEntries.map(([date, groupItems]) => {
@@ -480,6 +585,7 @@ export default function ScheduleTable({
                 isCollapsed={isCollapsed}
                 isToday={isToday}
                 lodgingName={lodging?.name ?? null}
+                dndVariant="mobile"
                 onToggleCollapse={() =>
                   setCollapsedDates(prev => {
                     const next = new Set(prev)
@@ -505,38 +611,17 @@ export default function ScheduleTable({
 
         {undatedItems.length > 0 && (
           <div className="overflow-hidden rounded-xl border border-border bg-bg-elevated shadow-sm">
-            <div className="flex items-center gap-2 px-3 py-3 bg-bg-elevated border-b border-border sticky top-0 z-10">
-              <button
-                type="button"
-                onClick={() => setUndatedCollapsed(prev => !prev)}
-                className="flex items-center gap-2 flex-1 min-w-0 text-left"
-              >
-                <span className="text-sm font-semibold text-fg">날짜 미정</span>
-                <span className="text-xs text-fg-muted">{undatedItems.length}개</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`w-3.5 h-3.5 text-fg-subtle transition-transform flex-shrink-0 ${undatedCollapsed ? '-rotate-90' : ''}`}
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setUndatedCollapsed(false)
-                  setAddingToDate(UNDATED_KEY)
-                  setNewItemName('')
-                }}
-                className="flex items-center gap-1 text-xs text-fg-subtle hover:text-fg-muted transition-colors flex-shrink-0"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-                추가
-              </button>
-            </div>
+            <UndatedGroupHeader
+              count={undatedItems.length}
+              isCollapsed={undatedCollapsed}
+              dndVariant="mobile"
+              onToggleCollapse={() => setUndatedCollapsed(prev => !prev)}
+              onAddItem={() => {
+                setUndatedCollapsed(false)
+                setAddingToDate(UNDATED_KEY)
+                setNewItemName('')
+              }}
+            />
             {!undatedCollapsed && renderMobileGroupRows(UNDATED_KEY, undatedItems)}
           </div>
         )}
@@ -548,6 +633,7 @@ export default function ScheduleTable({
             <div className={TABLE_MIN_WIDTH}>
               {/* 컬럼 헤더 */}
               <div className="flex items-center gap-0 border-b border-border bg-bg-elevated px-0">
+                <div className="w-6 flex-shrink-0" />
                 <div className="w-16 flex-shrink-0 px-3 py-2.5">
                   <span className="text-xs font-semibold text-fg-muted whitespace-nowrap">시간</span>
                 </div>
@@ -563,7 +649,7 @@ export default function ScheduleTable({
                 <div className="w-24 flex-shrink-0 px-3 py-2.5 text-right">
                   <span className="text-xs font-semibold text-fg-muted whitespace-nowrap">예산</span>
                 </div>
-                <div className="w-8 flex-shrink-0" />
+                <div className="w-16 flex-shrink-0" />
               </div>
 
               {/* 날짜 있는 그룹 */}
@@ -584,6 +670,7 @@ export default function ScheduleTable({
                       isCollapsed={isCollapsed}
                       isToday={isToday}
                       lodgingName={lodging?.name ?? null}
+                      dndVariant="desktop"
                       onToggleCollapse={() =>
                         setCollapsedDates(prev => {
                           const next = new Set(prev)
@@ -610,38 +697,17 @@ export default function ScheduleTable({
               {/* 미배정 버킷 (최하단, 있을 때만) */}
               {undatedItems.length > 0 && (
                 <div>
-                  <div className="flex items-center gap-2 px-3 py-3 bg-bg-elevated border-b border-border sticky top-0 z-10">
-                    <button
-                      type="button"
-                      onClick={() => setUndatedCollapsed(prev => !prev)}
-                      className="flex items-center gap-2 flex-1 min-w-0 text-left"
-                    >
-                      <span className="text-sm font-semibold text-fg">날짜 미정</span>
-                      <span className="text-xs text-fg-muted">{undatedItems.length}개</span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className={`w-3.5 h-3.5 text-fg-subtle transition-transform flex-shrink-0 ${undatedCollapsed ? '-rotate-90' : ''}`}
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUndatedCollapsed(false)
-                        setAddingToDate(UNDATED_KEY)
-                        setNewItemName('')
-                      }}
-                      className="flex items-center gap-1 text-xs text-fg-subtle hover:text-fg-muted transition-colors flex-shrink-0"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                      </svg>
-                      추가
-                    </button>
-                  </div>
+                  <UndatedGroupHeader
+                    count={undatedItems.length}
+                    isCollapsed={undatedCollapsed}
+                    dndVariant="desktop"
+                    onToggleCollapse={() => setUndatedCollapsed(prev => !prev)}
+                    onAddItem={() => {
+                      setUndatedCollapsed(false)
+                      setAddingToDate(UNDATED_KEY)
+                      setNewItemName('')
+                    }}
+                  />
                   {!undatedCollapsed && renderDesktopGroupRows(UNDATED_KEY, undatedItems)}
                 </div>
               )}
@@ -650,5 +716,7 @@ export default function ScheduleTable({
         </div>
       </div>
     </div>
+    <DragOverlay>{activeItem ? <DragPreviewCard item={activeItem} /> : null}</DragOverlay>
+    </DndContext>
   )
 }
