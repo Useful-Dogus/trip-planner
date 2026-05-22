@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useOptionalTrip } from '@/lib/hooks/useTripContext'
+import { formatBudget, normalizeCurrency } from '@/lib/currency'
 
 interface BudgetCellProps {
   value: number | undefined
@@ -11,6 +13,8 @@ interface BudgetCellProps {
 }
 
 export default function BudgetCell({ value, isEditing, onClick, onBlur, onKeyDown }: BudgetCellProps) {
+  const trip = useOptionalTrip()
+  const currency = normalizeCurrency(trip?.currency)
   const inputRef = useRef<HTMLInputElement>(null)
   const [draft, setDraft] = useState(value !== undefined ? String(value) : '')
 
@@ -61,7 +65,7 @@ export default function BudgetCell({ value, isEditing, onClick, onBlur, onKeyDow
       onClick={onClick}
     >
       {value !== undefined ? (
-        `$${value.toLocaleString()}`
+        formatBudget(value, currency)
       ) : (
         <span className="text-fg-subtle">—</span>
       )}

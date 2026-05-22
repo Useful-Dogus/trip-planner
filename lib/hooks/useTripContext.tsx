@@ -11,6 +11,7 @@ export type TripContextValue = {
   endDate: string | null
   region: string | null
   basecampAddress: string | null
+  currency: string
   role: TripRole
 }
 

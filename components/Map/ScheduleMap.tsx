@@ -8,6 +8,7 @@ import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 import { getEndLodging, getStartLodging, isStayItem } from '@/lib/lodging'
 import MapInitialCenter from './MapInitialCenter'
 import { useOptionalTrip } from '@/lib/hooks/useTripContext'
+import { formatBudget, normalizeCurrency } from '@/lib/currency'
 
 interface ScheduleMapProps {
   items: TripItem[]
@@ -132,7 +133,7 @@ export default function ScheduleMap({ items, onSelectItem }: ScheduleMapProps) {
                 </p>
                 {item.time_start && <p className="text-xs text-fg-muted">{item.time_start}</p>}
                 {item.budget !== undefined && (
-                  <p className="text-xs text-fg-muted">${item.budget}</p>
+                  <p className="text-xs text-fg-muted">{formatBudget(item.budget, normalizeCurrency(trip?.currency))}</p>
                 )}
                 <TripPriorityBadge tripPriority={item.trip_priority} />
               </div>

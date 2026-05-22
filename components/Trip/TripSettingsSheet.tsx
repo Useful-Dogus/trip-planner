@@ -9,6 +9,7 @@ import { useToast } from '@/components/UI/Toast'
 import { useTrip } from '@/lib/hooks/useTripContext'
 import { useConfirm } from '@/components/UI/ConfirmDialog'
 import { Trash2 } from 'lucide-react'
+import { SUPPORTED_CURRENCIES, normalizeCurrency, type CurrencyCode } from '@/lib/currency'
 
 interface Props {
   open: boolean
@@ -26,6 +27,7 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
   const [endDate, setEndDate] = useState(trip.endDate ?? '')
   const [region, setRegion] = useState(trip.region ?? '')
   const [basecamp, setBasecamp] = useState(trip.basecampAddress ?? '')
+  const [currency, setCurrency] = useState<CurrencyCode>(normalizeCurrency(trip.currency))
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
@@ -48,6 +50,7 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
           end_date: endDate || null,
           region: region.trim() || null,
           basecamp_address: basecamp.trim() || null,
+          currency,
         }),
       })
       const data = await res.json()
@@ -144,6 +147,23 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
             value={basecamp}
             onChange={(e) => setBasecamp(e.target.value)}
           />
+          <div>
+            <label className="block text-sm font-medium text-fg mb-1.5">통화</label>
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
+              className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-fg focus-visible:outline-2 focus-visible:outline-accent"
+            >
+              {SUPPORTED_CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.symbol} {c.code} — {c.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-fg-subtle mt-1">
+              예산 입력·표시에 사용해요. 기존 항목의 수치는 그대로 유지돼요.
+            </p>
+          </div>
         </div>
       </SheetSection>
 

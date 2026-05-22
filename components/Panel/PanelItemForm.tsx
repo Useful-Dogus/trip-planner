@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { Category, ReservationStatus, TripItem, TripPriority, Link as TripLink } from '@/types'
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip } from '@/lib/hooks/useTripContext'
+import { currencyFieldLabel, normalizeCurrency } from '@/lib/currency'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
@@ -232,7 +233,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
               </Field>
             </div>
           </div>
-          <Field label="예산 (USD)">
+          <Field label={currencyFieldLabel('예산', normalizeCurrency(trip.currency))}>
             <input type="number" min="0" value={form.budget} onChange={e => setField('budget', e.target.value)} className={inputClass} placeholder="예: 50" />
           </Field>
         </section>

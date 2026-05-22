@@ -8,6 +8,7 @@ import Sheet from '@/components/UI/Sheet'
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip } from '@/lib/hooks/useTripContext'
 import { useConfirm } from '@/components/UI/ConfirmDialog'
+import { formatBudget, currencyFieldLabel, normalizeCurrency } from '@/lib/currency'
 import {
   CATEGORY_OPTIONS,
   CHIP_TONE,
@@ -207,6 +208,7 @@ function ItemDetailView({
   const trip = useTrip()
   const dateMin = trip.startDate ?? undefined
   const dateMax = trip.endDate ?? undefined
+  const tripCurrency = normalizeCurrency(trip.currency)
   const [editing, setEditing] = useState<InlineField | null>(null)
   const [vals, setVals] = useState({
     name: item.name,
@@ -456,7 +458,7 @@ function ItemDetailView({
           }
         </InlineRow>
 
-        <InlineRow label="예산 (USD)">
+        <InlineRow label={currencyFieldLabel('예산', tripCurrency)}>
           {editing === 'budget'
             ? <input
                 autoFocus
@@ -473,7 +475,7 @@ function ItemDetailView({
                 placeholder="0"
               />
             : <span className={vals.budget ? 'text-sm font-medium text-fg cursor-text' : emptyClass} onClick={() => activate('budget')}>
-                {vals.budget ? `$${parseInt(vals.budget).toLocaleString()}` : '입력'}
+                {vals.budget ? formatBudget(parseInt(vals.budget), tripCurrency) : '입력'}
               </span>
           }
         </InlineRow>

@@ -6,6 +6,7 @@ import Navigation from '@/components/Layout/Navigation'
 import ItemMetadataChips from '@/components/UI/ItemMetadataChips'
 import { buildTripPath } from '@/lib/hooks/useTripContext'
 import TripContextLabel from '@/components/UI/TripContextLabel'
+import { formatBudget, normalizeCurrency } from '@/lib/currency'
 import type { TripItem } from '@/types'
 
 export default async function ItemDetailPage({
@@ -13,10 +14,17 @@ export default async function ItemDetailPage({
 }: {
   params: { tripId: string; id: string }
 }) {
-  const items = await readItems(createRouteHandlerSupabase(), params.tripId)
+  const client = createRouteHandlerSupabase()
+  const items = await readItems(client, params.tripId)
   const item = items.find(i => i.id === params.id)
 
   if (!item) notFound()
+  const { data: tripRow } = await client
+    .from('trips')
+    .select('currency')
+    .eq('id', params.tripId)
+    .maybeSingle<{ currency: string | null }>()
+  const tripCurrency = normalizeCurrency(tripRow?.currency)
   const scheduleRows = buildScheduleRows(item)
 
   return (
@@ -50,7 +58,7 @@ export default async function ItemDetailPage({
                 <Row key={row.label} label={row.label} value={row.value} />
               ))}
               {item.budget !== undefined && (
-                <Row label="예산" value={`$${item.budget.toLocaleString()}`} />
+                <Row label="예산" value={formatBudget(item.budget, tripCurrency)} />
               )}
             </section>
           )}

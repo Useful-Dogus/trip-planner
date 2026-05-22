@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import type { Category, ReservationStatus, TripItem, TripPriority, Link as TripLink } from '@/types'
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip, useTripPath } from '@/lib/hooks/useTripContext'
+import { currencyFieldLabel, normalizeCurrency } from '@/lib/currency'
 import { useConfirm } from '@/components/UI/ConfirmDialog'
 import {
   CATEGORY_OPTIONS,
@@ -329,7 +330,7 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
         </div>
 
         <div>
-          <label className={labelClass}>예산 (USD)</label>
+          <label className={labelClass}>{currencyFieldLabel('예산', normalizeCurrency(trip.currency))}</label>
           <input type="number" min="0" value={form.budget} onChange={e => setField('budget', e.target.value)} className={inputClass} placeholder="예: 50" />
         </div>
       </section>

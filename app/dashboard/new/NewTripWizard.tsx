@@ -8,6 +8,7 @@ import Button from '@/components/UI/Button'
 import { Input } from '@/components/UI/Input'
 import { useToast } from '@/components/UI/Toast'
 import { cn } from '@/lib/cn'
+import { SUPPORTED_CURRENCIES, type CurrencyCode } from '@/lib/currency'
 
 type Step = 1 | 2 | 3 | 4 | 5
 
@@ -29,6 +30,7 @@ export default function NewTripWizard() {
   const [region, setRegion] = useState('')
   const [basecamp, setBasecamp] = useState('')
   const [basecampSkipped, setBasecampSkipped] = useState(false)
+  const [currency, setCurrency] = useState<CurrencyCode>('KRW')
   const [submitting, setSubmitting] = useState(false)
 
   const canProceed = useMemo(() => {
@@ -72,6 +74,7 @@ export default function NewTripWizard() {
           end_date: endDate || null,
           region: region.trim() || null,
           basecamp_address: basecamp.trim() || null,
+          currency,
         }),
       })
       if (!res.ok) {
@@ -160,11 +163,13 @@ export default function NewTripWizard() {
               }}
               onSkip={skipBasecamp}
               skipped={basecampSkipped}
+              currency={currency}
+              setCurrency={setCurrency}
             />
           )}
           {step === 5 && (
             <Step5
-              summary={{ title, startDate, endDate, region, basecamp }}
+              summary={{ title, startDate, endDate, region, basecamp, currency }}
               basecampSkipped={basecampSkipped && !basecamp.trim()}
               onEdit={jumpToStep}
             />
@@ -281,35 +286,58 @@ function Step4({
   setBasecamp,
   onSkip,
   skipped,
+  currency,
+  setCurrency,
 }: {
   basecamp: string
   setBasecamp: (v: string) => void
   onSkip: () => void
   skipped: boolean
+  currency: CurrencyCode
+  setCurrency: (c: CurrencyCode) => void
 }) {
   return (
-    <div className="space-y-3">
-      <Input
-        label="베이스캠프 (숙소)"
-        value={basecamp}
-        onChange={(e) => setBasecamp(e.target.value)}
-        placeholder="예: 난바 인근 호텔"
-        autoFocus
-      />
-      <p className="text-xs text-fg-subtle">
-        선택사항. 동선의 기준점이 돼요. 보통은 숙소 주소를 적어요.
-      </p>
-      <div className="flex items-center justify-between pt-2">
-        <button
-          type="button"
-          onClick={onSkip}
-          className="text-xs text-fg-muted underline-offset-2 hover:underline"
+    <div className="space-y-4">
+      <div>
+        <Input
+          label="베이스캠프 (숙소)"
+          value={basecamp}
+          onChange={(e) => setBasecamp(e.target.value)}
+          placeholder="예: 난바 인근 호텔"
+          autoFocus
+        />
+        <p className="text-xs text-fg-subtle mt-1">
+          선택사항. 동선의 기준점이 돼요. 보통은 숙소 주소를 적어요.
+        </p>
+        <div className="flex items-center justify-between pt-2">
+          <button
+            type="button"
+            onClick={onSkip}
+            className="text-xs text-fg-muted underline-offset-2 hover:underline"
+          >
+            {skipped ? '나중에 정하기로 설정됨' : '나중에 정하기'}
+          </button>
+          {skipped && !basecamp.trim() && (
+            <span className="text-xs text-fg-subtle">여행을 만든 뒤 설정에서 추가할 수 있어요.</span>
+          )}
+        </div>
+      </div>
+      <div className="border-t border-border pt-4">
+        <label className="block text-sm font-medium text-fg mb-1.5">통화</label>
+        <select
+          value={currency}
+          onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
+          className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-fg focus-visible:outline-2 focus-visible:outline-accent"
         >
-          {skipped ? '나중에 정하기로 설정됨' : '나중에 정하기'}
-        </button>
-        {skipped && !basecamp.trim() && (
-          <span className="text-xs text-fg-subtle">여행을 만든 뒤 설정에서 추가할 수 있어요.</span>
-        )}
+          {SUPPORTED_CURRENCIES.map((c) => (
+            <option key={c.code} value={c.code}>
+              {c.symbol} {c.code} — {c.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-fg-subtle mt-1">
+          예산을 입력·표시할 통화를 정해요. 여행 설정에서 나중에 바꿀 수 있어요.
+        </p>
       </div>
     </div>
   )
@@ -320,7 +348,7 @@ function Step5({
   basecampSkipped,
   onEdit,
 }: {
-  summary: { title: string; startDate: string; endDate: string; region: string; basecamp: string }
+  summary: { title: string; startDate: string; endDate: string; region: string; basecamp: string; currency: CurrencyCode }
   basecampSkipped: boolean
   onEdit: (step: Step) => void
 }) {
@@ -359,6 +387,14 @@ function Step5({
                 ? '나중에 정하기'
                 : '미설정'
           }
+          onEdit={() => onEdit(4)}
+        />
+        <SummaryEditRow
+          label="통화"
+          value={(() => {
+            const c = SUPPORTED_CURRENCIES.find((x) => x.code === summary.currency)
+            return c ? `${c.symbol} ${c.code} — ${c.label}` : summary.currency
+          })()}
           onEdit={() => onEdit(4)}
         />
       </dl>
