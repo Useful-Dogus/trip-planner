@@ -25,7 +25,7 @@ function PlaceholderChip({ label }: { label: string }) {
 
 function CategoryChip({ category }: { category: TripItem['category'] | undefined }) {
   if (!category) return <PlaceholderChip label={PLACEHOLDER_LABELS.category} />
-  const emoji = CATEGORY_META[category]?.emoji
+  const Icon = CATEGORY_META[category]?.Icon
   return (
     <span
       className={cn(
@@ -33,7 +33,7 @@ function CategoryChip({ category }: { category: TripItem['category'] | undefined
         CHIP_TONE,
       )}
     >
-      <span aria-hidden="true">{emoji}</span>
+      {Icon ? <Icon size={12} aria-hidden="true" className="flex-shrink-0" /> : null}
       {category}
     </span>
   )

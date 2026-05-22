@@ -124,7 +124,7 @@ function MobileScheduleItemCard({
   const status = getStatusMeta(item.reservation_status)
   const budget = formatBudget(item.budget, trip?.currency ?? 'KRW')
   const time = formatTimeRange(item)
-  const emoji = CATEGORY_META[item.category]?.emoji ?? '📌'
+  const Icon = CATEGORY_META[item.category]?.Icon
   const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
     id: `drag:item:${item.id}`,
     data: { itemId: item.id, sourceDate: item.date ?? null },
@@ -138,8 +138,8 @@ function MobileScheduleItemCard({
         className="w-full rounded-2xl border border-border bg-bg-elevated p-4 pl-10 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md active:scale-[0.99]"
       >
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-bg-subtle text-lg">
-            {emoji}
+          <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-bg-subtle text-fg-muted">
+            {Icon ? <Icon size={18} /> : null}
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">
@@ -177,13 +177,13 @@ function MobileScheduleItemCard({
 
 function DragPreviewCard({ item }: { item: TripItem }) {
   const trip = useOptionalTrip()
-  const emoji = CATEGORY_META[item.category]?.emoji ?? '📌'
+  const Icon = CATEGORY_META[item.category]?.Icon
   const budget = formatBudget(item.budget, trip?.currency ?? 'KRW')
   return (
     <div className="pointer-events-none w-72 rounded-2xl border border-accent bg-bg-elevated p-3 shadow-2xl rotate-1">
       <div className="flex items-center gap-2">
-        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-bg-subtle text-base">
-          {emoji}
+        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-bg-subtle text-fg-muted">
+          {Icon ? <Icon size={16} /> : null}
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-fg">{item.name}</p>

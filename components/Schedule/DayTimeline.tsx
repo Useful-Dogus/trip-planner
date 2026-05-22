@@ -38,7 +38,7 @@ export default function DayTimeline({ items, selectedItemId, onSelectItem }: Day
       {items.map((item, idx) => {
         const prev = idx > 0 ? items[idx - 1] : null
         const km = prev ? distance(prev, item) : null
-        const emoji = CATEGORY_META[item.category]?.emoji ?? '📌'
+        const Icon = CATEGORY_META[item.category]?.Icon
         const color = CATEGORY_META[item.category]?.color ?? '#cbd5e1'
         const active = item.id === selectedItemId
         return (
@@ -68,7 +68,7 @@ export default function DayTimeline({ items, selectedItemId, onSelectItem }: Day
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="text-xs">{emoji}</span>
+                    {Icon ? <Icon size={12} className="flex-shrink-0 text-fg-muted" /> : null}
                     <span className="truncate text-xs font-semibold text-fg">
                       {item.name}
                     </span>

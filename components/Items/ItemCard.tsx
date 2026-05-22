@@ -91,12 +91,12 @@ export default function ItemCard({
       />
       <div className="flex items-start justify-between gap-2 pl-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <span
-            className="flex-shrink-0 text-base leading-none"
-            aria-hidden="true"
-          >
-            {CATEGORY_META[item.category]?.emoji ?? '📌'}
-          </span>
+          {(() => {
+            const Icon = CATEGORY_META[item.category]?.Icon
+            return Icon ? (
+              <Icon size={16} className="flex-shrink-0 text-fg-muted" aria-hidden="true" />
+            ) : null
+          })()}
           <div className="min-w-0">
             {editingName !== null ? (
               <input

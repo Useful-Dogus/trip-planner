@@ -310,7 +310,7 @@ function CandidatesView({
           {filtered.map((item) => {
             const active = item.id === selectedItemId
             const color = CATEGORY_META[item.category]?.color ?? '#cbd5e1'
-            const emoji = CATEGORY_META[item.category]?.emoji ?? '📌'
+            const Icon = CATEGORY_META[item.category]?.Icon
             const isConfirmed = item.trip_priority === '확정'
             return (
               <li key={item.id}>
@@ -335,9 +335,7 @@ function CandidatesView({
                   />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-1.5">
-                      <span className="text-xs" aria-hidden="true">
-                        {emoji}
-                      </span>
+                      {Icon ? <Icon size={12} className="flex-shrink-0 text-fg-muted" aria-hidden="true" /> : null}
                       <span className="truncate text-xs font-semibold text-fg">
                         {item.name}
                       </span>
