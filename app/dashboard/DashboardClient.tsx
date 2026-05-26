@@ -61,7 +61,7 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
   const { data, mutate: mutateTrips } = useSWR<{ trips: TripSummary[] }>(
     '/api/trips',
     fetcher,
-    { fallbackData: { trips: initialTrips }, revalidateOnFocus: false },
+    { fallbackData: { trips: initialTrips } },
   )
   const trips = data?.trips ?? initialTrips
   // legacy state (탬플릿 호환). 실제 보존은 SWR 캐시.
@@ -94,6 +94,7 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
       }
       setTrips((prev) => prev.filter((t) => t.id !== trip.id))
       showToast({ message: '여행을 삭제했어요.', type: 'success' })
+      mutateTrips()
       router.refresh()
     } catch {
       showToast({ message: '네트워크 오류가 발생했습니다.', type: 'error' })

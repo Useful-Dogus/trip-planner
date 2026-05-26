@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import 'leaflet/dist/leaflet.css'
 import Providers from './providers'
+import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 
 export const metadata: Metadata = {
   title: 'Trip Planner',
@@ -46,14 +47,25 @@ const themeInitScript = `
 })();
 `
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // 클라이언트 SWR 캐시를 user-scope 로 격리하기 위해 root 에서 user id 를 1회 읽어
+  // Providers 에 prop 으로 내려준다. 인증되지 않은 경로(/login, /signup 등) 도 안전.
+  let userId: string | null = null
+  try {
+    const client = createRouteHandlerSupabase()
+    const { data } = await client.auth.getUser()
+    userId = data.user?.id ?? null
+  } catch {
+    userId = null
+  }
+
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="bg-bg text-fg font-sans antialiased">
-        <Providers>{children}</Providers>
+        <Providers userId={userId}>{children}</Providers>
       </body>
     </html>
   )

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { mutate as globalMutate } from 'swr'
 import Sheet, { SheetSection } from '@/components/UI/Sheet'
 import { Input } from '@/components/UI/Input'
 import Button from '@/components/UI/Button'
@@ -59,6 +60,7 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
         return
       }
       showToast({ message: '여행 정보를 저장했습니다.', type: 'success' })
+      globalMutate('/api/trips')
       router.refresh()
       onClose()
     } catch {
@@ -89,6 +91,7 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
         return
       }
       showToast({ message: '여행을 삭제했어요.', type: 'success' })
+      globalMutate('/api/trips')
       router.push('/dashboard')
     } catch {
       showToast({ message: '네트워크 오류가 발생했습니다.', type: 'error' })
