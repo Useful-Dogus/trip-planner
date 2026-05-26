@@ -9,6 +9,7 @@ import { Input } from '@/components/UI/Input'
 import { useToast } from '@/components/UI/Toast'
 import { cn } from '@/lib/cn'
 import { SUPPORTED_CURRENCIES, type CurrencyCode } from '@/lib/currency'
+import { useIsTouchDevice } from '@/lib/hooks/useIsTouchDevice'
 
 type Step = 1 | 2 | 3 | 4 | 5
 
@@ -206,6 +207,7 @@ function Step1({
   title: string
   setTitle: (v: string) => void
 }) {
+  const isTouch = useIsTouchDevice()
   return (
     <div className="space-y-3">
       <Input
@@ -213,7 +215,7 @@ function Step1({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="예: 오사카 가을 여행"
-        autoFocus
+        autoFocus={!isTouch}
         required
       />
       <p className="text-xs text-fg-subtle">
@@ -267,6 +269,7 @@ function Step3({
   region: string
   setRegion: (v: string) => void
 }) {
+  const isTouch = useIsTouchDevice()
   return (
     <div className="space-y-3">
       <Input
@@ -274,7 +277,7 @@ function Step3({
         value={region}
         onChange={(e) => setRegion(e.target.value)}
         placeholder="예: 일본 오사카"
-        autoFocus
+        autoFocus={!isTouch}
       />
       <p className="text-xs text-fg-subtle">국가·도시·테마 등 자유롭게.</p>
     </div>
@@ -296,6 +299,7 @@ function Step4({
   currency: CurrencyCode
   setCurrency: (c: CurrencyCode) => void
 }) {
+  const isTouch = useIsTouchDevice()
   return (
     <div className="space-y-4">
       <div>
@@ -304,7 +308,7 @@ function Step4({
           value={basecamp}
           onChange={(e) => setBasecamp(e.target.value)}
           placeholder="예: 난바 인근 호텔"
-          autoFocus
+          autoFocus={!isTouch}
         />
         <p className="text-xs text-fg-subtle mt-1">
           선택사항. 동선의 기준점이 돼요. 보통은 숙소 주소를 적어요.

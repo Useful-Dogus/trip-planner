@@ -326,6 +326,20 @@
 }
 
 /* ============================================================
+ * iOS Safari 자동 줌인 방지
+ * - 인풋 font-size 가 16px 미만이면 포커스 시 자동으로 줌인된다.
+ * - 데스크탑 밀도는 유지하고 모바일 viewport 에서만 16px 이상을 보장한다.
+ * - color/checkbox/radio/range 처럼 텍스트가 없는 타입은 제외.
+ * ========================================================== */
+@media (max-width: 640px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* ============================================================
  * Reduced motion
  * ========================================================== */
 @media (prefers-reduced-motion: reduce) {
