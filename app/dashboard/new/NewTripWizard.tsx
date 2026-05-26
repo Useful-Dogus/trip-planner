@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { mutate as globalMutate } from 'swr'
 import { ArrowLeft, Check } from 'lucide-react'
 import Button from '@/components/UI/Button'
 import { Input } from '@/components/UI/Input'
@@ -83,6 +84,9 @@ export default function NewTripWizard() {
         throw new Error(data?.error ?? '여행 생성에 실패했습니다.')
       }
       const data = (await res.json()) as { tripId: string }
+      // 대시보드 SWR 캐시를 즉시 갱신해 두면, 사용자가 뒤로가서 목록으로 돌아왔을 때
+      // 새 trip 이 0.3-0.5s 후 "팝업" 되는 대신 처음부터 보인다.
+      await globalMutate('/api/trips')
       router.push(`/trip/${data.tripId}/map`)
     } catch (e) {
       const msg = e instanceof Error ? e.message : '여행 생성에 실패했습니다.'
