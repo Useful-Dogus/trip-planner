@@ -1,9 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Copy, Plus, Trash2, Check, AlertCircle } from 'lucide-react'
+import { Copy, Plus, Trash2, Check, AlertCircle, Link2Off } from 'lucide-react'
 import Sheet from '@/components/UI/Sheet'
 import Button from '@/components/UI/Button'
+import EmptyState from '@/components/UI/EmptyState'
 import { useToast } from '@/components/UI/Toast'
 import { useConfirm } from '@/components/UI/ConfirmDialog'
 import type { Share } from '@/lib/share'
@@ -130,7 +131,12 @@ export default function ShareDialog({ open, onClose, tripId }: Props) {
           {loading && !shares ? (
             <p className="text-sm text-fg-subtle">불러오는 중…</p>
           ) : activeShares.length === 0 ? (
-            <p className="text-sm text-fg-subtle">아직 발급된 활성 링크가 없어요.</p>
+            <EmptyState
+              size="inline"
+              icon={<Link2Off className="size-7" aria-hidden="true" />}
+              title="활성 링크가 없어요"
+              description="새 공유 링크를 만들어 일행에게 보내세요."
+            />
           ) : (
             <ul className="space-y-2">
               {activeShares.map((s) => {
