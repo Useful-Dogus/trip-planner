@@ -33,13 +33,35 @@ export async function PATCH(
     return NextResponse.json({ error: '잘못된 요청 본문' }, { status: 400 })
   }
 
-  const patch: Record<string, string | null> = {}
+  const patch: Record<string, string | number | null> = {}
 
   if ('currency' in body) {
     if (!isCurrencyCode(body.currency)) {
       return NextResponse.json({ error: '지원하지 않는 통화 코드' }, { status: 400 })
     }
     patch.currency = body.currency
+  }
+
+  if ('home_currency' in body) {
+    const v = body.home_currency
+    if (v === null) {
+      patch.home_currency = null
+    } else if (isCurrencyCode(v)) {
+      patch.home_currency = v
+    } else {
+      return NextResponse.json({ error: '지원하지 않는 home 통화 코드' }, { status: 400 })
+    }
+  }
+
+  if ('home_currency_rate' in body) {
+    const v = body.home_currency_rate
+    if (v === null) {
+      patch.home_currency_rate = null
+    } else if (typeof v === 'number' && Number.isFinite(v) && v > 0) {
+      patch.home_currency_rate = v
+    } else {
+      return NextResponse.json({ error: '환율은 0 보다 큰 숫자여야 합니다.' }, { status: 400 })
+    }
   }
 
   for (const key of FIELD_KEYS) {
@@ -90,7 +112,7 @@ export async function PATCH(
     .from('trips')
     .update(patch)
     .eq('id', tripId)
-    .select('id, title, start_date, end_date, region, basecamp_address, currency')
+    .select('id, title, start_date, end_date, region, basecamp_address, currency, home_currency, home_currency_rate')
     .maybeSingle()
 
   if (error) {

@@ -69,3 +69,19 @@ export function currencySymbol(currency: CurrencyCode = 'KRW'): string {
 export function currencyFieldLabel(prefix: string, currency: CurrencyCode = 'KRW'): string {
   return `${prefix} (${currencySymbol(currency)})`
 }
+
+/**
+ * Trip 통화에서 home 통화로 환산 후 포맷.
+ * homeCurrency 또는 rate 가 없거나, fromCurrency === homeCurrency 면 null.
+ */
+export function formatHomeConversion(
+  amount: number,
+  fromCurrency: CurrencyCode,
+  homeCurrency: CurrencyCode | null,
+  rate: number | null,
+): string | null {
+  if (!homeCurrency || !rate || rate <= 0) return null
+  if (fromCurrency === homeCurrency) return null
+  const converted = amount * rate
+  return formatBudget(converted, homeCurrency)
+}
