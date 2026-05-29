@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, MapPin, MoreVertical, Plus, Search, Trash2, User } from 'lucide-react'
+import { Compass, LogOut, MapPin, MoreVertical, Plus, Search, SearchX, Trash2, User } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { Input } from '@/components/UI/Input'
 import Button from '@/components/UI/Button'
@@ -196,6 +196,7 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
         {trips.length === 0 ? (
           <div className="py-12">
             <EmptyState
+              icon={<Compass className="size-10" aria-hidden="true" />}
               title="아직 여행이 없어요"
               description="첫 여행을 만들어 일정을 정리해 보세요."
               action={
@@ -211,6 +212,7 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
         ) : visibleTrips.length === 0 ? (
           <div className="py-12">
             <EmptyState
+              icon={<SearchX className="size-10" aria-hidden="true" />}
               title="검색 결과가 없어요"
               description="다른 키워드로 검색해 보세요."
             />

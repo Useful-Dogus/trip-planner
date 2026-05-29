@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ExternalLink, Compass } from 'lucide-react'
+import { ExternalLink, Compass, CalendarRange } from 'lucide-react'
 import { fetchSharedTrip, type SharedTripPayload } from '@/lib/sharedTrip'
 import SharedItemCard from '@/components/Share/SharedItemCard'
+import EmptyState from '@/components/UI/EmptyState'
 import type { TripItem } from '@/types'
 
 type Props = { params: { token: string } }
@@ -138,8 +139,11 @@ export default async function SharePage({ params }: Props) {
       </header>
 
       {items.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border bg-bg-elevated p-8 text-center text-sm text-fg-subtle">
-          아직 추가된 일정이 없어요.
+        <div className="rounded-lg border border-dashed border-border bg-bg-elevated">
+          <EmptyState
+            icon={<CalendarRange className="size-10" aria-hidden="true" />}
+            title="아직 추가된 일정이 없어요"
+          />
         </div>
       ) : (
         <section className="space-y-6">
