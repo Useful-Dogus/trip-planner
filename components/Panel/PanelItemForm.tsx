@@ -5,6 +5,7 @@ import type { Category, ReservationStatus, TripItem, TripPriority, Link as TripL
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip } from '@/lib/hooks/useTripContext'
 import { currencyFieldLabel, normalizeCurrency } from '@/lib/currency'
+import CollapsibleSection from '@/components/UI/CollapsibleSection'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
@@ -160,6 +161,10 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
 
   const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-bg-elevated'
 
+  const scheduleHasValue = !!(item.date || item.end_date || item.time_start || item.time_end || item.budget != null)
+  const locationHasValue = !!(item.address || item.lat != null || item.lng != null)
+  const linksHasValue = (item.links?.length ?? 0) > 0
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto min-h-0 px-5 py-4 space-y-6">
@@ -187,8 +192,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
           <textarea ref={memoRef} value={form.memo} onChange={e => setField('memo', e.target.value)} className={`${inputClass} resize-none overflow-hidden`} rows={4} placeholder="자유롭게 메모..." />
         </section>
 
-        <section className="space-y-4">
-          <h3 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">일정</h3>
+        <CollapsibleSection title="일정" defaultOpen={scheduleHasValue}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-3">
               <Field label="시작 날짜" hint={form.category === '숙박' ? '체크인' : undefined}>
@@ -236,10 +240,9 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
           <Field label={currencyFieldLabel('예산', normalizeCurrency(trip.currency))}>
             <input type="number" min="0" value={form.budget} onChange={e => setField('budget', e.target.value)} className={inputClass} placeholder="예: 50" />
           </Field>
-        </section>
+        </CollapsibleSection>
 
-        <section className="space-y-4">
-          <h3 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">위치</h3>
+        <CollapsibleSection title="위치" defaultOpen={locationHasValue}>
           <Field label="주소">
             <input type="text" value={form.address} onChange={e => setField('address', e.target.value)} onBlur={handleAddressBlur} className={inputClass} placeholder="주소 입력 후 포커스를 벗어나면 좌표 자동 입력" />
           </Field>
@@ -253,10 +256,17 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
               <input type="number" step="any" value={form.lng} onChange={e => setField('lng', e.target.value)} className={inputClass} />
             </Field>
           </div>
-        </section>
+        </CollapsibleSection>
 
-        <section className="space-y-3">
-          <h3 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">링크</h3>
+        <CollapsibleSection
+          title="링크"
+          defaultOpen={linksHasValue}
+          trailing={
+            form.links.length > 0 ? (
+              <span className="text-xs text-fg-subtle tabular-nums">{form.links.length}</span>
+            ) : null
+          }
+        >
           {form.links.map((link, i) => (
             <div key={i} className="flex gap-2 items-start">
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -269,7 +279,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
           <button type="button" onClick={addLink} className="w-full text-sm text-fg-subtle hover:text-fg-muted border border-dashed border-border-strong rounded-lg px-4 py-2 transition-colors">
             + 링크 추가
           </button>
-        </section>
+        </CollapsibleSection>
       </div>
 
       <div className="flex-shrink-0 px-5 py-3 border-t border-border space-y-2">
