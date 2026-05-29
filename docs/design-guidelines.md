@@ -270,18 +270,40 @@ Key + Ambient 2종 합성, 14% opacity 기본. trip-planner 매핑:
 
 ### 8.1 라이브러리
 
-- **lucide-react** 를 단일 패밀리로 채택(현재 인라인 SVG 혼재 → 점진적 마이그레이션).
-- stroke 1.5 통일(lucide 기본). 자체 그리기 금지.
+- **lucide-react** 를 단일 패밀리로 채택. 인라인 SVG · 이모지 단독 사용 금지.
+- 기본 `strokeWidth={2}` (lucide-react 기본값). 자체 그리기 금지.
+- 카테고리 표시는 **반드시 `CATEGORY_META[category].Icon` 사용** (`lib/itemOptions.ts`).
+  지도 마커는 `categoryIconSvg(category, ...)` (`lib/categoryIcon.ts`) 으로 SVG 문자열 생성 후 Leaflet `divIcon` 에 임베드.
 
 ### 8.2 사이즈 (Fluent 2)
 
 | 크기 | 용도 |
 |---|---|
-| 12px | 정보 표시 전용(별점, 거리 인디케이터). 인터랙션 X |
+| 12px | 정보 표시 전용(별점, 거리 인디케이터, 칩 leading). 인터랙션 X |
+| 14px | 지도 마커 안 (`tp-chip-marker`) |
 | 16px | 인라인 텍스트 옆, 메타 |
+| 18px | 카드 헤더 카테고리 아이콘 (모바일 일정 카드) |
 | **20px** | **버튼·툴바 표준** |
 | 24px | 지도 마커, 강조 |
-| 32-48px | 빈 상태 일러스트 |
+| 32-48px | 빈 상태(`EmptyState`) — `size-10` (page), `size-7` (inline) |
+
+### 8.3 카테고리 매핑 (`CATEGORY_META`)
+
+| Category | lucide | color (alias) | 용도 |
+|---|---|---|---|
+| 교통 | `Bus` | slate-400 | 이동 수단 |
+| 숙박 | `Hotel` | sky-400 | 호텔·에어비앤비 |
+| 명소 | `Landmark` | orange-400 | 관광 명소 |
+| 식당 | `UtensilsCrossed` | red-400 | 식사 |
+| 카페 | `Coffee` | amber-700 | 카페·디저트 |
+| 쇼핑 | `ShoppingBag` | pink-400 | 쇼핑 |
+| 문화시설 | `Palette` | violet-400 | 미술관·박물관·갤러리 |
+| 공연·스포츠 | `Drama` | emerald-400 | 콘서트·경기 |
+| 액티비티 | `Target` | amber-400 | 체험 |
+| 휴양 | `Palmtree` | green-400 | 자연·휴식 |
+| 기타 | `Bookmark` | slate-300 | 미분류 |
+
+색은 dot/leading 보조용. **칩 배경 전체를 카테고리 색으로 덮지 않는다** (§ 12.5 참고).
 
 ### 8.3 스타일 (Fluent 2)
 
@@ -424,6 +446,57 @@ Key + Ambient 2종 합성, 14% opacity 기본. trip-planner 매핑:
   - 포커스 트랩 + Escape 닫기 + 백드롭 클릭 닫기.
 - ≥ 1024px: **좌측 고정 패널** 360-400px 폭, Shadow 4-8.
 - 두 형태가 **같은 컴포넌트**를 공유해야 함(re-architect).
+
+### 12.5 칩 (`Chip` / `ChipButton`)
+
+`components/UI/Chip.tsx` 의 컴포넌트만 사용한다. 인라인 `rounded-full px-2 py-0.5 ...` 마크업으로 새 칩을 만들지 않는다.
+
+| variant | 배경 / 텍스트 | 용도 |
+|---|---|---|
+| `neutral` (기본) | `bg-bg-subtle text-fg-muted` | 일반 메타, 플레이스홀더 |
+| `accent` | `bg-accent-subtle text-accent` | 선택 / 활성 표시 |
+| `category` | neutral 톤 + props.category 의 lucide 아이콘 자동 leading | 카테고리 표시 |
+
+**규칙**
+
+- **카테고리 색은 leading dot / 아이콘에만**. 칩 배경 전체를 카테고리 색으로 깔지 않는다 (무지개 인상 방지).
+- 같은 화면에 채도 높은 칩이 동시에 5개 이상 떠 있으면 디자인 재검토.
+- 칩은 **"필터 가능한 분류"** 에만 사용. 시간 · 평점 · 거리 · 통화 같은 metadata 는 칩이 아니라 텍스트/작은 라벨로 표시.
+- 사이즈: 기본 `md` (h-7). 빽빽한 곳은 `sm` (h-6).
+- 인터랙티브 칩은 `ChipButton` (필터 토글, 칩 제거 X). `aria-pressed` 자동 적용.
+
+**금지 패턴**
+
+```tsx
+// ❌ inline 마크업
+<span className="rounded-full bg-blue-500 px-2 py-0.5 text-xs">{category}</span>
+
+// ✅ Chip 컴포넌트
+<Chip variant="category" category={category}>{category}</Chip>
+```
+
+### 12.6 빈 상태 (`EmptyState`)
+
+`components/UI/EmptyState.tsx` 만 사용한다. 인라인 `text-4xl` 이모지 + 텍스트로 빈 상태를 만들지 않는다.
+
+**필수 구성**
+
+- `icon`: **lucide 아이콘** (이모지 단독 사용 금지). `size-10` (size=page) / `size-7` (size=inline). `aria-hidden="true"`.
+- `title`: 한 줄. "아직 …이 없어요" 처럼 사용자 시점 (§ 11.2).
+- `description`: 선택. **다음 행동을 안내** (Polaris empty-state 원칙).
+- `action`: 선택. 1차 액션은 `<Button>` 으로 — 추가 / 검색 초기화 등.
+
+**lucide 매핑 가이드**
+
+| 컨텍스트 | 아이콘 |
+|---|---|
+| 목록(장소·항목 일반) | `MapPin` |
+| 일정/캘린더 | `CalendarRange` |
+| 검색 결과 0 | `SearchX` |
+| 대시보드(여행 0) | `Compass` |
+| 공유 링크 0 | `Link2Off` |
+
+`size`: 페이지 메인 = `page` (기본). 컨테이너 내부 보조 = `inline`.
 
 ---
 
@@ -575,3 +648,7 @@ showToast({
 - [ ] 비동기 작업에 **§ 13 Wait UX 패턴**을 적용했는가?
 - [ ] 한국어 카피가 **§ 11 용어/보이스**를 따르는가?
 - [ ] 빈 상태 / 에러 상태가 **다음 행동을 제시**하는가?
+- [ ] 새 칩이 인라인 마크업이 아닌 **`Chip` 컴포넌트** (§ 12.5) 인가?
+- [ ] 카테고리 색이 칩 배경 전체를 덮지 않는가? (leading dot/아이콘만)
+- [ ] 새 아이콘이 **lucide-react** 인가? 이모지 단독 사용 금지 (§ 8.1)
+- [ ] 새 빈 상태가 **`EmptyState` 컴포넌트** (§ 12.6) + lucide icon 인가?
