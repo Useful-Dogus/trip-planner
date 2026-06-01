@@ -5,9 +5,17 @@ import TripAccessDenied from '@/components/UI/TripAccessDenied'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-type TripRow = {
+// PostgreSQL "undefined_column" — 운영 DB 에 마이그레이션이 적용되지 않은 경우 등.
+// 권한 문제가 아니므로 forbidden 으로 처리하지 않는다.
+const PG_UNDEFINED_COLUMN = '42703'
+
+type AccessRow = {
   id: string
   title: string
+  trip_members: { role: TripRole }[]
+}
+
+type ExtendedRow = {
   start_date: string | null
   end_date: string | null
   region: string | null
@@ -19,8 +27,10 @@ type TripRow = {
   currency: string | null
   home_currency: string | null
   home_currency_rate: number | null
-  trip_members: { role: TripRole }[]
 }
+
+const EXTENDED_COLUMNS =
+  'start_date, end_date, region, basecamp_address, center_lat, center_lng, default_zoom, center_source, currency, home_currency, home_currency_rate'
 
 export default async function TripLayout({
   children,
@@ -41,59 +51,89 @@ export default async function TripLayout({
     redirect(`/login?next=${encodeURIComponent(`/trip/${tripId}`)}`)
   }
 
-  const { data, error } = await client
+  // Stage A — 접근 체크. 스키마 진화에 영향받지 않는 안정 컬럼만 사용한다.
+  // 스키마 드리프트(예: 신규 컬럼 마이그레이션 누락) 가 권한 거부로 오인되는 것을 막는다.
+  const access = await client
     .from('trips')
-    .select(
-      'id, title, start_date, end_date, region, basecamp_address, center_lat, center_lng, default_zoom, center_source, currency, home_currency, home_currency_rate, trip_members!inner(role)',
-    )
+    .select('id, title, trip_members!inner(role)')
     .eq('id', tripId)
     .eq('trip_members.user_id', userData.user.id)
-    .maybeSingle<TripRow>()
+    .maybeSingle<AccessRow>()
 
-  if (error) {
-    // 진단용: forbidden 화면이 뜬 실제 원인 (스키마 컬럼 누락 42703, RLS 거부, 타임아웃 등) 을 가린다.
-    // 운영 환경에서 한 번 재현해 어느 가설(컬럼 누락 / RLS race / 세션 race) 인지 확정 후
-    // 진짜 fix 적용. 본 PR 은 진단 로그만 추가.
-    console.error('[TripLayout] supabase trip lookup failed', {
+  if (access.error) {
+    console.error('[TripLayout] access check failed', {
       tripId,
       userId: userData.user.id,
-      code: error.code,
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
+      code: access.error.code,
+      message: access.error.message,
+      details: access.error.details,
+      hint: access.error.hint,
     })
-  } else if (!data) {
-    console.warn('[TripLayout] trip row not visible to user (RLS or not-found)', {
-      tripId,
-      userId: userData.user.id,
-    })
+    return <TripAccessDenied reason="server-error" />
   }
-
-  if (error || !data) {
+  if (!access.data) {
     return <TripAccessDenied reason="forbidden" />
   }
-
-  const role = data.trip_members[0]?.role
+  const role = access.data.trip_members[0]?.role
   if (!role) {
     return <TripAccessDenied reason="forbidden" />
+  }
+
+  // Stage B — 메타데이터. 컬럼 누락(42703) 은 권한 문제가 아니므로 기본값으로 폴백한다.
+  // 그래야 deploy-vs-DB 마이그레이션 시차에서도 사용자가 여행에 진입은 할 수 있다.
+  const meta = await client
+    .from('trips')
+    .select(EXTENDED_COLUMNS)
+    .eq('id', tripId)
+    .maybeSingle<ExtendedRow>()
+
+  let extended: ExtendedRow = {
+    start_date: null,
+    end_date: null,
+    region: null,
+    basecamp_address: null,
+    center_lat: null,
+    center_lng: null,
+    default_zoom: null,
+    center_source: null,
+    currency: null,
+    home_currency: null,
+    home_currency_rate: null,
+  }
+  if (meta.error) {
+    if (meta.error.code === PG_UNDEFINED_COLUMN) {
+      console.error('[TripLayout] schema drift detected — extended columns missing. 운영 DB 마이그레이션 누락 가능.', {
+        tripId,
+        code: meta.error.code,
+        message: meta.error.message,
+      })
+    } else {
+      console.error('[TripLayout] meta fetch failed', {
+        tripId,
+        code: meta.error.code,
+        message: meta.error.message,
+      })
+    }
+  } else if (meta.data) {
+    extended = meta.data
   }
 
   return (
     <TripProvider
       value={{
-        id: data.id,
-        title: data.title,
-        startDate: data.start_date,
-        endDate: data.end_date,
-        region: data.region,
-        basecampAddress: data.basecamp_address,
-        centerLat: data.center_lat,
-        centerLng: data.center_lng,
-        defaultZoom: data.default_zoom,
-        centerSource: data.center_source,
-        currency: data.currency ?? 'KRW',
-        homeCurrency: data.home_currency,
-        homeCurrencyRate: data.home_currency_rate,
+        id: access.data.id,
+        title: access.data.title,
+        startDate: extended.start_date,
+        endDate: extended.end_date,
+        region: extended.region,
+        basecampAddress: extended.basecamp_address,
+        centerLat: extended.center_lat,
+        centerLng: extended.center_lng,
+        defaultZoom: extended.default_zoom,
+        centerSource: extended.center_source,
+        currency: extended.currency ?? 'KRW',
+        homeCurrency: extended.home_currency,
+        homeCurrencyRate: extended.home_currency_rate,
         role,
       }}
     >
