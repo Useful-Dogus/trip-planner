@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+        env:
+          # build 단계는 실제 Supabase 호출 없이 모듈 import 만 평가하므로 placeholder 로 충분.
+          # 컴파일 시점에 env 가 미설정이면 lib/supabase-server 의 assertEnv 가 런타임에야 던지므로 빌드 자체는 통과.
+          NEXT_PUBLIC_SUPABASE_URL: 'https://example.supabase.co'
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: 'placeholder-anon-key'
+
+  # 운영 DB 스키마 드리프트 검출 (#225 재발 방지).
+  # PR 에는 적용하지 않는다 (운영 DB 에 직접 접근하므로). main 으로 push 된 직후, 또는 수동 실행시 동작.
+  db-check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run db:check
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
