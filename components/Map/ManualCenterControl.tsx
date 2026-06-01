@@ -92,7 +92,7 @@ export default function ManualCenterBanner({ map, items, basecampCoord, region }
   }
 
   return (
-    <div className="pointer-events-none absolute top-3 left-1/2 z-[600] -translate-x-1/2">
+    <div className="pointer-events-none absolute bottom-3 left-1/2 z-[600] -translate-x-1/2">
       {manualActive ? (
         <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-bg-elevated/95 px-3 py-1.5 text-xs shadow-md backdrop-blur">
           <span className="inline-flex items-center gap-1 font-medium text-fg">
