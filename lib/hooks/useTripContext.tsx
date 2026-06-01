@@ -11,6 +11,10 @@ export type TripContextValue = {
   endDate: string | null
   region: string | null
   basecampAddress: string | null
+  centerLat: number | null
+  centerLng: number | null
+  defaultZoom: number | null
+  centerSource: 'auto' | 'manual' | null
   currency: string
   role: TripRole
 }

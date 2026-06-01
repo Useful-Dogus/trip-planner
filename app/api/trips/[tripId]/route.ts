@@ -17,6 +17,18 @@ function sanitizeDate(v: unknown): string | null {
 
 const FIELD_KEYS = ['title', 'start_date', 'end_date', 'region', 'basecamp_address'] as const
 
+function sanitizeLat(v: unknown): number | null {
+  return typeof v === 'number' && Number.isFinite(v) && v >= -90 && v <= 90 ? v : null
+}
+
+function sanitizeLng(v: unknown): number | null {
+  return typeof v === 'number' && Number.isFinite(v) && v >= -180 && v <= 180 ? v : null
+}
+
+function sanitizeZoom(v: unknown): number | null {
+  return typeof v === 'number' && Number.isFinite(v) && v >= 1 && v <= 20 ? Math.round(v) : null
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { tripId: string } },
@@ -33,7 +45,24 @@ export async function PATCH(
     return NextResponse.json({ error: '잘못된 요청 본문' }, { status: 400 })
   }
 
-  const patch: Record<string, string | null> = {}
+  const patch: Record<string, string | number | null> = {}
+
+  if ('center_lat' in body || 'center_lng' in body || 'default_zoom' in body || 'center_source' in body) {
+    const lat = sanitizeLat(body.center_lat)
+    const lng = sanitizeLng(body.center_lng)
+    // 좌표는 lat·lng 가 둘 다 유효할 때만 저장. 하나라도 null 이면 좌표 전체를 비운다.
+    if (lat !== null && lng !== null) {
+      patch.center_lat = lat
+      patch.center_lng = lng
+      patch.default_zoom = sanitizeZoom(body.default_zoom)
+      patch.center_source = body.center_source === 'manual' ? 'manual' : 'auto'
+    } else {
+      patch.center_lat = null
+      patch.center_lng = null
+      patch.default_zoom = null
+      patch.center_source = null
+    }
+  }
 
   if ('currency' in body) {
     if (!isCurrencyCode(body.currency)) {
@@ -90,7 +119,7 @@ export async function PATCH(
     .from('trips')
     .update(patch)
     .eq('id', tripId)
-    .select('id, title, start_date, end_date, region, basecamp_address, currency')
+    .select('id, title, start_date, end_date, region, basecamp_address, center_lat, center_lng, default_zoom, center_source, currency')
     .maybeSingle()
 
   if (error) {
