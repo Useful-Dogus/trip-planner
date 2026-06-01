@@ -2,7 +2,12 @@
 
 import { useDroppable } from '@dnd-kit/core'
 import { useOptionalTrip } from '@/lib/hooks/useTripContext'
-import { formatBudget, normalizeCurrency } from '@/lib/currency'
+import {
+  formatBudget,
+  formatHomeConversion,
+  isCurrencyCode,
+  normalizeCurrency,
+} from '@/lib/currency'
 
 interface DateGroupHeaderProps {
   date: string
@@ -94,11 +99,24 @@ export default function DateGroupHeader({
             <span className="truncate">{lodgingName}</span>
           </span>
         )}
-        {totalBudget > 0 && (
-          <span className="text-xs text-fg-muted tabular-nums">
-            {formatBudget(totalBudget, normalizeCurrency(trip?.currency))}
-          </span>
-        )}
+        {totalBudget > 0 && (() => {
+          const tripCurrency = normalizeCurrency(trip?.currency)
+          const homeCurrency = isCurrencyCode(trip?.homeCurrency) ? trip.homeCurrency : null
+          const converted = formatHomeConversion(
+            totalBudget,
+            tripCurrency,
+            homeCurrency,
+            trip?.homeCurrencyRate ?? null,
+          )
+          return (
+            <span className="text-xs text-fg-muted tabular-nums">
+              {formatBudget(totalBudget, tripCurrency)}
+              {converted && (
+                <span className="ml-1 text-fg-subtle">≈ {converted}</span>
+              )}
+            </span>
+          )
+        })()}
         <button
           type="button"
           onClick={onAddItem}

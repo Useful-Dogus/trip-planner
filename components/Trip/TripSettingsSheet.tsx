@@ -36,6 +36,12 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
   const [region, setRegion] = useState(trip.region ?? '')
   const [basecamp, setBasecamp] = useState(trip.basecampAddress ?? '')
   const [currency, setCurrency] = useState<CurrencyCode>(normalizeCurrency(trip.currency))
+  const [homeCurrency, setHomeCurrency] = useState<CurrencyCode | ''>(
+    (trip.homeCurrency as CurrencyCode | null) ?? '',
+  )
+  const [homeCurrencyRate, setHomeCurrencyRate] = useState<string>(
+    trip.homeCurrencyRate != null ? String(trip.homeCurrencyRate) : '',
+  )
   const [saving, setSaving] = useState(false)
 
   const [resolution, setResolution] = useState<RegionResolution | null>(null)
@@ -89,6 +95,20 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
       showToast({ message: '종료일은 시작일보다 빠를 수 없습니다.', type: 'error' })
       return
     }
+    // 환율 입력 검증: home 통화가 선택돼야 환율 의미가 있다.
+    let homeRateNum: number | null = null
+    if (homeCurrencyRate.trim()) {
+      const parsed = Number(homeCurrencyRate)
+      if (!Number.isFinite(parsed) || parsed <= 0) {
+        showToast({ message: '환율은 0 보다 큰 숫자여야 합니다.', type: 'error' })
+        return
+      }
+      homeRateNum = parsed
+    }
+    // home 통화 선택 안 했으면 rate 도 함께 비워 일관성 유지
+    const finalHomeCurrency = homeCurrency || null
+    const finalHomeRate = finalHomeCurrency ? homeRateNum : null
+
     // 명시 좌표 유지: manual 좌표가 활성이고 region 이 바뀌었는데 사용자가 재계산을 고르지 않은 경우
     const keepManual = showGuard && guardChoice !== 'recalc'
 
@@ -99,6 +119,8 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
       region: region.trim() || null,
       basecamp_address: basecamp.trim() || null,
       currency,
+      home_currency: finalHomeCurrency,
+      home_currency_rate: finalHomeRate,
     }
     if (!keepManual) {
       if (pendingCenter) {
@@ -113,6 +135,7 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
         body.center_source = null
       }
     }
+
 
     setSaving(true)
     try {
@@ -248,6 +271,42 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
             <p className="text-xs text-fg-subtle mt-1">
               예산 입력·표시에 사용해요. 기존 항목의 수치는 그대로 유지돼요.
             </p>
+          </div>
+
+          <div className="rounded-lg border border-border bg-bg-subtle p-3 space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-fg mb-1.5">환산 표시 (선택)</label>
+              <p className="text-xs text-fg-subtle">
+                합계 옆에 home 통화로 환산한 값을 부가 표시합니다. 미입력 시 표시 안 함.
+              </p>
+            </div>
+            <div>
+              <label className="block text-xs text-fg-muted mb-1">Home 통화</label>
+              <select
+                value={homeCurrency}
+                onChange={(e) => setHomeCurrency(e.target.value as CurrencyCode | '')}
+                className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-fg focus-visible:outline-2 focus-visible:outline-accent"
+              >
+                <option value="">설정 안 함</option>
+                {SUPPORTED_CURRENCIES.filter((c) => c.code !== currency).map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.symbol} {c.code} — {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {homeCurrency && (
+              <Input
+                label={`환율 (1 ${currency} = N ${homeCurrency})`}
+                type="number"
+                inputMode="decimal"
+                step="0.0001"
+                min="0"
+                value={homeCurrencyRate}
+                onChange={(e) => setHomeCurrencyRate(e.target.value)}
+                placeholder="예: 9.2"
+              />
+            )}
           </div>
         </div>
       </SheetSection>

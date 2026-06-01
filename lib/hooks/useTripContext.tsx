@@ -16,6 +16,10 @@ export type TripContextValue = {
   defaultZoom: number | null
   centerSource: 'auto' | 'manual' | null
   currency: string
+  /** 합계 환산 표시용 home 통화 (미설정 시 null) */
+  homeCurrency: string | null
+  /** 1 trip-currency = N home-currency. null 또는 0 이하면 환산 표시 안 함 */
+  homeCurrencyRate: number | null
   role: TripRole
 }
 
