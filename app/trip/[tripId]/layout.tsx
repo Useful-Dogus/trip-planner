@@ -12,6 +12,10 @@ type TripRow = {
   end_date: string | null
   region: string | null
   basecamp_address: string | null
+  center_lat: number | null
+  center_lng: number | null
+  default_zoom: number | null
+  center_source: 'auto' | 'manual' | null
   currency: string | null
   home_currency: string | null
   home_currency_rate: number | null
@@ -40,7 +44,7 @@ export default async function TripLayout({
   const { data, error } = await client
     .from('trips')
     .select(
-      'id, title, start_date, end_date, region, basecamp_address, currency, home_currency, home_currency_rate, trip_members!inner(role)',
+      'id, title, start_date, end_date, region, basecamp_address, center_lat, center_lng, default_zoom, center_source, currency, home_currency, home_currency_rate, trip_members!inner(role)',
     )
     .eq('id', tripId)
     .eq('trip_members.user_id', userData.user.id)
@@ -83,6 +87,10 @@ export default async function TripLayout({
         endDate: data.end_date,
         region: data.region,
         basecampAddress: data.basecamp_address,
+        centerLat: data.center_lat,
+        centerLng: data.center_lng,
+        defaultZoom: data.default_zoom,
+        centerSource: data.center_source,
         currency: data.currency ?? 'KRW',
         homeCurrency: data.home_currency,
         homeCurrencyRate: data.home_currency_rate,

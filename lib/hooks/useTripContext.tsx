@@ -11,6 +11,10 @@ export type TripContextValue = {
   endDate: string | null
   region: string | null
   basecampAddress: string | null
+  centerLat: number | null
+  centerLng: number | null
+  defaultZoom: number | null
+  centerSource: 'auto' | 'manual' | null
   currency: string
   /** 합계 환산 표시용 home 통화 (미설정 시 null) */
   homeCurrency: string | null
