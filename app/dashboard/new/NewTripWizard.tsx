@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { mutate as globalMutate } from 'swr'
 import { ArrowLeft, Check } from 'lucide-react'
@@ -12,6 +13,14 @@ import { cn } from '@/lib/cn'
 import { SUPPORTED_CURRENCIES, type CurrencyCode } from '@/lib/currency'
 import { useIsTouchDevice } from '@/lib/hooks/useIsTouchDevice'
 import { resolveRegionCenter, resolutionToCenter } from '@/lib/resolveRegionCenter'
+import type { CenterValue } from '@/components/Map/CenterPicker'
+
+const CenterPicker = dynamic(() => import('@/components/Map/CenterPicker'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-44 animate-pulse rounded-lg border border-border bg-bg-subtle" />
+  ),
+})
 
 type Step = 1 | 2 | 3 | 4 | 5
 
@@ -31,6 +40,7 @@ export default function NewTripWizard() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [region, setRegion] = useState('')
+  const [center, setCenter] = useState<CenterValue | null>(null)
   const [basecamp, setBasecamp] = useState('')
   const [basecampSkipped, setBasecampSkipped] = useState(false)
   const [currency, setCurrency] = useState<CurrencyCode>('KRW')
@@ -85,24 +95,27 @@ export default function NewTripWizard() {
         throw new Error(data?.error ?? '여행 생성에 실패했습니다.')
       }
       const data = (await res.json()) as { tripId: string }
-      // region 좌표를 생성 시점에 1회 확보해 trip 에 저장(US2). 이후 지도 로드는 외부 호출 0회.
-      // preset 매칭은 즉시, 미수록 도시는 지오코딩 1회. 실패 시 좌표는 비운 채 둔다(지도 로드 시 preset/폴백).
+      // 지도 중심 좌표를 생성 시점에 저장(US2). 이후 지도 로드는 외부 호출 0회.
+      // 미리보기(CenterPicker)에서 확보한 좌표를 우선 쓰고, 디바운스 레이스로 비어 있으면
+      // region 으로 1회 재확보한다. 실패 시 좌표는 비운 채 둔다(지도 로드 시 preset/폴백).
+      let resolved: { lat: number; lng: number; zoom: number; source: 'auto' | 'manual' } | null =
+        center
       const trimmedRegion = region.trim()
-      if (trimmedRegion) {
-        const resolution = await resolveRegionCenter(trimmedRegion)
-        const center = resolutionToCenter(resolution)
-        if (center) {
-          await fetch(`/api/trips/${data.tripId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              center_lat: center.lat,
-              center_lng: center.lng,
-              default_zoom: center.zoom,
-              center_source: 'auto',
-            }),
-          }).catch(() => {})
-        }
+      if (!resolved && trimmedRegion) {
+        const c = resolutionToCenter(await resolveRegionCenter(trimmedRegion))
+        if (c) resolved = { ...c, source: 'auto' }
+      }
+      if (resolved) {
+        await fetch(`/api/trips/${data.tripId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            center_lat: resolved.lat,
+            center_lng: resolved.lng,
+            default_zoom: resolved.zoom,
+            center_source: resolved.source,
+          }),
+        }).catch(() => {})
       }
       // 대시보드 SWR 캐시를 즉시 갱신해 두면, 사용자가 뒤로가서 목록으로 돌아왔을 때
       // 새 trip 이 0.3-0.5s 후 "팝업" 되는 대신 처음부터 보인다.
@@ -177,7 +190,7 @@ export default function NewTripWizard() {
             />
           )}
           {step === 3 && (
-            <Step3 region={region} setRegion={setRegion} />
+            <Step3 region={region} setRegion={setRegion} center={center} setCenter={setCenter} />
           )}
           {step === 4 && (
             <Step4
@@ -195,6 +208,7 @@ export default function NewTripWizard() {
           {step === 5 && (
             <Step5
               summary={{ title, startDate, endDate, region, basecamp, currency }}
+              centerManual={center?.source === 'manual'}
               basecampSkipped={basecampSkipped && !basecamp.trim()}
               onEdit={jumpToStep}
             />
@@ -289,9 +303,13 @@ function Step2({
 function Step3({
   region,
   setRegion,
+  center,
+  setCenter,
 }: {
   region: string
   setRegion: (v: string) => void
+  center: CenterValue | null
+  setCenter: (v: CenterValue | null) => void
 }) {
   const isTouch = useIsTouchDevice()
   return (
@@ -304,6 +322,7 @@ function Step3({
         autoFocus={!isTouch}
       />
       <p className="text-xs text-fg-subtle">국가·도시·테마 등 자유롭게.</p>
+      <CenterPicker region={region} value={center} onChange={setCenter} />
     </div>
   )
 }
@@ -373,10 +392,12 @@ function Step4({
 
 function Step5({
   summary,
+  centerManual,
   basecampSkipped,
   onEdit,
 }: {
   summary: { title: string; startDate: string; endDate: string; region: string; basecamp: string; currency: CurrencyCode }
+  centerManual: boolean
   basecampSkipped: boolean
   onEdit: (step: Step) => void
 }) {
@@ -403,7 +424,9 @@ function Step5({
         />
         <SummaryEditRow
           label="지역"
-          value={summary.region || '미설정'}
+          value={
+            (summary.region || '미설정') + (centerManual ? ' · 중심 직접 지정' : '')
+          }
           onEdit={() => onEdit(3)}
         />
         <SummaryEditRow
