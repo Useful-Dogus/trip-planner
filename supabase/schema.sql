@@ -14,6 +14,10 @@ create table if not exists public.trips (
   end_date         date,
   region           text,
   basecamp_address text,
+  center_lat       double precision,
+  center_lng       double precision,
+  default_zoom     smallint,
+  center_source    text        check (center_source in ('auto', 'manual')),
   created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now()
 );

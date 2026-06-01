@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Polyline, Tooltip, ZoomControl } from 
 import MapAddOnLongPress from './MapAddOnLongPress'
 import MapInitialCenter from './MapInitialCenter'
 import SelectedItemPan from './SelectedItemPan'
+import ManualCenterBanner, { MapRefBinder } from './ManualCenterControl'
 import L from 'leaflet'
 import type { TripItem } from '@/types'
 import { categoryIconSvg } from '@/lib/categoryIcon'
@@ -65,6 +66,7 @@ export default function TripPlannerMap({
 }: TripPlannerMapProps) {
   const trip = useOptionalTrip()
   const [basecampCoord, setBasecampCoord] = useState<[number, number] | null>(null)
+  const [mapRef, setMapRef] = useState<L.Map | null>(null)
 
   useEffect(() => {
     const addr = trip?.basecampAddress?.trim()
@@ -129,18 +131,25 @@ export default function TripPlannerMap({
   }, [dayItems, items, selectedDate, basecampCoord])
 
   return (
+    <div className="relative h-full w-full">
     <MapContainer
-      center={[36.2048, 138.2529]}
-      zoom={5}
+      center={[20, 0]}
+      zoom={2}
       zoomControl={false}
       style={{ height: '100%', width: '100%' }}
       className="touch-none"
     >
       <ZoomControl position="bottomright" />
+      <MapRefBinder onReady={setMapRef} />
       <MapInitialCenter
         items={visibleItems}
         basecampCoord={basecampCoord}
         region={trip?.region ?? null}
+        tripCenter={
+          trip?.centerLat != null && trip?.centerLng != null
+            ? { lat: trip.centerLat, lng: trip.centerLng, zoom: trip.defaultZoom }
+            : null
+        }
       />
       <SelectedItemPan
         selectedItem={
@@ -209,5 +218,12 @@ export default function TripPlannerMap({
 
       <MapAddOnLongPress />
     </MapContainer>
+      <ManualCenterBanner
+        map={mapRef}
+        items={visibleItems}
+        basecampCoord={basecampCoord}
+        region={trip?.region ?? null}
+      />
+    </div>
   )
 }

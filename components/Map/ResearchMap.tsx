@@ -30,8 +30,8 @@ export default function ResearchMap({ items, onSelectItem }: ResearchMapProps) {
 
   return (
     <MapContainer
-      center={[36.2048, 138.2529]}
-      zoom={5}
+      center={[20, 0]}
+      zoom={2}
       zoomControl={false}
       style={{ height: '100%', width: '100%' }}
       className="touch-none"
@@ -41,6 +41,11 @@ export default function ResearchMap({ items, onSelectItem }: ResearchMapProps) {
         items={mapItems}
         basecampCoord={null}
         region={trip?.region ?? null}
+        tripCenter={
+          trip?.centerLat != null && trip?.centerLng != null
+            ? { lat: trip.centerLat, lng: trip.centerLng, zoom: trip.defaultZoom }
+            : null
+        }
       />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
