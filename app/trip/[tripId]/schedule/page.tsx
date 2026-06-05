@@ -11,6 +11,9 @@ import { useItems } from '@/lib/hooks/useItems'
 import { useToast } from '@/components/UI/Toast'
 import TripPageHeader from '@/components/Layout/TripPageHeader'
 import StickyAddBar from '@/components/UI/StickyAddBar'
+import IconButton from '@/components/UI/IconButton'
+import { Share } from 'lucide-react'
+import ExportScheduleDialog from '@/components/Schedule/ExportScheduleDialog'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
@@ -32,6 +35,7 @@ function SchedulePageContent() {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
     searchParams.get('item'),
   )
+  const [exportOpen, setExportOpen] = useState(false)
 
   const selectedItem = items.find((i) => i.id === selectedItemId) ?? null
 
@@ -67,7 +71,18 @@ function SchedulePageContent() {
   return (
     <div className="md:pl-44 bg-bg text-fg min-h-screen">
       <div className="max-w-3xl mx-auto">
-        <TripPageHeader section="일정" />
+        <TripPageHeader
+          section="일정"
+          actions={
+            <IconButton
+              aria-label="일정 내보내기"
+              onClick={() => setExportOpen(true)}
+              title="일정 내보내기"
+            >
+              <Share className="size-5" />
+            </IconButton>
+          }
+        />
       </div>
 
       {isLoading ? (
@@ -100,6 +115,12 @@ function SchedulePageContent() {
           handleClosePanel()
           showToast({ type: 'success', message: '삭제했어요' })
         }}
+      />
+
+      <ExportScheduleDialog
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        items={items}
       />
     </div>
   )
