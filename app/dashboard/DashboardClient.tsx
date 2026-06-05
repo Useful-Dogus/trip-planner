@@ -167,6 +167,7 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
                 onChange={e => setQuery(e.target.value)}
                 placeholder="이름·지역으로 검색"
                 leading={<Search className="size-4" aria-hidden="true" />}
+                data-shortcut="search"
               />
             </div>
             <div className="flex items-center gap-2">
