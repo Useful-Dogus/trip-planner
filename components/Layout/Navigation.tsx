@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ArrowLeft, List, Map, CalendarDays, Download, LogOut, MoreHorizontal, User } from 'lucide-react'
+import { ArrowLeft, List, Map, CalendarDays, Download, LogOut, MoreHorizontal, User, Loader2 } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
 import Sheet, { SheetSection } from '@/components/UI/Sheet'
 import { cn } from '@/lib/cn'
@@ -32,6 +32,9 @@ export default function Navigation() {
   const pathname = usePathname()
   const tripId = useOptionalTripId()
   const [moreOpen, setMoreOpen] = useState(false)
+  // 클릭 직후 즉시 "눌림" 표시를 위한 지연된 활성 href.
+  // pathname 이 실제로 바뀌기 전까지 사용자에게 "이 항목으로 가고 있음" 을 표시한다 (#233).
+  const [pendingHref, setPendingHref] = useState<string | null>(null)
 
   const hrefFor = (sub: string): string =>
     tripId ? buildTripPath(tripId, sub) : legacyHref(sub)
@@ -39,6 +42,28 @@ export default function Navigation() {
   const isActive = (sub: string): boolean => {
     const href = hrefFor(sub)
     return pathname.startsWith(href)
+  }
+
+  // pathname 이 pending href 와 같은 prefix 가 되면 = 라우트 도달 → pending 해제
+  useEffect(() => {
+    if (pendingHref && pathname.startsWith(pendingHref)) {
+      setPendingHref(null)
+    }
+  }, [pathname, pendingHref])
+
+  // pendingHref 가 8초 넘게 유지되면 안전 폴백 — 라우트 변경 실패 시 무한 스피너 방지
+  useEffect(() => {
+    if (!pendingHref) return
+    const t = setTimeout(() => setPendingHref(null), 8000)
+    return () => clearTimeout(t)
+  }, [pendingHref])
+
+  const isPending = (sub: string): boolean => pendingHref === hrefFor(sub)
+
+  const handleNavClick = (href: string) => {
+    // 이미 같은 경로면 pending 표시 불필요
+    if (pathname.startsWith(href)) return
+    setPendingHref(href)
   }
 
   return (
@@ -55,19 +80,27 @@ export default function Navigation() {
         <ul className="flex">
           {NAV_ITEMS.map(({ sub, label, icon: Icon }) => {
             const active = isActive(sub)
+            const pending = isPending(sub)
+            const href = hrefFor(sub)
             return (
               <li key={sub} className="flex-1">
                 <Link
-                  href={hrefFor(sub)}
+                  href={href}
+                  onClick={() => handleNavClick(href)}
                   aria-current={active ? 'page' : undefined}
+                  aria-busy={pending || undefined}
                   className={cn(
                     'flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-11',
                     'text-[11px] font-medium transition-colors duration-150',
                     'focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-accent rounded',
-                    active ? 'text-accent' : 'text-fg-subtle hover:text-fg-muted',
+                    active || pending ? 'text-accent' : 'text-fg-subtle hover:text-fg-muted',
                   )}
                 >
-                  <Icon className="size-5" aria-hidden="true" />
+                  {pending ? (
+                    <Loader2 className="size-5 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Icon className="size-5" aria-hidden="true" />
+                  )}
                   <span>{label}</span>
                 </Link>
               </li>
@@ -172,39 +205,63 @@ export default function Navigation() {
         <ul className="flex-1 space-y-0.5">
           {NAV_ITEMS.map(({ sub, label, icon: Icon }) => {
             const active = isActive(sub)
+            const pending = isPending(sub)
+            const href = hrefFor(sub)
             return (
               <li key={sub}>
                 <Link
-                  href={hrefFor(sub)}
+                  href={href}
+                  onClick={() => handleNavClick(href)}
                   aria-current={active ? 'page' : undefined}
+                  aria-busy={pending || undefined}
                   className={cn(
                     'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium',
                     'transition-colors duration-150',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
                     active
                       ? 'bg-accent text-accent-fg'
-                      : 'text-fg-muted hover:bg-bg-subtle hover:text-fg',
+                      : pending
+                        ? 'bg-bg-subtle text-fg'
+                        : 'text-fg-muted hover:bg-bg-subtle hover:text-fg',
                   )}
                 >
-                  <Icon className="size-4 shrink-0" aria-hidden="true" />
+                  {pending ? (
+                    <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Icon className="size-4 shrink-0" aria-hidden="true" />
+                  )}
                   <span>{label}</span>
                 </Link>
               </li>
             )
           })}
           <li>
-            <Link
-              href={hrefFor('gmaps-import')}
-              className={cn(
-                'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium',
-                'transition-colors duration-150',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-                'text-fg-muted hover:bg-bg-subtle hover:text-fg',
-              )}
-            >
-              <Download className="size-4 shrink-0" aria-hidden="true" />
-              <span>구글맵 가져오기</span>
-            </Link>
+            {(() => {
+              const href = hrefFor('gmaps-import')
+              const pending = pendingHref === href
+              return (
+                <Link
+                  href={href}
+                  onClick={() => handleNavClick(href)}
+                  aria-busy={pending || undefined}
+                  className={cn(
+                    'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium',
+                    'transition-colors duration-150',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+                    pending
+                      ? 'bg-bg-subtle text-fg'
+                      : 'text-fg-muted hover:bg-bg-subtle hover:text-fg',
+                  )}
+                >
+                  {pending ? (
+                    <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Download className="size-4 shrink-0" aria-hidden="true" />
+                  )}
+                  <span>구글맵 가져오기</span>
+                </Link>
+              )
+            })()}
           </li>
         </ul>
         <div className="border-t border-border pt-3 mt-2 space-y-0.5">
