@@ -24,6 +24,11 @@ import { useToast } from '@/components/UI/Toast'
 import type { FilterState } from '@/components/Items/ItemList'
 import { getActiveFilterCount } from '@/components/Items/ItemList'
 import type { Category, ReservationStatus, TripPriority } from '@/types'
+import UnnamedBulkEditDialog, {
+  countUnnamed,
+  filterUnnamed,
+} from '@/components/Items/UnnamedBulkEditDialog'
+import { MapPin } from 'lucide-react'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
@@ -48,6 +53,7 @@ function ResearchPageContent() {
   const { showToast } = useToast()
   const tripId = useTripId()
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [unnamedDialogOpen, setUnnamedDialogOpen] = useState(false)
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
     searchParams.get('item'),
@@ -313,6 +319,26 @@ function ResearchPageContent() {
         </div>
       </header>
 
+      {(() => {
+        const unnamedCount = countUnnamed(items)
+        if (unnamedCount === 0) return null
+        return (
+          <div className="px-4 md:px-8 mb-3">
+            <button
+              type="button"
+              onClick={() => setUnnamedDialogOpen(true)}
+              className="w-full flex items-center gap-2 rounded-lg border border-border bg-warning-bg text-warning-fg px-3 py-2 text-sm hover:opacity-90"
+            >
+              <MapPin className="size-4 shrink-0" aria-hidden />
+              <span className="flex-1 text-left">
+                이름 미정 {unnamedCount}개 — 일괄 편집
+              </span>
+              <span className="text-xs opacity-80">열기 →</span>
+            </button>
+          </div>
+        )
+      })()}
+
       {isLoading ? (
         <>
           <div className="md:hidden px-4 space-y-2">
@@ -365,6 +391,13 @@ function ResearchPageContent() {
           handleClosePanel()
           showToast({ type: 'success', message: '삭제했어요' })
         }}
+      />
+
+      <UnnamedBulkEditDialog
+        open={unnamedDialogOpen}
+        onClose={() => setUnnamedDialogOpen(false)}
+        items={filterUnnamed(items)}
+        onUpdateItem={updateItem}
       />
 
       <ShareDialog
