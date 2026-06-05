@@ -26,10 +26,10 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: 'placeholder-anon-key'
 
   # 운영 DB 스키마 드리프트 검출 (#225 재발 방지).
-  # PR 에는 적용하지 않는다 (운영 DB 에 직접 접근하므로). main 으로 push 된 직후, 또는 수동 실행시 동작.
+  # PR·push·수동 모두에서 동작한다. db:check 는 읽기 전용(select limit 0)이라 PR 에서 돌려도 안전.
+  # secret 이 없는 환경(fork PR 등)에서는 스킵한다.
   db-check:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,7 +37,17 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - run: npm ci
-      - run: npm run db:check
+      # secret 주입 여부를 step output 으로 노출 (secrets 는 if: 조건에서 직접 못 씀).
+      - id: guard
+        run: |
+          if [ -n "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" ] && [ -n "${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" ]; then
+            echo "has_secrets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_secrets=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Supabase secret 미설정 — db:check 스킵 (fork PR 등)."
+          fi
+      - if: steps.guard.outputs.has_secrets == 'true'
+        run: npm run db:check
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

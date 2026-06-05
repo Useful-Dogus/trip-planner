@@ -21,8 +21,15 @@
  * 컬럼 추가 시:
  *   코드(layout/API/Provider) 에 컬럼을 추가하는 PR 은 반드시 REQUIRED_COLUMNS 도 함께 갱신한다.
  *   드리프트 가드는 이 목록의 정확성에 의존한다.
+ *
+ * 구현 메모:
+ *   PostgREST 에 직접 fetch 한다 (`@supabase/supabase-js` 미사용).
+ *   supabase-js 의 createClient 는 RealtimeClient 를 즉시 생성하는데, Node < 22 에는
+ *   네이티브 WebSocket 이 없어 "Node.js 20 detected without native WebSocket support" 로
+ *   스크립트가 스키마와 무관하게 죽었다 (CI 에서 발견). 이 스크립트는 realtime 이 전혀
+ *   필요 없으므로 컬럼 존재성만 PostgREST REST 엔드포인트로 확인한다. Node 18+ 의
+ *   전역 fetch 만 사용 → WebSocket·추가 의존성 불필요.
  */
-import { createClient } from '@supabase/supabase-js'
 
 const REQUIRED_COLUMNS: Record<string, string[]> = {
   trips: [
@@ -58,6 +65,54 @@ const REQUIRED_COLUMNS: Record<string, string[]> = {
 
 const PG_UNDEFINED_COLUMN = '42703'
 
+/**
+ * PostgREST 에 `select=<col>&limit=0` 으로 컬럼 존재성만 확인한다.
+ * 반환:
+ *   - { ok: true }                 컬럼 존재 (200) 또는 RLS 등 비-치명 응답
+ *   - { missing: true }            컬럼 미존재 (HTTP 400 + code 42703)
+ *   - { warning: string }          기타 응답 (RLS 거부·네트워크 등) — 컬럼 부정 아님
+ */
+async function probeColumn(
+  url: string,
+  anon: string,
+  table: string,
+  column: string,
+): Promise<{ ok?: true; missing?: true; warning?: string }> {
+  const endpoint = `${url.replace(/\/$/, '')}/rest/v1/${encodeURIComponent(
+    table,
+  )}?select=${encodeURIComponent(column)}&limit=0`
+  let res: Response
+  try {
+    res = await fetch(endpoint, {
+      headers: {
+        apikey: anon,
+        Authorization: `Bearer ${anon}`,
+        Accept: 'application/json',
+      },
+    })
+  } catch (e) {
+    return { warning: `${table}.${column}: fetch 실패 — ${(e as Error).message}` }
+  }
+
+  if (res.ok) return { ok: true }
+
+  let code: string | undefined
+  let message = ''
+  try {
+    const body = (await res.json()) as { code?: string; message?: string }
+    code = body.code
+    message = body.message ?? ''
+  } catch {
+    // 본문 파싱 실패 — 상태코드만으로 판단
+  }
+
+  if (code === PG_UNDEFINED_COLUMN) return { missing: true }
+
+  // RLS 거부(401/403) 또는 기타는 컬럼 존재성 자체를 부정하지 않는다.
+  // (PostgREST 는 컬럼 미존재면 명확히 42703 으로 회신한다.)
+  return { warning: `${table}.${column}: HTTP ${res.status} ${code ?? ''} ${message}`.trim() }
+}
+
 async function main(): Promise<void> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -66,21 +121,14 @@ async function main(): Promise<void> {
     process.exit(2)
   }
 
-  const client = createClient(url, anon, { auth: { persistSession: false } })
   const missing: { table: string; column: string }[] = []
   const warnings: string[] = []
 
   for (const [table, columns] of Object.entries(REQUIRED_COLUMNS)) {
     for (const column of columns) {
-      const { error } = await client.from(table).select(column).limit(0)
-      if (!error) continue
-      if (error.code === PG_UNDEFINED_COLUMN) {
-        missing.push({ table, column })
-        continue
-      }
-      // RLS 또는 인증 미설정으로 인한 select 거부는 컬럼 존재성 자체를 부정하지 않는다.
-      // (PostgREST 는 컬럼 미존재면 명확히 42703 으로 회신한다.)
-      warnings.push(`${table}.${column}: ${error.code ?? '?'} ${error.message}`)
+      const result = await probeColumn(url, anon, table, column)
+      if (result.missing) missing.push({ table, column })
+      else if (result.warning) warnings.push(result.warning)
     }
   }
 

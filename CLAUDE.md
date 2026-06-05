@@ -122,6 +122,24 @@ TypeScript + Node.js 18+: Follow standard conventions
 - `TRIP_DATE_MIN/MAX` 같은 단일 trip 가정 상수에 의존하지 않는다. 항상 현재 trip context(기간·지역·basecamp) 에서 동적으로 끌어온다.
 - ‟NYC", ‟뉴욕", ‟2026년 7월" 같은 단일 trip 시대 카피 잔재가 없는지 grep 확인.
 
+### PR 만들기 전 필수 게이트 (로컬에서 실행)
+
+PR 생성 **전에** 아래를 모두 통과시킨다. CI(`.github/workflows/ci.yml`)가 같은 검증을 PR·push 에서 다시 돌리므로, 로컬에서 미리 돌려야 ‟머지 후 빨강" 을 막는다.
+
+```bash
+npm run lint
+npm run build
+set -a; . ./.env.local; set +a; npm run db:check   # 스키마 드리프트 가드
+```
+
+- **`db:check` 는 `supabase-js` 를 쓰지 않는다** — PostgREST 에 직접 fetch 한다. 과거 `createClient` 가 RealtimeClient 를 즉시 생성해 Node < 22 에서 WebSocket 부재로 죽은 사고가 있었다 (스키마와 무관하게 crash). 스크립트가 realtime 을 요구하게 만들지 말 것.
+- 코드(layout/API/Provider)에 DB 컬럼을 추가·삭제·개명하는 PR 은 `scripts/check-trips-schema.ts` 의 `REQUIRED_COLUMNS` 도 같은 PR 에서 갱신한다. 드리프트 가드는 이 목록의 정확성에 의존한다.
+
+### 머지 규칙
+
+- **CI(`ci` 워크플로)가 green 이 된 것을 확인한 뒤** 머지한다. `gh pr merge` 직후 push 이벤트에서 또 검증이 돌므로, PR 단계 체크가 빨강이면 머지하지 않는다.
+- 자동 파이프라인(ship.pipeline 등)도 동일 — PR 생성 후 CI 결과를 확인하고 green 일 때만 다음 항목으로 넘어간다.
+
 ### 작업 끝낼 때
 
 PR 본문에 다음 5문항 체크박스를 포함한다 (G-22 로 템플릿화 예정, 그 전까지 수동):
