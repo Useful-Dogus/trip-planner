@@ -29,7 +29,7 @@ function SchedulePageContent() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { items, isLoading, updateItem, createItem } = useItems()
+  const { items, isLoading, updateItem, createItem, deleteItem } = useItems()
   const { showToast } = useToast()
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
@@ -98,6 +98,7 @@ function SchedulePageContent() {
             onUpdateItem={updateItem}
             onCreateItem={createItem}
             onOpenPanel={handleSelectItem}
+            onDeleteItem={deleteItem}
           />
         </div>
       )}

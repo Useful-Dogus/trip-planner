@@ -27,6 +27,9 @@ interface TableRowProps {
   onCellDeactivate: () => void
   onNavigate: (direction: 'tab' | 'shift-tab' | 'enter' | 'escape', field: EditableField) => void
   onOpenPanel: (id: string) => void
+  selected?: boolean
+  onToggleSelect?: (id: string) => void
+  selectionActive?: boolean
 }
 
 export default function TableRow({
@@ -37,6 +40,9 @@ export default function TableRow({
   onCellDeactivate,
   onNavigate,
   onOpenPanel,
+  selected = false,
+  onToggleSelect,
+  selectionActive = false,
 }: TableRowProps) {
   const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
     id: `drag:item:${item.id}`,
@@ -67,8 +73,25 @@ export default function TableRow({
       ref={setNodeRef}
       className={`flex min-w-[744px] items-center gap-0 border-b border-border hover:bg-bg-subtle group transition-colors ${
         isDragging ? 'opacity-40' : ''
-      }`}
+      } ${selected ? 'bg-accent-bg/40' : ''}`}
     >
+      {/* 선택 체크박스 */}
+      {onToggleSelect && (
+        <div
+          className={`w-6 flex-shrink-0 flex items-center justify-center self-stretch transition-opacity ${
+            selectionActive || selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}
+        >
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={() => onToggleSelect(item.id)}
+            aria-label={`${item.name} 선택`}
+            className="size-4 accent-accent cursor-pointer"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
       {/* 드래그 핸들 */}
       <button
         type="button"
