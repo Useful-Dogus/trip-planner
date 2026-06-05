@@ -10,6 +10,7 @@ import AuthStateSync from '@/components/Auth/AuthStateSync'
 import TopProgressBar from '@/components/Layout/TopProgressBar'
 import KeyboardShortcuts from '@/components/Layout/KeyboardShortcuts'
 import AvatarDropdown from '@/components/Layout/AvatarDropdown'
+import WebVitalsReporter from '@/components/Layout/WebVitalsReporter'
 
 export default function Providers({
   children,
@@ -30,6 +31,9 @@ export default function Providers({
                 추가할 때 정적 렌더링 bail-out 을 막기 위한 안전 장치. */}
             <Suspense fallback={null}>
               <TopProgressBar />
+            </Suspense>
+            <Suspense fallback={null}>
+              <WebVitalsReporter />
             </Suspense>
             <KeyboardShortcuts />
             <AvatarDropdown />
