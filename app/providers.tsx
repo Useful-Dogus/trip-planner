@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/Theme/ThemeProvider'
 import OfflineBanner from '@/components/UI/OfflineBanner'
 import AuthStateSync from '@/components/Auth/AuthStateSync'
 import TopProgressBar from '@/components/Layout/TopProgressBar'
+import KeyboardShortcuts from '@/components/Layout/KeyboardShortcuts'
 
 export default function Providers({
   children,
@@ -29,6 +30,7 @@ export default function Providers({
             <Suspense fallback={null}>
               <TopProgressBar />
             </Suspense>
+            <KeyboardShortcuts />
             <OfflineBanner />
             {children}
           </ConfirmProvider>

@@ -286,6 +286,7 @@ function ResearchPageContent() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="이름·주소·메모로 검색"
                 leading={<Search className="size-4" aria-hidden="true" />}
+                data-shortcut="search"
               />
             </div>
             <div className="relative flex items-center gap-1.5 flex-shrink-0">
