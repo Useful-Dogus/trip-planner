@@ -7,6 +7,7 @@ import { useItems } from '@/lib/hooks/useItems'
 import { useTrip, useTripPath } from '@/lib/hooks/useTripContext'
 import { currencyFieldLabel, normalizeCurrency } from '@/lib/currency'
 import { useConfirm } from '@/components/UI/ConfirmDialog'
+import MemoField from '@/components/UI/MemoField'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
@@ -374,7 +375,14 @@ export default function ItemForm({ mode, initialData, itemId }: ItemFormProps) {
 
       <section className="space-y-3">
         <h2 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">메모</h2>
-        <textarea ref={memoRef} value={form.memo} onChange={e => setField('memo', e.target.value)} className={`${inputClass} resize-none overflow-hidden`} rows={4} placeholder="자유롭게 메모..." />
+        <MemoField
+          inlineRef={memoRef}
+          value={form.memo}
+          onChange={v => setField('memo', v)}
+          className={`${inputClass} resize-none overflow-hidden`}
+          rows={4}
+          placeholder="자유롭게 메모..."
+        />
       </section>
 
       {error && <p className="text-sm text-critical-fg">{error}</p>}
