@@ -6,6 +6,7 @@ import { useItems } from '@/lib/hooks/useItems'
 import { useTrip } from '@/lib/hooks/useTripContext'
 import { currencyFieldLabel, normalizeCurrency } from '@/lib/currency'
 import CollapsibleSection from '@/components/UI/CollapsibleSection'
+import MemoField from '@/components/UI/MemoField'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
@@ -189,7 +190,14 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
 
         <section className="space-y-3">
           <h3 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">메모</h3>
-          <textarea ref={memoRef} value={form.memo} onChange={e => setField('memo', e.target.value)} className={`${inputClass} resize-none overflow-hidden`} rows={4} placeholder="자유롭게 메모..." />
+          <MemoField
+            inlineRef={memoRef}
+            value={form.memo}
+            onChange={v => setField('memo', v)}
+            className={`${inputClass} resize-none overflow-hidden`}
+            rows={4}
+            placeholder="자유롭게 메모..."
+          />
         </section>
 
         <CollapsibleSection title="일정" defaultOpen={scheduleHasValue}>
