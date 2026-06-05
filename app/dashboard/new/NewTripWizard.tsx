@@ -65,9 +65,11 @@ export default function NewTripWizard() {
   }
 
   function skipBasecamp() {
+    // 베이스캠프 입력만 비우는 액션이다. 스텝을 넘기지 않는다.
+    // 같은 step 의 통화 등 다른 필드 입력을 보존해야 함 (#226).
+    // 사용자는 통화 등 나머지 필드를 마저 채우고 "다음" 으로 step 5 에 진입한다.
     setBasecamp('')
     setBasecampSkipped(true)
-    if (step === 4) setStep(5)
   }
 
   function jumpToStep(target: Step) {
