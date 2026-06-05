@@ -8,6 +8,7 @@ import { mutate as globalMutate } from 'swr'
 import { ArrowLeft, Check } from 'lucide-react'
 import Button from '@/components/UI/Button'
 import { Input } from '@/components/UI/Input'
+import LocationAutocompleteInput from '@/components/UI/LocationAutocompleteInput'
 import { useToast } from '@/components/UI/Toast'
 import { cn } from '@/lib/cn'
 import { SUPPORTED_CURRENCIES, type CurrencyCode } from '@/lib/currency'
@@ -316,14 +317,17 @@ function Step3({
   const isTouch = useIsTouchDevice()
   return (
     <div className="space-y-3">
-      <Input
+      <LocationAutocompleteInput
         label="지역"
         value={region}
-        onChange={(e) => setRegion(e.target.value)}
+        onChange={setRegion}
+        onSelectCandidate={(c) => {
+          setCenter({ lat: c.lat, lng: c.lng, zoom: center?.zoom ?? 11, source: 'auto' })
+        }}
         placeholder="예: 일본 오사카"
         autoFocus={!isTouch}
       />
-      <p className="text-xs text-fg-subtle">국가·도시·테마 등 자유롭게.</p>
+      <p className="text-xs text-fg-subtle">국가·도시·테마 등 자유롭게. 인식되지 않아도 진행할 수 있어요.</p>
       <CenterPicker region={region} value={center} onChange={setCenter} />
     </div>
   )
@@ -348,10 +352,10 @@ function Step4({
   return (
     <div className="space-y-4">
       <div>
-        <Input
+        <LocationAutocompleteInput
           label="베이스캠프 (숙소)"
           value={basecamp}
-          onChange={(e) => setBasecamp(e.target.value)}
+          onChange={setBasecamp}
           placeholder="예: 난바 인근 호텔"
           autoFocus={!isTouch}
         />
