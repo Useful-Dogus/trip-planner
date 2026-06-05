@@ -9,6 +9,7 @@ import OfflineBanner from '@/components/UI/OfflineBanner'
 import AuthStateSync from '@/components/Auth/AuthStateSync'
 import TopProgressBar from '@/components/Layout/TopProgressBar'
 import KeyboardShortcuts from '@/components/Layout/KeyboardShortcuts'
+import AvatarDropdown from '@/components/Layout/AvatarDropdown'
 
 export default function Providers({
   children,
@@ -31,6 +32,7 @@ export default function Providers({
               <TopProgressBar />
             </Suspense>
             <KeyboardShortcuts />
+            <AvatarDropdown />
             <OfflineBanner />
             {children}
           </ConfirmProvider>

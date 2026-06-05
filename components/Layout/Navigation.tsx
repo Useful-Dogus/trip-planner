@@ -264,36 +264,11 @@ export default function Navigation() {
             })()}
           </li>
         </ul>
-        <div className="border-t border-border pt-3 mt-2 space-y-0.5">
-          <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-fg-subtle">내 계정</p>
-          <div className="px-3 py-2 flex items-center justify-between gap-2">
-            <span className="text-xs text-fg-subtle whitespace-nowrap">테마</span>
-            <ThemeToggle />
-          </div>
-          <Link
-            href="/me"
-            className={cn(
-              'flex items-center gap-2 px-3 py-2 text-sm rounded-lg',
-              'text-fg-subtle hover:text-fg hover:bg-bg-subtle transition-colors duration-150',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-            )}
-          >
-            <User className="size-4 shrink-0" aria-hidden="true" />
-            <span>프로필</span>
-          </Link>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className={cn(
-              'flex items-center gap-2 px-3 py-2 text-sm rounded-lg w-full text-left',
-              'text-fg-subtle hover:text-fg hover:bg-bg-subtle transition-colors duration-150',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-            )}
-          >
-            <LogOut className="size-4 shrink-0" aria-hidden="true" />
-            <span>로그아웃</span>
-          </button>
-        </div>
+        {/*
+          데스크탑 사이드바는 trip-scope (목록·지도·일정·구글맵 가져오기) 만 담는다.
+          user-scope (프로필·테마·로그아웃) 는 우상단 AvatarDropdown 으로 이동 (#206).
+          모바일은 기존 ‟더보기" 시트가 두 scope 모두 담는다.
+        */}
       </aside>
     </>
   )
