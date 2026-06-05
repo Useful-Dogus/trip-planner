@@ -11,10 +11,12 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import { CalendarRange, Plus } from 'lucide-react'
+import { CalendarRange, Plus, Trash2, X } from 'lucide-react'
 import type { ReservationStatus, TripItem } from '@/types'
 import EmptyState from '@/components/UI/EmptyState'
 import Button from '@/components/UI/Button'
+import { useConfirm } from '@/components/UI/ConfirmDialog'
+import { RESERVATION_STATUS_OPTIONS } from '@/lib/itemOptions'
 import Link from 'next/link'
 import { CATEGORY_META, RESERVATION_STATUS_META } from '@/lib/itemOptions'
 import { haversineKm } from '@/lib/distance'
@@ -38,6 +40,8 @@ interface ScheduleTableProps {
   onUpdateItem: (id: string, changes: Record<string, unknown>) => void
   onCreateItem: (item: Omit<TripItem, 'id' | 'created_at' | 'updated_at'>) => void
   onOpenPanel: (id: string) => void
+  /** 벌크 삭제용. 미전달 시 삭제 액션 미노출. */
+  onDeleteItem?: (id: string) => Promise<unknown> | unknown
 }
 
 const UNDATED_KEY = '__undated__'
@@ -238,9 +242,46 @@ export default function ScheduleTable({
   onUpdateItem,
   onCreateItem,
   onOpenPanel,
+  onDeleteItem,
 }: ScheduleTableProps) {
   const tripId = useOptionalTripId()
+  const trip = useOptionalTrip()
   const storageKey = tripId ? `schedule:collapsed:${tripId}` : null
+  const confirm = useConfirm()
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkPending, setBulkPending] = useState(false)
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  const clearSelection = useCallback(() => setSelectedIds(new Set()), [])
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape' && selectedIds.size > 0) clearSelection()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [selectedIds.size, clearSelection])
+
+  useEffect(() => {
+    if (selectedIds.size === 0) return
+    const existing = new Set(items.map((i) => i.id))
+    let changed = false
+    const next = new Set<string>()
+    selectedIds.forEach((id) => {
+      if (existing.has(id)) next.add(id)
+      else changed = true
+    })
+    if (changed) setSelectedIds(next)
+  }, [items, selectedIds])
 
   const [activeItemId, setActiveItemId] = useState<string | null>(null)
   const pointerSensor = useSensor(PointerSensor, {
@@ -449,6 +490,9 @@ export default function ScheduleTable({
                   onCellDeactivate={() => setEditingCell(null)}
                   onNavigate={handleNavigate}
                   onOpenPanel={onOpenPanel}
+                  selected={selectedIds.has(item.id)}
+                  onToggleSelect={toggleSelect}
+                  selectionActive={selectedIds.size > 0}
                 />
               </div>
             </Fragment>
@@ -456,6 +500,7 @@ export default function ScheduleTable({
         })}
         {addingToDate === date ? (
           <div className="flex min-w-[744px] items-center border-b border-border bg-info-bg/30">
+            <div className="w-6 flex-shrink-0" />
             <div className="w-6 flex-shrink-0" />
             <div className="w-16 flex-shrink-0 px-3 py-2.5" />
             <div className="min-w-[220px] flex-1 px-3 py-2.5">
@@ -631,11 +676,64 @@ export default function ScheduleTable({
       </div>
 
       <div className="hidden md:block">
+        {selectedIds.size > 0 && (
+          <BulkActionBar
+            count={selectedIds.size}
+            tripStart={trip?.startDate ?? null}
+            tripEnd={trip?.endDate ?? null}
+            pending={bulkPending}
+            onClear={clearSelection}
+            onApplyDate={async (date) => {
+              setBulkPending(true)
+              try {
+                await Promise.all(
+                  Array.from(selectedIds).map((id) => onUpdateItem(id, { date })),
+                )
+              } finally {
+                setBulkPending(false)
+              }
+            }}
+            onApplyStatus={async (status) => {
+              setBulkPending(true)
+              try {
+                await Promise.all(
+                  Array.from(selectedIds).map((id) =>
+                    onUpdateItem(id, { reservation_status: status }),
+                  ),
+                )
+              } finally {
+                setBulkPending(false)
+              }
+            }}
+            onDelete={
+              onDeleteItem
+                ? async () => {
+                    const ok = await confirm({
+                      title: `${selectedIds.size}개 항목 삭제`,
+                      description: '되돌릴 수 없어요. 정말 삭제할까요?',
+                      tone: 'destructive',
+                      confirmLabel: '삭제',
+                    })
+                    if (!ok) return
+                    setBulkPending(true)
+                    try {
+                      const ids = Array.from(selectedIds)
+                      await Promise.all(ids.map((id) => onDeleteItem(id)))
+                      clearSelection()
+                    } finally {
+                      setBulkPending(false)
+                    }
+                  }
+                : null
+            }
+          />
+        )}
         <div className="overflow-hidden rounded-xl border border-border bg-bg-elevated">
           <div className="overflow-x-auto">
             <div className={TABLE_MIN_WIDTH}>
               {/* 컬럼 헤더 */}
               <div className="flex items-center gap-0 border-b border-border bg-bg-elevated px-0">
+                <div className="w-6 flex-shrink-0" />
                 <div className="w-6 flex-shrink-0" />
                 <div className="w-16 flex-shrink-0 px-3 py-2.5">
                   <span className="text-xs font-semibold text-fg-muted whitespace-nowrap">시간</span>
@@ -721,5 +819,89 @@ export default function ScheduleTable({
     </div>
     <DragOverlay>{activeItem ? <DragPreviewCard item={activeItem} /> : null}</DragOverlay>
     </DndContext>
+  )
+}
+
+interface BulkActionBarProps {
+  count: number
+  tripStart: string | null
+  tripEnd: string | null
+  pending: boolean
+  onClear: () => void
+  onApplyDate: (date: string | null) => Promise<void> | void
+  onApplyStatus: (status: ReservationStatus) => Promise<void> | void
+  onDelete: (() => Promise<void> | void) | null
+}
+
+function BulkActionBar({
+  count,
+  tripStart,
+  tripEnd,
+  pending,
+  onClear,
+  onApplyDate,
+  onApplyStatus,
+  onDelete,
+}: BulkActionBarProps) {
+  return (
+    <div className="sticky top-0 z-10 mb-2 flex flex-wrap items-center gap-3 rounded-xl border border-accent bg-accent-bg/30 px-3 py-2 shadow-sm">
+      <span className="text-sm font-medium text-fg">{count}개 선택됨</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="text-xs text-fg-muted">날짜 이동</label>
+        <input
+          type="date"
+          min={tripStart ?? undefined}
+          max={tripEnd ?? undefined}
+          disabled={pending}
+          onChange={(e) => {
+            const v = e.target.value
+            if (v) void onApplyDate(v)
+            e.target.value = ''
+          }}
+          className="h-8 rounded border border-border bg-bg px-2 text-xs text-fg disabled:opacity-50"
+        />
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="text-xs text-fg-muted">예약 상태</label>
+        <select
+          disabled={pending}
+          defaultValue=""
+          onChange={(e) => {
+            const v = e.target.value
+            if (v) void onApplyStatus(v as ReservationStatus)
+            e.target.value = ''
+          }}
+          className="h-8 rounded border border-border bg-bg px-2 text-xs text-fg disabled:opacity-50"
+        >
+          <option value="" disabled>
+            선택
+          </option>
+          {RESERVATION_STATUS_OPTIONS.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </div>
+      {onDelete && (
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => void onDelete()}
+          disabled={pending}
+          leftIcon={<Trash2 size={14} />}
+        >
+          삭제
+        </Button>
+      )}
+      <button
+        type="button"
+        onClick={onClear}
+        className="ml-auto inline-flex items-center gap-1 text-xs text-fg-muted hover:text-fg"
+        title="선택 해제 (Esc)"
+      >
+        <X size={14} /> 해제
+      </button>
+    </div>
   )
 }
