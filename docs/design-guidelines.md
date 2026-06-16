@@ -89,46 +89,52 @@ font-family: "Pretendard Variable", "Pretendard",
 
 ### 3.1 토큰 체계 (alias 우선, hex 직접 사용 금지)
 
-CSS 변수로 시맨틱 토큰을 정의하고 Tailwind theme 에서 참조합니다.
+CSS 변수로 시맨틱 토큰을 정의하고 Tailwind theme 에서 참조합니다. 토큰은 `R G B` 삼중값으로 두고 `rgb(var(--token))` / `rgb(var(--token) / .5)` 로 소비합니다.
+
+> **브랜드 팔레트 (Waypost)**: 쿨 그레이 바탕 + 잉크 네이비 + 브라스 강조. 정본·도출 근거는 [brand.md](brand.md) §6 을 따릅니다(이슈 #231). 아래는 그 정본을 시맨틱 토큰으로 옮긴 것이며, 실제 `app/globals.css` 적용은 #228 에서 수행합니다. 종이/세피아 바탕·채도 높은 주황·네온은 금지.
 
 ```css
 /* app/globals.css */
 :root {
-  /* surface */
-  --color-bg:            #ffffff;
-  --color-bg-elevated:   #ffffff;     /* 카드, 패널 */
-  --color-bg-subtle:     #f8fafc;     /* 섹션 배경 (gray-50) */
-  --color-bg-overlay:    rgba(0,0,0,.30);
-  /* text */
-  --color-fg:            #0f172a;     /* gray-900 */
-  --color-fg-muted:      #475569;     /* gray-600 */
-  --color-fg-subtle:     #94a3b8;     /* gray-400 (placeholder) */
+  /* surface — 페이지는 쿨 그레이, 카드는 흰색으로 떠 보이게 */
+  --bg:            244 246 248;   /* #F4F6F8 cool gray */
+  --bg-subtle:     236 238 241;   /* #ECEEF1 */
+  --bg-elevated:   255 255 255;   /* #FFFFFF 카드·패널 */
+  --bg-overlay:    15 23 42;      /* rgb(var(--bg-overlay) / .30) */
+  /* text — 검정 대신 잉크 네이비 */
+  --fg:            22 36 63;      /* #16243F ink navy */
+  --fg-muted:      74 88 110;     /* #4A586E */
+  --fg-subtle:     137 149 166;   /* #8995A6 placeholder */
+  --fg-on-accent:  255 255 255;   /* #FFFFFF */
   /* line */
-  --color-border:        #e2e8f0;     /* gray-200 */
-  --color-border-strong: #cbd5e1;     /* gray-300 */
-  /* status */
-  --color-success-bg:    #ecfdf5;
-  --color-success-fg:    #047857;
-  --color-warning-bg:    #fef3c7;
-  --color-warning-fg:    #92400e;
-  --color-critical-bg:   #fef2f2;
-  --color-critical-fg:   #b91c1c;
-  --color-info-bg:       #eff6ff;
-  --color-info-fg:       #1d4ed8;
-  /* accent (브랜드 1개, CTA 한정) */
-  --color-accent:        #0f172a;     /* 현재 검정 기반, 차후 브랜드 hue 결정 */
-  --color-accent-fg:     #ffffff;
+  --border:        228 232 236;   /* #E4E8EC */
+  --border-strong: 213 219 225;   /* #D5DBE1 */
+  /* status (기능색 — 브랜드 강조와 별개, 의미 전달 전용) */
+  --success-bg:    236 253 245;  --success-fg:  4 120 87;
+  --warning-bg:    254 243 199;  --warning-fg:  146 64 14;
+  --critical-bg:   254 242 242;  --critical-fg: 185 28 28;
+  --info-bg:       239 246 255;  --info-fg:     29 78 216;
+  /* accent — 브라스 (CTA·활성·동선/핀 등 의미 있는 곳에만, 절제) */
+  --accent:        151 118 47;    /* #97762F brass */
+  --accent-hover:  126 99 38;     /* #7E6326 */
+  --accent-subtle: 241 234 216;   /* #F1EAD8 */
 }
 
 /* 다크 모드: 명도 반전이 아니라 층 구조 (Apple HIG, Fluent 2) */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg:            #0b1020;
-    --color-bg-elevated:   #131a2e;
-    --color-bg-subtle:     #1a223a;
-    --color-fg:            #f1f5f9;
-    --color-fg-muted:      #94a3b8;
-    --color-border:        #1e293b;
+    --bg:            18 24 33;     /* #121821 */
+    --bg-subtle:     24 32 44;     /* #18202C */
+    --bg-elevated:   27 36 48;     /* #1B2430 */
+    --fg:            230 235 241;  /* #E6EBF1 */
+    --fg-muted:      159 176 196;  /* #9FB0C4 */
+    --fg-subtle:     107 122 140;  /* #6B7A8C */
+    --fg-on-accent:  26 20 4;      /* #1A1404 */
+    --border:        42 51 66;     /* #2A3342 */
+    --border-strong: 58 68 86;     /* #3A4456 */
+    --accent:        198 160 78;   /* #C6A04E brass, 다크에서 밝게 */
+    --accent-hover:  216 184 106;  /* #D8B86A */
+    --accent-subtle: 51 43 20;     /* #332B14 */
     /* status: 다크에서 채도 -10%, 명도 +15% (Fluent 권장) */
   }
 }
