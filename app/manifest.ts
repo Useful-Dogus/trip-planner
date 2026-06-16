@@ -2,16 +2,16 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Trip Planner',
-    short_name: 'Trip Planner',
-    description: '지도와 함께 만드는 여행 계획',
+    name: 'Waypost',
+    short_name: 'Waypost',
+    description: '지도 위에서 후보를 모아 동선을 직접 깎는 여행 설계 도구',
     lang: 'ko',
     start_url: '/',
     scope: '/',
     display: 'standalone',
     orientation: 'portrait',
-    background_color: '#ffffff',
-    theme_color: '#0D9488',
+    background_color: '#f4f6f8',
+    theme_color: '#97762f',
     icons: [
       { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml' },
       { src: '/icon0', sizes: '192x192', type: 'image/png', purpose: 'any' },

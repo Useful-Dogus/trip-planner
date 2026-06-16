@@ -33,12 +33,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const payload = await fetchSharedTrip(params.token)
   if (!payload) {
     return {
-      title: '공유 링크가 유효하지 않습니다 · Trip Planner',
+      title: '공유 링크가 유효하지 않습니다 · Waypost',
       description: '이 링크는 만료되었거나 회수되었습니다.',
       robots: { index: false, follow: false },
     }
   }
-  const title = `${payload.trip.title} · Trip Planner`
+  const title = `${payload.trip.title} · Waypost`
   const description = ogDescription(payload)
   return {
     title,
@@ -95,7 +95,7 @@ export default async function SharePage({ params }: Props) {
             href="/"
             className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
           >
-            Trip Planner 둘러보기
+            Waypost 둘러보기
             <ExternalLink className="size-3.5" aria-hidden />
           </Link>
         </div>
@@ -168,7 +168,7 @@ export default async function SharePage({ params }: Props) {
           href="/signup"
           className="mt-3 inline-flex items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-fg hover:bg-accent-hover"
         >
-          Trip Planner 시작하기
+          Waypost 시작하기
         </Link>
       </footer>
     </main>

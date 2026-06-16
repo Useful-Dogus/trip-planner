@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ArrowLeft, List, Map, CalendarDays, Download, LogOut, MoreHorizontal, User, Loader2 } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
+import Wordmark from '@/components/Brand/Wordmark'
 import Sheet, { SheetSection } from '@/components/UI/Sheet'
 import { cn } from '@/lib/cn'
 import { logout } from '@/lib/auth-client'
@@ -193,10 +194,17 @@ export default function Navigation() {
         className="hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:h-full md:w-44 z-50 bg-bg-elevated border-r border-border p-4"
         aria-label="기본 네비게이션"
       >
-        <div className="mb-6 px-3">
+        <div className="mb-6 px-3 space-y-3">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-1.5 text-xs text-fg-subtle hover:text-fg transition-colors"
+            aria-label="Waypost 홈"
+            className="inline-flex rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            <Wordmark size="sm" />
+          </Link>
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 text-xs text-fg-subtle hover:text-fg transition-colors"
           >
             <ArrowLeft className="size-3.5" aria-hidden="true" />
             내 여행 목록

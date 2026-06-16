@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { clearAppCache } from '@/lib/clearAppCache'
 import { ErrorBanner } from '@/components/UI'
 import { useToast } from '@/components/UI/Toast'
+import { BrandMark, PRODUCT_NAME } from '@/components/Brand/Wordmark'
 import type { AuthErrorCode } from '@/lib/auth-errors'
 
 export default function LoginForm() {
@@ -86,22 +87,9 @@ export default function LoginForm() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-bg via-bg-subtle to-bg flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-6 h-6 text-accent-fg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-fg">trip-planner</h1>
+        <div className="flex flex-col items-center text-center mb-8">
+          <BrandMark size="lg" className="mb-3" />
+          <h1 className="text-2xl font-semibold tracking-tight text-fg">{PRODUCT_NAME}</h1>
           <p className="text-sm text-fg-subtle mt-1">로그인하여 여행을 계획하세요</p>
         </div>
 

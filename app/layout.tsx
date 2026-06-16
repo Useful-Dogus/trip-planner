@@ -5,28 +5,28 @@ import Providers from './providers'
 import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 
 export const metadata: Metadata = {
-  title: 'Trip Planner',
-  description: '지도와 함께 만드는 여행 계획',
-  applicationName: 'Trip Planner',
+  title: 'Waypost',
+  description: '지도 위에서 후보를 모아 동선을 직접 깎는 여행 설계 도구',
+  applicationName: 'Waypost',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Trip Planner',
+    title: 'Waypost',
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
-    title: 'Trip Planner',
-    description: '지도와 함께 만드는 여행 계획',
+    title: 'Waypost',
+    description: '지도 위에서 후보를 모아 동선을 직접 깎는 여행 설계 도구',
     type: 'website',
   },
 }
 
 export const viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0b1020' },
+    { media: '(prefers-color-scheme: light)', color: '#f4f6f8' },
+    { media: '(prefers-color-scheme: dark)', color: '#121821' },
   ],
   width: 'device-width',
   initialScale: 1,
