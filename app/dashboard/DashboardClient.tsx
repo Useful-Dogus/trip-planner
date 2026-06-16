@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Compass, LogOut, MapPin, MoreVertical, Plus, Search, SearchX, Trash2, User } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
+import Wordmark from '@/components/Brand/Wordmark'
 import { Input } from '@/components/UI/Input'
 import Button from '@/components/UI/Button'
 import EmptyState from '@/components/UI/EmptyState'
@@ -129,6 +130,7 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
       <header className="border-b border-border bg-bg-elevated">
         <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between gap-4">
           <div className="min-w-0">
+            <Wordmark size="sm" className="mb-1.5" />
             <h1 className="text-lg md:text-xl font-bold text-fg">내 여행</h1>
             {userEmail && (
               <p className="text-xs text-fg-subtle mt-0.5 truncate">{userEmail}</p>
