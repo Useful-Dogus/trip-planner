@@ -55,19 +55,38 @@ export const PLACEHOLDER_LABELS = {
   reservation_status: '예약 정보 없음',
 } as const
 
-// 색은 카테고리 dot 보조용. 채도 한 단계 낮춤 (Tailwind 400 톤 정렬) — 무지개 인상 완화.
-export const CATEGORY_META: Record<Category, { Icon: LucideIcon; color: string }> = {
-  교통: { Icon: Bus, color: '#94a3b8' },           // slate-400 (유지)
-  숙박: { Icon: Hotel, color: '#38bdf8' },         // sky-400
-  명소: { Icon: Landmark, color: '#fb923c' },      // orange-400
-  식당: { Icon: UtensilsCrossed, color: '#f87171' }, // red-400
-  카페: { Icon: Coffee, color: '#b45309' },        // amber-700 (밝게)
-  쇼핑: { Icon: ShoppingBag, color: '#f472b6' },   // pink-400
-  문화시설: { Icon: Palette, color: '#a78bfa' },   // violet-400
-  '공연·스포츠': { Icon: Drama, color: '#34d399' }, // emerald-400
-  액티비티: { Icon: Target, color: '#fbbf24' },    // amber-400
-  휴양: { Icon: Palmtree, color: '#4ade80' },      // green-400
-  기타: { Icon: Bookmark, color: '#cbd5e1' },      // slate-300 (유지)
+// 카테고리 식별은 아이콘 + 라벨 텍스트로만 한다 (#240). 색상은 정보 전달이 안 되고
+// 시각 잡음만 더해 제거했다. 분포 비교가 목적인 CategoryStackBar 만 예외로
+// 아래 CATEGORY_STACK_COLORS 를 쓴다.
+export const CATEGORY_META: Record<Category, { Icon: LucideIcon }> = {
+  교통: { Icon: Bus },
+  숙박: { Icon: Hotel },
+  명소: { Icon: Landmark },
+  식당: { Icon: UtensilsCrossed },
+  카페: { Icon: Coffee },
+  쇼핑: { Icon: ShoppingBag },
+  문화시설: { Icon: Palette },
+  '공연·스포츠': { Icon: Drama },
+  액티비티: { Icon: Target },
+  휴양: { Icon: Palmtree },
+  기타: { Icon: Bookmark },
+}
+
+// CategoryStackBar 전용 팔레트. 스택 바는 카테고리 분포 비교가 목적이라
+// 색상이 정보 그 자체이므로 여기서만 카테고리별 색을 유지한다 (#240 결정).
+// 다른 곳에서는 절대 import 하지 않는다.
+export const CATEGORY_STACK_COLORS: Record<Category, string> = {
+  교통: '#94a3b8',       // slate-400
+  숙박: '#38bdf8',       // sky-400
+  명소: '#fb923c',       // orange-400
+  식당: '#f87171',       // red-400
+  카페: '#b45309',       // amber-700
+  쇼핑: '#f472b6',       // pink-400
+  문화시설: '#a78bfa',   // violet-400
+  '공연·스포츠': '#34d399', // emerald-400
+  액티비티: '#fbbf24',   // amber-400
+  휴양: '#4ade80',       // green-400
+  기타: '#cbd5e1',       // slate-300
 }
 
 interface PriorityMeta {

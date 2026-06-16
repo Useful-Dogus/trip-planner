@@ -39,7 +39,6 @@ export default function DayTimeline({ items, selectedItemId, onSelectItem }: Day
         const prev = idx > 0 ? items[idx - 1] : null
         const km = prev ? distance(prev, item) : null
         const Icon = CATEGORY_META[item.category]?.Icon
-        const color = CATEGORY_META[item.category]?.color ?? '#cbd5e1'
         const active = item.id === selectedItemId
         return (
           <Fragment key={item.id}>
@@ -60,10 +59,7 @@ export default function DayTimeline({ items, selectedItemId, onSelectItem }: Day
                   active ? 'bg-bg-subtle' : 'hover:bg-bg-subtle'
                 }`}
               >
-                <span
-                  className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                  style={{ backgroundColor: color }}
-                >
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-fg-muted text-[10px] font-bold text-bg-elevated">
                   {idx + 1}
                 </span>
                 <span className="min-w-0 flex-1">
