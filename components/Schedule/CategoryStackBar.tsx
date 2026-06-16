@@ -1,7 +1,7 @@
 'use client'
 
 import type { Category } from '@/types'
-import { CATEGORY_META } from '@/lib/itemOptions'
+import { CATEGORY_STACK_COLORS } from '@/lib/itemOptions'
 
 interface CategoryStackBarProps {
   breakdown: { category: Category; count: number }[]
@@ -19,7 +19,7 @@ export default function CategoryStackBar({ breakdown }: CategoryStackBarProps) {
     >
       {breakdown.map(({ category, count }) => {
         const pct = (count / total) * 100
-        const color = CATEGORY_META[category]?.color ?? '#cbd5e1'
+        const color = CATEGORY_STACK_COLORS[category] ?? '#cbd5e1'
         return (
           <div
             key={category}

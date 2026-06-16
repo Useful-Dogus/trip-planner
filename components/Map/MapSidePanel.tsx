@@ -270,20 +270,17 @@ function CandidatesView({
           <CategoryFilterChip
             active={categoryFilter === null}
             onClick={() => setCategoryFilter(null)}
-            color={null}
           >
             모두
             <span className="tabular ml-1 opacity-70">{items.length}</span>
           </CategoryFilterChip>
           {CATEGORY_OPTIONS.filter((c) => (counts.get(c) ?? 0) > 0).map((c) => {
             const active = categoryFilter === c
-            const color = CATEGORY_META[c]?.color ?? '#cbd5e1'
             return (
               <CategoryFilterChip
                 key={c}
                 active={active}
                 onClick={() => setCategoryFilter(active ? null : c)}
-                color={color}
               >
                 {c}
                 <span className="tabular ml-1 opacity-70">{counts.get(c)}</span>
@@ -310,7 +307,6 @@ function CandidatesView({
         <ul className="min-h-0 flex-1 divide-y divide-border overflow-y-auto">
           {filtered.map((item) => {
             const active = item.id === selectedItemId
-            const color = CATEGORY_META[item.category]?.color ?? '#cbd5e1'
             const Icon = CATEGORY_META[item.category]?.Icon
             const isConfirmed = item.trip_priority === '확정'
             return (
@@ -329,11 +325,6 @@ function CandidatesView({
                     active ? 'bg-accent-subtle' : 'hover:bg-bg-subtle',
                   )}
                 >
-                  <span
-                    className="mt-1 inline-block h-2 w-2 flex-shrink-0 rounded-full"
-                    style={{ backgroundColor: color }}
-                    aria-hidden="true"
-                  />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-1.5">
                       {Icon ? <Icon size={12} className="flex-shrink-0 text-fg-muted" aria-hidden="true" /> : null}
@@ -365,12 +356,10 @@ function CandidatesView({
 function CategoryFilterChip({
   active,
   onClick,
-  color,
   children,
 }: {
   active: boolean
   onClick: () => void
-  color: string | null
   children: React.ReactNode
 }) {
   return (
@@ -387,13 +376,6 @@ function CategoryFilterChip({
           : 'bg-bg-subtle text-fg-muted hover:bg-border',
       )}
     >
-      {color && (
-        <span
-          aria-hidden="true"
-          className="inline-block h-2 w-2 rounded-full"
-          style={{ backgroundColor: color }}
-        />
-      )}
       {children}
     </button>
   )

@@ -29,7 +29,6 @@ export default function ItemCard({
   const trip = useOptionalTrip()
   const tripCurrency = normalizeCurrency(trip?.currency)
   const scheduleLabel = formatScheduleLabel(item)
-  const accentColor = CATEGORY_META[item.category]?.color ?? '#cbd5e1'
 
   useEffect(() => {
     if (editingName !== null) inputRef.current?.select()
@@ -83,12 +82,6 @@ export default function ItemCard({
             : 'border-border hover:border-border-strong',
       )}
     >
-      {/* 카테고리 컬러바 */}
-      <span
-        aria-hidden="true"
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{ backgroundColor: accentColor }}
-      />
       <div className="flex items-start justify-between gap-2 pl-2">
         <div className="flex items-center gap-2.5 min-w-0">
           {(() => {
