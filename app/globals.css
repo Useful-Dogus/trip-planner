@@ -11,26 +11,26 @@
  * ========================================================== */
 @layer base {
   :root {
-    /* surface */
-    --bg: 255 255 255;
-    --bg-subtle: 248 250 252;
+    /* surface — 쿨 그레이 바탕 + 흰색 카드 (브랜드: Waypost, docs/brand.md §6) */
+    --bg: 244 246 248;
+    --bg-subtle: 236 238 241;
     --bg-elevated: 255 255 255;
-    --bg-overlay: 15 23 42;
+    --bg-overlay: 22 36 63;
 
-    /* text */
-    --fg: 15 23 42;
-    --fg-muted: 71 85 105;
-    --fg-subtle: 148 163 184;
+    /* text — 잉크 네이비 */
+    --fg: 22 36 63;
+    --fg-muted: 74 88 110;
+    --fg-subtle: 137 149 166;
     --fg-on-accent: 255 255 255;
 
     /* line */
-    --border: 226 232 240;
-    --border-strong: 203 213 225;
+    --border: 228 232 236;
+    --border-strong: 213 219 225;
 
-    /* accent — Teal */
-    --accent: 13 148 136;
-    --accent-hover: 15 118 110;
-    --accent-subtle: 240 253 250;
+    /* accent — Brass (절제, CTA·활성·동선/핀 등 의미 있는 곳에만) */
+    --accent: 151 118 47;
+    --accent-hover: 126 99 38;
+    --accent-subtle: 241 234 216;
 
     /* status */
     --success-bg: 240 253 244;
@@ -99,22 +99,24 @@
 
   /* 다크 모드: html.dark 클래스로 적용 */
   :root.dark {
-    --bg: 11 16 32;
-    --bg-subtle: 19 26 46;
-    --bg-elevated: 26 34 58;
+    /* surface — 쿨 다크 (밤의 지도). Base → Elevated 갈수록 한 단계 밝게 */
+    --bg: 18 24 33;
+    --bg-subtle: 24 32 44;
+    --bg-elevated: 27 36 48;
     --bg-overlay: 0 0 0;
 
-    --fg: 241 245 249;
-    --fg-muted: 148 163 184;
-    --fg-subtle: 100 116 139;
-    --fg-on-accent: 11 16 32;
+    --fg: 230 235 241;
+    --fg-muted: 159 176 196;
+    --fg-subtle: 107 122 140;
+    --fg-on-accent: 26 20 4;
 
-    --border: 30 41 59;
-    --border-strong: 51 65 85;
+    --border: 42 51 66;
+    --border-strong: 58 68 86;
 
-    --accent: 45 212 191;
-    --accent-hover: 94 234 212;
-    --accent-subtle: 19 78 74;
+    /* accent — Brass, 다크에서 밝게 */
+    --accent: 198 160 78;
+    --accent-hover: 216 184 106;
+    --accent-subtle: 51 43 20;
 
     --success-bg: 6 78 59;
     --success-fg: 187 247 208;
