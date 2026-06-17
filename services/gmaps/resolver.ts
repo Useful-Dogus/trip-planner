@@ -2,6 +2,9 @@
  * Google Maps short URL → list ID 추출
  */
 
+import http from 'node:http'
+import https from 'node:https'
+
 export class GmapsResolverError extends Error {
   constructor(
     message: string,
@@ -68,10 +71,6 @@ function followRedirect(url: string, redirectsLeft: number, timeoutMs: number): 
     const parsed = new URL(url)
     // Use Node's builtin HTTP client directly. In this route, fetch() receives a
     // durable deep-link HTML page instead of the 302 Location we need.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const http = require('node:http') as typeof import('node:http')
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const https = require('node:https') as typeof import('node:https')
     const client = parsed.protocol === 'https:' ? https : http
     const request = client.request(
       url,
