@@ -51,14 +51,27 @@ export default async function TripLayout({
     redirect(`/login?next=${encodeURIComponent(`/trip/${tripId}`)}`)
   }
 
-  // Stage A — 접근 체크. 스키마 진화에 영향받지 않는 안정 컬럼만 사용한다.
-  // 스키마 드리프트(예: 신규 컬럼 마이그레이션 누락) 가 권한 거부로 오인되는 것을 막는다.
-  const access = await client
-    .from('trips')
-    .select('id, title, trip_members!inner(role)')
-    .eq('id', tripId)
-    .eq('trip_members.user_id', userData.user.id)
-    .maybeSingle<AccessRow>()
+  // #234 — trip 진입 TTFB 최적화. 두 쿼리는 같은 trips 행을 읽을 뿐 데이터 의존성이 없으므로
+  // 순차 await 대신 병렬로 실행해 DB 왕복 1회를 제거한다. 스키마 드리프트 격리를 위해
+  // 쿼리 자체는 안정 컬럼(access) / 확장 컬럼(meta) 으로 분리한 상태를 유지한다.
+  //  - Stage A: 접근 체크. 스키마 진화에 영향받지 않는 안정 컬럼만 사용한다.
+  //    스키마 드리프트(예: 신규 컬럼 마이그레이션 누락) 가 권한 거부로 오인되는 것을 막는다.
+  //  - Stage B: 메타데이터. 컬럼 누락(42703) 은 권한 문제가 아니므로 기본값으로 폴백한다.
+  //    그래야 deploy-vs-DB 마이그레이션 시차에서도 사용자가 여행에 진입은 할 수 있다.
+  //    비멤버의 경우 RLS 로 빈 결과가 돌아오고, access 게이트 통과 전에는 사용하지 않으므로 안전.
+  const [access, meta] = await Promise.all([
+    client
+      .from('trips')
+      .select('id, title, trip_members!inner(role)')
+      .eq('id', tripId)
+      .eq('trip_members.user_id', userData.user.id)
+      .maybeSingle<AccessRow>(),
+    client
+      .from('trips')
+      .select(EXTENDED_COLUMNS)
+      .eq('id', tripId)
+      .maybeSingle<ExtendedRow>(),
+  ])
 
   if (access.error) {
     console.error('[TripLayout] access check failed', {
@@ -79,14 +92,7 @@ export default async function TripLayout({
     return <TripAccessDenied reason="forbidden" />
   }
 
-  // Stage B — 메타데이터. 컬럼 누락(42703) 은 권한 문제가 아니므로 기본값으로 폴백한다.
-  // 그래야 deploy-vs-DB 마이그레이션 시차에서도 사용자가 여행에 진입은 할 수 있다.
-  const meta = await client
-    .from('trips')
-    .select(EXTENDED_COLUMNS)
-    .eq('id', tripId)
-    .maybeSingle<ExtendedRow>()
-
+  // 메타데이터 결과 적용 — 위 Promise.all 에서 함께 fetch 됨.
   let extended: ExtendedRow = {
     start_date: null,
     end_date: null,
