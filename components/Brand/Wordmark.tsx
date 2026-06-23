@@ -7,6 +7,14 @@ import { cn } from '@/lib/cn'
  */
 export const PRODUCT_NAME = 'Waypost'
 
+/**
+ * 제품 이익 한 문장 — "왜 쓰는가 = 무엇을 얻는가" (이슈 #258).
+ * 기능 나열·협업 강조 대신, 사용자가 얻는 결과만 말한다.
+ * 정본 기준 문장: "내가 모은 후보 더미를, 버리지 않고 추려서,
+ * 현장에서 안 깨지는 하루 일정으로 만든다." 를 표면용으로 압축한 것.
+ */
+export const PRODUCT_TAGLINE = '모아둔 후보를 추려, 현장에서 안 깨지는 하루 일정으로'
+
 type WordmarkSize = 'sm' | 'md' | 'lg'
 
 const SIZES: Record<WordmarkSize, { box: string; icon: string; text: string; gap: string }> = {

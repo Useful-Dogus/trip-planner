@@ -307,8 +307,8 @@ export default function ItemList({
         {renderEntries.length === 0 && items.length === 0 && (
           <EmptyState
             icon={<MapPin className="size-10" aria-hidden="true" />}
-            title="아직 장소가 없어요"
-            description="가고 싶은 장소를 추가하면 여기에 모입니다."
+            title="가고 싶은 곳부터 모아요"
+            description="후보를 모아두면, 나중에 추려서 안 깨지는 하루 일정으로 만들 수 있어요."
             action={
               <Button onClick={() => router.push(tripPath('items/new'))}>
                 첫 장소 추가하기
