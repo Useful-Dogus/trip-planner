@@ -5,11 +5,13 @@ import type { Category, ReservationStatus, Satisfaction, TripItem, TripPriority,
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip } from '@/lib/hooks/useTripContext'
 import { currencyFieldLabel, normalizeCurrency } from '@/lib/currency'
-import { TriangleAlert } from 'lucide-react'
+import { TriangleAlert, Users } from 'lucide-react'
 import CollapsibleSection from '@/components/UI/CollapsibleSection'
 import MemoField from '@/components/UI/MemoField'
+import { useToast } from '@/components/UI/Toast'
 import { cn } from '@/lib/cn'
 import { getScheduleWarnings } from '@/lib/scheduleWarnings'
+import type { PlaceCorrection } from '@/lib/placeCorrections'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
@@ -82,9 +84,13 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     closed_days: item.closed_days ?? [],
     links: item.links ?? [],
   })
+  const { showToast } = useToast()
   const [nameError, setNameError] = useState('')
   const [geocoding, setGeocoding] = useState(false)
   const [geocodeError, setGeocodeError] = useState('')
+  // #278 공유 영업시간 보정(crowd-correction).
+  const [shared, setShared] = useState<PlaceCorrection | null>(null)
+  const [sharing, setSharing] = useState(false)
   const memoRef = useRef<HTMLTextAreaElement>(null)
   const nameRef = useRef<HTMLInputElement>(null)
 
@@ -125,6 +131,66 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
   function setField<K extends keyof FormData>(key: K, value: FormData[K]) {
     if (key === 'name') setNameError('')
     setForm(prev => ({ ...prev, [key]: value }))
+  }
+
+  // 공유 보정(#278): 같은 google_place_id 의 최신 보정을 불러온다.
+  useEffect(() => {
+    const placeId = item.google_place_id
+    if (!placeId) {
+      setShared(null)
+      return
+    }
+    let alive = true
+    fetch(`/api/place-corrections?placeIds=${encodeURIComponent(placeId)}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => {
+        if (alive) setShared(data?.corrections?.[placeId] ?? null)
+      })
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [item.google_place_id, item.id])
+
+  function applyShared() {
+    if (!shared) return
+    if (shared.openingHours) {
+      setField('open_time', shared.openingHours.open)
+      setField('close_time', shared.openingHours.close)
+    }
+    if (shared.closedDays) setField('closed_days', shared.closedDays)
+  }
+
+  async function shareHours() {
+    const placeId = item.google_place_id
+    if (!placeId) return
+    const openingHours = form.open_time && form.close_time ? { open: form.open_time, close: form.close_time } : null
+    const closedDays = form.closed_days.length ? [...form.closed_days].sort((a, b) => a - b) : null
+    if (!openingHours && !closedDays) {
+      showToast({ type: 'error', message: '공유할 영업시간이나 휴무를 먼저 입력하세요' })
+      return
+    }
+    setSharing(true)
+    try {
+      const res = await fetch('/api/place-corrections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ googlePlaceId: placeId, openingHours, closedDays }),
+      })
+      if (!res.ok) throw new Error()
+      showToast({ type: 'success', message: '영업정보를 공유했어요 — 다른 사용자에게도 반영돼요' })
+      setShared(prev => ({
+        googlePlaceId: placeId,
+        openingHours,
+        closedDays,
+        count: (prev?.count ?? 0) + 1,
+        updatedAt: new Date().toISOString(),
+      }))
+    } catch {
+      showToast({ type: 'error', message: '공유에 실패했어요' })
+    } finally {
+      setSharing(false)
+    }
   }
 
   async function handleAddressBlur() {
@@ -387,6 +453,28 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
           <p className="text-xs text-fg-subtle">
             입력하면 휴무일·영업시간 밖 방문에 경고가 떠요. 비워두면 “정보 없음”으로 두고 경고하지 않아요.
           </p>
+
+          {item.google_place_id && shared && (
+            <div className="rounded-lg border border-info-border bg-info-bg/50 p-2.5 text-xs">
+              <div className="flex items-center gap-1.5 font-medium text-info-fg">
+                <Users className="size-3.5 flex-shrink-0" aria-hidden="true" />
+                다른 사용자가 보정한 영업정보가 있어요 ({shared.count}건)
+              </div>
+              <div className="mt-1 text-fg-muted">
+                {shared.openingHours ? `영업 ${shared.openingHours.open}-${shared.openingHours.close}` : '영업시간 정보 없음'}
+                {shared.closedDays && shared.closedDays.length > 0
+                  ? ` · 휴무 ${shared.closedDays.map(d => WEEKDAY_LABELS[d]).join('·')}`
+                  : ''}
+              </div>
+              <button
+                type="button"
+                onClick={applyShared}
+                className="mt-1.5 rounded border border-info-border px-2 py-1 text-[11px] font-medium text-info-fg hover:bg-info-bg"
+              >
+                이 값 적용
+              </button>
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="영업 시작">
               <input
@@ -436,6 +524,17 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
               })}
             </div>
           </Field>
+          {item.google_place_id && (
+            <button
+              type="button"
+              onClick={shareHours}
+              disabled={sharing}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-fg-muted transition-colors hover:border-border-strong hover:text-fg disabled:opacity-50"
+            >
+              <Users className="size-3.5" aria-hidden="true" />
+              {sharing ? '공유 중…' : '이 영업정보 공유 (다른 사용자에게 반영)'}
+            </button>
+          )}
         </CollapsibleSection>
 
         <CollapsibleSection title="위치" defaultOpen={locationHasValue}>
