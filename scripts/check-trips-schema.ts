@@ -52,6 +52,7 @@ const REQUIRED_COLUMNS: Record<string, string[]> = {
     'status',
     'links',
     'decision_reason',
+    'satisfaction',
     'created_at',
     'updated_at',
   ],

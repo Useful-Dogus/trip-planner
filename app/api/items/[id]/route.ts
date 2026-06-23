@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readItems, writeItems } from '@/lib/data'
 import { createRouteHandlerSupabase } from '@/lib/supabase-server'
-import type { Category, TripPriority, ReservationStatus } from '@/types'
+import type { Category, TripPriority, ReservationStatus, Satisfaction } from '@/types'
 import {
   CATEGORY_OPTIONS,
   RESERVATION_STATUS_OPTIONS,
   TRIP_PRIORITY_OPTIONS,
+  SATISFACTION_OPTIONS,
 } from '@/lib/itemOptions'
 import {
   fetchTripBounds,
@@ -40,6 +41,13 @@ function validatePartial(body: Record<string, unknown>, bounds: TripBounds | nul
     (typeof body.decision_reason !== 'string' || (body.decision_reason as string).length > 200)
   ) {
     return 'decision_reason은 200자 이하의 문자열이어야 합니다.'
+  }
+  if (
+    body.satisfaction !== undefined &&
+    body.satisfaction !== null &&
+    !SATISFACTION_OPTIONS.includes(body.satisfaction as Satisfaction)
+  ) {
+    return '유효하지 않은 satisfaction입니다.'
   }
   if (
     body.date !== undefined &&

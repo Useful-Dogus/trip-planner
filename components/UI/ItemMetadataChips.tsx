@@ -2,6 +2,7 @@ import type { TripItem, TripPriority } from '@/types'
 import { ITEM_FIELD_LABELS, PLACEHOLDER_LABELS } from '@/lib/itemOptions'
 import TripPriorityBadge from '@/components/UI/TripPriorityBadge'
 import ReservationStatusBadge from '@/components/UI/ReservationStatusBadge'
+import SatisfactionBadge from '@/components/UI/SatisfactionBadge'
 import PriorityQuickPicker from '@/components/UI/PriorityQuickPicker'
 import { Chip } from '@/components/UI/Chip'
 
@@ -60,6 +61,16 @@ export default function ItemMetadataChips({
         <PlaceholderChip label={PLACEHOLDER_LABELS.reservation_status} />
       ),
     },
+    // 만족도는 입력했을 때만 노출한다 (선택 입력 — 빈 자리에 placeholder 안 둠).
+    ...(item.satisfaction
+      ? [
+          {
+            key: 'satisfaction',
+            label: '만족도',
+            node: <SatisfactionBadge satisfaction={item.satisfaction} />,
+          },
+        ]
+      : []),
   ]
 
   return (

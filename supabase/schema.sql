@@ -49,6 +49,7 @@ create table if not exists public.items (
   budget      integer,
   memo        text,
   decision_reason text,
+  satisfaction text,
   date        text,
   end_date    text,
   time_start  text,

@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readItems, writeItems } from '@/lib/data'
 import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 import { v4 as uuidv4 } from 'uuid'
-import type { TripItem, Category, TripPriority, Link, ReservationStatus } from '@/types'
+import type { TripItem, Category, TripPriority, Link, ReservationStatus, Satisfaction } from '@/types'
 import {
   CATEGORY_OPTIONS,
   RESERVATION_STATUS_OPTIONS,
   TRIP_PRIORITY_OPTIONS,
+  SATISFACTION_OPTIONS,
 } from '@/lib/itemOptions'
 import {
   fetchTripBounds,
@@ -41,6 +42,13 @@ function validateItem(body: Record<string, unknown>, bounds: TripBounds | null):
     (typeof body.decision_reason !== 'string' || (body.decision_reason as string).length > 200)
   ) {
     return 'decision_reason은 200자 이하의 문자열이어야 합니다.'
+  }
+  if (
+    body.satisfaction !== undefined &&
+    body.satisfaction !== null &&
+    !SATISFACTION_OPTIONS.includes(body.satisfaction as Satisfaction)
+  ) {
+    return '유효하지 않은 satisfaction입니다.'
   }
   if (body.date !== undefined && body.date !== null && !/^\d{4}-\d{2}-\d{2}$/.test(body.date as string)) {
     return 'date는 YYYY-MM-DD 형식이어야 합니다.'
@@ -160,6 +168,7 @@ export async function POST(request: NextRequest) {
   if (body.budget !== undefined) item.budget = body.budget as number
   if (body.memo !== undefined) item.memo = body.memo as string
   if (body.decision_reason !== undefined) item.decision_reason = body.decision_reason as string | null
+  if (body.satisfaction !== undefined) item.satisfaction = body.satisfaction as Satisfaction | null
   if (body.date !== undefined) item.date = body.date as string
   if (body.end_date !== undefined && body.end_date !== null) item.end_date = body.end_date as string
   if (body.time_start !== undefined) item.time_start = body.time_start as string

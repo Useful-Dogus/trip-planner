@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import type { Category, ReservationStatus, TripItem, TripPriority, Link as TripLink } from '@/types'
+import type { Category, ReservationStatus, Satisfaction, TripItem, TripPriority, Link as TripLink } from '@/types'
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip } from '@/lib/hooks/useTripContext'
 import { currencyFieldLabel, normalizeCurrency } from '@/lib/currency'
 import CollapsibleSection from '@/components/UI/CollapsibleSection'
 import MemoField from '@/components/UI/MemoField'
+import { cn } from '@/lib/cn'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
@@ -14,6 +15,8 @@ import {
   TRIP_PRIORITY_OPTIONS,
   RESERVATION_STATUS_META,
   RESERVATION_STATUS_OPTIONS,
+  SATISFACTION_OPTIONS,
+  SATISFACTION_META,
 } from '@/lib/itemOptions'
 
 interface FormData {
@@ -27,6 +30,7 @@ interface FormData {
   budget: string
   memo: string
   decision_reason: string
+  satisfaction: Satisfaction | ''
   date: string
   end_date: string
   time_start: string
@@ -57,6 +61,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     budget: item.budget?.toString() ?? '',
     memo: item.memo ?? '',
     decision_reason: item.decision_reason ?? '',
+    satisfaction: item.satisfaction ?? '',
     date: item.date ?? '',
     end_date: item.end_date ?? '',
     time_start: item.time_start ?? '',
@@ -89,6 +94,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
       form.budget !== (item.budget?.toString() ?? '') ||
       form.memo !== (item.memo ?? '') ||
       form.decision_reason !== (item.decision_reason ?? '') ||
+      form.satisfaction !== (item.satisfaction ?? '') ||
       form.date !== (item.date ?? '') ||
       form.end_date !== (item.end_date ?? '') ||
       form.time_start !== (item.time_start ?? '') ||
@@ -143,6 +149,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
       budget: form.budget.trim() ? parseInt(form.budget) : null,
       memo: form.memo.trim() || null,
       decision_reason: form.decision_reason.trim() || null,
+      satisfaction: form.satisfaction || null,
     }
     changes.date = form.date.trim() || null
     changes.end_date = form.end_date.trim() || null
@@ -203,6 +210,37 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
                 placeholder="예: 거리가 멀어 동선에서 빠짐"
               />
               <p className="text-xs text-fg-subtle mt-1">왜 뺐는지 한 줄 남기면 나중에 결정을 되짚기 쉬워요.</p>
+            </div>
+          )}
+          {(form.trip_priority === '확정' || form.satisfaction) && (
+            <div>
+              <label className="block text-sm font-medium text-fg mb-1">
+                다녀온 뒤 만족도 <span className="font-normal text-fg-subtle">(선택)</span>
+              </label>
+              <div className="flex gap-1.5" role="group" aria-label="다녀온 뒤 만족도">
+                {SATISFACTION_OPTIONS.map((option) => {
+                  const active = form.satisfaction === option
+                  const meta = SATISFACTION_META[option]
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      aria-pressed={active}
+                      // 같은 값을 다시 누르면 해제 — 입력 강요 없음.
+                      onClick={() => setField('satisfaction', active ? '' : option)}
+                      className={cn(
+                        'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+                        active ? meta.className : 'border-border text-fg-muted hover:bg-bg-subtle',
+                      )}
+                    >
+                      <span aria-hidden="true">{meta.emoji}</span>
+                      {option}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-xs text-fg-subtle mt-1">다녀온 곳의 만족도는 다음 추천에 반영돼요.</p>
             </div>
           )}
           <SelectField label={ITEM_FIELD_LABELS.reservation_status} value={form.reservation_status} onChange={value => setField('reservation_status', value as ReservationStatus)} options={RESERVATION_STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${RESERVATION_STATUS_META[value].description}` }))} />
