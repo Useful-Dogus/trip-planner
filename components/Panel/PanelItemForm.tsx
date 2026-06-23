@@ -21,6 +21,8 @@ import {
   SATISFACTION_META,
 } from '@/lib/itemOptions'
 
+const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토']
+
 interface FormData {
   name: string
   category: Category
@@ -39,6 +41,9 @@ interface FormData {
   time_end: string
   last_entry_time: string
   reservation_deadline: string
+  open_time: string
+  close_time: string
+  closed_days: number[]
   links: TripLink[]
 }
 
@@ -72,6 +77,9 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     time_end: item.time_end ?? '',
     last_entry_time: item.last_entry_time ?? '',
     reservation_deadline: item.reservation_deadline ?? '',
+    open_time: item.opening_hours?.open ?? '',
+    close_time: item.opening_hours?.close ?? '',
+    closed_days: item.closed_days ?? [],
     links: item.links ?? [],
   })
   const [nameError, setNameError] = useState('')
@@ -107,6 +115,9 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
       form.time_end !== (item.time_end ?? '') ||
       form.last_entry_time !== (item.last_entry_time ?? '') ||
       form.reservation_deadline !== (item.reservation_deadline ?? '') ||
+      form.open_time !== (item.opening_hours?.open ?? '') ||
+      form.close_time !== (item.opening_hours?.close ?? '') ||
+      JSON.stringify(form.closed_days) !== JSON.stringify(item.closed_days ?? []) ||
       JSON.stringify(cleanLinks) !== JSON.stringify(item.links ?? [])
     onDirtyChange(dirty)
   }, [form, item, onDirtyChange])
@@ -165,6 +176,9 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     changes.time_end = form.time_end.trim() || null
     changes.last_entry_time = form.last_entry_time.trim() || null
     changes.reservation_deadline = form.reservation_deadline.trim() || null
+    changes.opening_hours =
+      form.open_time && form.close_time ? { open: form.open_time, close: form.close_time } : null
+    changes.closed_days = form.closed_days.length ? [...form.closed_days].sort((a, b) => a - b) : null
     await updateItem(item.id, changes)
     onSave()
   }
@@ -188,10 +202,14 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
   const scheduleWarnings = getScheduleWarnings(
     {
       ...item,
+      date: form.date || undefined,
       time_start: form.time_start || undefined,
       last_entry_time: form.last_entry_time || null,
       reservation_deadline: form.reservation_deadline || null,
       reservation_status: form.reservation_status,
+      opening_hours:
+        form.open_time && form.close_time ? { open: form.open_time, close: form.close_time } : null,
+      closed_days: form.closed_days,
     },
     todayKey,
   )
@@ -359,6 +377,64 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
           )}
           <Field label={currencyFieldLabel('예산', normalizeCurrency(trip.currency))}>
             <input type="number" min="0" value={form.budget} onChange={e => setField('budget', e.target.value)} className={inputClass} placeholder="예: 50" />
+          </Field>
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title="영업 정보"
+          defaultOpen={!!(item.opening_hours || (item.closed_days?.length ?? 0) > 0)}
+        >
+          <p className="text-xs text-fg-subtle">
+            입력하면 휴무일·영업시간 밖 방문에 경고가 떠요. 비워두면 “정보 없음”으로 두고 경고하지 않아요.
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="영업 시작">
+              <input
+                type="time"
+                value={form.open_time}
+                onChange={e => setField('open_time', e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="영업 종료">
+              <input
+                type="time"
+                value={form.close_time}
+                onChange={e => setField('close_time', e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+          </div>
+          <Field label="휴무 요일">
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label="휴무 요일">
+              {WEEKDAY_LABELS.map((label, day) => {
+                const active = form.closed_days.includes(day)
+                return (
+                  <button
+                    key={day}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() =>
+                      setField(
+                        'closed_days',
+                        active
+                          ? form.closed_days.filter(d => d !== day)
+                          : [...form.closed_days, day],
+                      )
+                    }
+                    className={cn(
+                      'inline-flex size-8 items-center justify-center rounded-full border text-xs font-medium transition-colors',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+                      active
+                        ? 'border-warning-border bg-warning-bg text-warning-fg'
+                        : 'border-border text-fg-muted hover:bg-bg-subtle',
+                    )}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
           </Field>
         </CollapsibleSection>
 

@@ -55,6 +55,8 @@ const REQUIRED_COLUMNS: Record<string, string[]> = {
     'satisfaction',
     'last_entry_time',
     'reservation_deadline',
+    'opening_hours',
+    'closed_days',
     'created_at',
     'updated_at',
   ],

@@ -20,6 +20,12 @@ export interface Link {
   url: string
 }
 
+/** 단순 영업시간(#260). 수동 입력 폴백 — 추후 per-day 확장 여지. */
+export interface OpeningHours {
+  open: string
+  close: string
+}
+
 export interface TripItem {
   id: string
   name: string
@@ -44,6 +50,10 @@ export interface TripItem {
   last_entry_time?: string | null
   /** 예약 마감일 YYYY-MM-DD (#261, 선택). 지났는데 미예약이면 경고. */
   reservation_deadline?: string | null
+  /** 영업시간(#260, 선택). 없으면 "정보 없음" 으로 경고 안 함. */
+  opening_hours?: OpeningHours | null
+  /** 휴무 요일 0=일..6=토 (#260, 선택). */
+  closed_days?: number[] | null
   google_place_id?: string | null
   created_at: string
   updated_at: string

@@ -56,6 +56,8 @@ create table if not exists public.items (
   time_end    text,
   last_entry_time      text,
   reservation_deadline text,
+  opening_hours    jsonb,
+  closed_days      jsonb,
   is_franchise     boolean,
   branches         jsonb,
   google_place_id  text,

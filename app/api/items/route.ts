@@ -15,6 +15,7 @@ import {
   isDateWithinBounds,
   type TripBounds,
 } from '@/lib/trips'
+import { isValidOpeningHours, isValidClosedDays } from '@/lib/itemValidation'
 
 function validateItem(body: Record<string, unknown>, bounds: TripBounds | null): string | null {
   if (!body.name || typeof body.name !== 'string' || !body.name.trim()) {
@@ -63,6 +64,12 @@ function validateItem(body: Record<string, unknown>, bounds: TripBounds | null):
     !/^\d{4}-\d{2}-\d{2}$/.test(body.reservation_deadline as string)
   ) {
     return 'reservation_deadline는 YYYY-MM-DD 형식이어야 합니다.'
+  }
+  if (body.opening_hours !== undefined && body.opening_hours !== null && !isValidOpeningHours(body.opening_hours)) {
+    return 'opening_hours는 {open:"HH:MM", close:"HH:MM"} 형식이어야 합니다.'
+  }
+  if (body.closed_days !== undefined && body.closed_days !== null && !isValidClosedDays(body.closed_days)) {
+    return 'closed_days는 0-6 정수 배열이어야 합니다.'
   }
   if (body.date !== undefined && body.date !== null && !/^\d{4}-\d{2}-\d{2}$/.test(body.date as string)) {
     return 'date는 YYYY-MM-DD 형식이어야 합니다.'
@@ -189,6 +196,8 @@ export async function POST(request: NextRequest) {
   if (body.time_end !== undefined && body.time_end !== null) item.time_end = body.time_end as string
   if (body.last_entry_time !== undefined) item.last_entry_time = body.last_entry_time as string | null
   if (body.reservation_deadline !== undefined) item.reservation_deadline = body.reservation_deadline as string | null
+  if (body.opening_hours !== undefined) item.opening_hours = body.opening_hours as TripItem['opening_hours']
+  if (body.closed_days !== undefined) item.closed_days = body.closed_days as TripItem['closed_days']
 
   const items = await readItems(client, tripId)
   items.push(item)
