@@ -134,6 +134,7 @@ export default function GroupCard({
               item={item}
               isActive={item.id === selectedItemId}
               onSelect={onSelectItem}
+              onUpdateItem={onUpdateItem}
             />
           ))}
         </div>
@@ -146,10 +147,12 @@ function BranchRow({
   item,
   isActive,
   onSelect,
+  onUpdateItem,
 }: {
   item: TripItem
   isActive: boolean
   onSelect: (id: string) => void
+  onUpdateItem: (id: string, changes: Record<string, unknown>) => void
 }) {
   return (
     <div
@@ -184,7 +187,12 @@ function BranchRow({
             <span className="text-xs text-fg-subtle italic block">(주소 없음)</span>
           )}
           <div className="mt-1.5">
-            <ItemMetadataChips item={item} />
+            <ItemMetadataChips
+              item={item}
+              onChangePriority={(priority) =>
+                onUpdateItem(item.id, { trip_priority: priority })
+              }
+            />
           </div>
         </div>
       </div>
