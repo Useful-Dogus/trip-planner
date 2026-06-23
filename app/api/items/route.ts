@@ -50,6 +50,20 @@ function validateItem(body: Record<string, unknown>, bounds: TripBounds | null):
   ) {
     return '유효하지 않은 satisfaction입니다.'
   }
+  if (
+    body.last_entry_time !== undefined &&
+    body.last_entry_time !== null &&
+    !/^\d{2}:\d{2}$/.test(body.last_entry_time as string)
+  ) {
+    return 'last_entry_time는 HH:MM 형식이어야 합니다.'
+  }
+  if (
+    body.reservation_deadline !== undefined &&
+    body.reservation_deadline !== null &&
+    !/^\d{4}-\d{2}-\d{2}$/.test(body.reservation_deadline as string)
+  ) {
+    return 'reservation_deadline는 YYYY-MM-DD 형식이어야 합니다.'
+  }
   if (body.date !== undefined && body.date !== null && !/^\d{4}-\d{2}-\d{2}$/.test(body.date as string)) {
     return 'date는 YYYY-MM-DD 형식이어야 합니다.'
   }
@@ -173,6 +187,8 @@ export async function POST(request: NextRequest) {
   if (body.end_date !== undefined && body.end_date !== null) item.end_date = body.end_date as string
   if (body.time_start !== undefined) item.time_start = body.time_start as string
   if (body.time_end !== undefined && body.time_end !== null) item.time_end = body.time_end as string
+  if (body.last_entry_time !== undefined) item.last_entry_time = body.last_entry_time as string | null
+  if (body.reservation_deadline !== undefined) item.reservation_deadline = body.reservation_deadline as string | null
 
   const items = await readItems(client, tripId)
   items.push(item)

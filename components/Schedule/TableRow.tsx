@@ -8,6 +8,7 @@ import TimeCell from './cells/TimeCell'
 import CategoryCell from './cells/CategoryCell'
 import StatusCell from './cells/StatusCell'
 import BudgetCell from './cells/BudgetCell'
+import ItemWarnings from './ItemWarnings'
 import { useOptionalTrip } from '@/lib/hooks/useTripContext'
 
 export type EditableField = 'time_start' | 'name' | 'category' | 'reservation_status' | 'budget'
@@ -27,6 +28,7 @@ interface TableRowProps {
   onCellDeactivate: () => void
   onNavigate: (direction: 'tab' | 'shift-tab' | 'enter' | 'escape', field: EditableField) => void
   onOpenPanel: (id: string) => void
+  todayKey: string
   selected?: boolean
   onToggleSelect?: (id: string) => void
   selectionActive?: boolean
@@ -40,6 +42,7 @@ export default function TableRow({
   onCellDeactivate,
   onNavigate,
   onOpenPanel,
+  todayKey,
   selected = false,
   onToggleSelect,
   selectionActive = false,
@@ -144,6 +147,7 @@ export default function TableRow({
             })
           }
         />
+        <ItemWarnings item={item} todayKey={todayKey} className="mt-1" />
       </div>
 
       {/* 카테고리 */}

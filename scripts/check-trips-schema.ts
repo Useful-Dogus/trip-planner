@@ -53,6 +53,8 @@ const REQUIRED_COLUMNS: Record<string, string[]> = {
     'links',
     'decision_reason',
     'satisfaction',
+    'last_entry_time',
+    'reservation_deadline',
     'created_at',
     'updated_at',
   ],

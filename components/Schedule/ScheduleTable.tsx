@@ -28,6 +28,7 @@ import TableRow from './TableRow'
 import DateGroupHeader from './DateGroupHeader'
 import UndatedGroupHeader from './UndatedGroupHeader'
 import DistanceSeparator from './DistanceSeparator'
+import ItemWarnings from './ItemWarnings'
 import { useDraggable } from '@dnd-kit/core'
 
 interface EditingCell {
@@ -124,9 +125,11 @@ function formatDate(dateStr: string): string {
 function MobileScheduleItemCard({
   item,
   onOpenPanel,
+  todayKey,
 }: {
   item: TripItem
   onOpenPanel: (id: string) => void
+  todayKey: string
 }) {
   const trip = useOptionalTrip()
   const status = getStatusMeta(item.reservation_status)
@@ -165,6 +168,7 @@ function MobileScheduleItemCard({
               <span className="tabular-nums">{time}</span>
               {budget ? <span className="tabular-nums font-medium text-fg">{budget}</span> : <span />}
             </div>
+            <ItemWarnings item={item} todayKey={todayKey} className="mt-2" />
           </div>
         </div>
       </button>
@@ -490,6 +494,7 @@ export default function ScheduleTable({
                   onCellDeactivate={() => setEditingCell(null)}
                   onNavigate={handleNavigate}
                   onOpenPanel={onOpenPanel}
+                  todayKey={todayKey}
                   selected={selectedIds.has(item.id)}
                   onToggleSelect={toggleSelect}
                   selectionActive={selectedIds.size > 0}
@@ -548,7 +553,7 @@ export default function ScheduleTable({
           return (
             <Fragment key={item.id}>
               {km != null && <DistanceSeparator km={km} variant="mobile" />}
-              <MobileScheduleItemCard item={item} onOpenPanel={onOpenPanel} />
+              <MobileScheduleItemCard item={item} onOpenPanel={onOpenPanel} todayKey={todayKey} />
             </Fragment>
           )
         })}
