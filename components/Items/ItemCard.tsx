@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { CalendarPlus } from 'lucide-react'
+import { CalendarPlus, ThumbsUp } from 'lucide-react'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
 import ItemMetadataChips from '@/components/UI/ItemMetadataChips'
@@ -17,6 +17,10 @@ interface ItemCardProps {
   isActive?: boolean
   isHighlighted?: boolean
   onUpdateItem?: (id: string, changes: Record<string, unknown>) => void
+  /** 그룹 투표(#265). voteCount 는 표시용, onToggleVote 가 있으면 토글 가능(viewer 는 미전달). */
+  voteCount?: number
+  voted?: boolean
+  onToggleVote?: () => void
 }
 
 export default function ItemCard({
@@ -25,6 +29,9 @@ export default function ItemCard({
   isActive = false,
   isHighlighted = false,
   onUpdateItem,
+  voteCount = 0,
+  voted = false,
+  onToggleVote,
 }: ItemCardProps) {
   const [editingName, setEditingName] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -124,6 +131,9 @@ export default function ItemCard({
           </div>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
+          {(onToggleVote || voteCount > 0) && (
+            <VotePill voteCount={voteCount} voted={voted} onToggleVote={onToggleVote} />
+          )}
           <LinkButton links={item.links} />
         </div>
       </div>
@@ -159,6 +169,54 @@ export default function ItemCard({
         </div>
       )}
     </div>
+  )
+}
+
+function VotePill({
+  voteCount,
+  voted,
+  onToggleVote,
+}: {
+  voteCount: number
+  voted: boolean
+  onToggleVote?: () => void
+}) {
+  const label = `가고 싶어요 ${voteCount}명`
+  const content = (
+    <>
+      <ThumbsUp className={cn('size-3', voted && 'fill-current')} aria-hidden="true" />
+      <span className="tabular-nums">{voteCount}</span>
+    </>
+  )
+  const base = 'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium'
+  if (!onToggleVote) {
+    // viewer: 읽기 전용 표시.
+    return (
+      <span className={cn(base, 'border-border text-fg-muted')} title={label} aria-label={label}>
+        {content}
+      </span>
+    )
+  }
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
+        onToggleVote()
+      }}
+      aria-pressed={voted}
+      aria-label={label}
+      title={label}
+      className={cn(
+        base,
+        'transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+        voted
+          ? 'border-accent bg-accent-subtle text-accent'
+          : 'border-border text-fg-muted hover:border-border-strong hover:text-fg',
+      )}
+    >
+      {content}
+    </button>
   )
 }
 

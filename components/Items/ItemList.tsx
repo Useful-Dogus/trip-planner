@@ -51,6 +51,9 @@ interface ItemListProps {
   onSelectItem: (id: string) => void
   onUpdateItem: (id: string, changes: Record<string, unknown>) => void
   highlightedIds?: Set<string>
+  /** 그룹 투표(#265). 집계 맵 + 토글(viewer 면 onToggleVote 미전달). */
+  votes?: Record<string, { count: number; mine: boolean }>
+  onToggleVote?: (id: string) => void
 }
 
 export default function ItemList({
@@ -59,6 +62,8 @@ export default function ItemList({
   onSelectItem,
   onUpdateItem,
   highlightedIds,
+  votes,
+  onToggleVote,
 }: ItemListProps) {
   const router = useRouter()
   const tripPath = useTripPath()
@@ -301,6 +306,9 @@ export default function ItemList({
               isActive={entry.item.id === selectedItemId}
               isHighlighted={highlightedIds?.has(entry.item.id) ?? false}
               onUpdateItem={onUpdateItem}
+              voteCount={votes?.[entry.item.id]?.count ?? 0}
+              voted={votes?.[entry.item.id]?.mine ?? false}
+              onToggleVote={onToggleVote ? () => onToggleVote(entry.item.id) : undefined}
             />
           ),
         )}
