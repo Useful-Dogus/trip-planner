@@ -49,3 +49,12 @@ export function formatDuration(minutes: number): string {
   const m = minutes % 60
   return m === 0 ? `${h}시간` : `${h}시간 ${m}분`
 }
+
+// 추정 이동시간이 이 분(min)을 넘는 구간은 "동선이 비효율적"이라는 정보성 경고로
+// 위계를 올린다. 차단이 아니라 인지를 돕는 신호다.
+export const FAR_LEG_MINUTES = 25
+
+/** 두 항목 사이가 과도하게 먼(비효율) 구간인지 — 추정 이동시간 기준. */
+export function isFarLeg(straightKm: number): boolean {
+  return estimateTravelMinutes(straightKm) >= FAR_LEG_MINUTES
+}
