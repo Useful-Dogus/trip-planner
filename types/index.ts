@@ -40,6 +40,10 @@ export interface TripItem {
   end_date?: string
   time_start?: string
   time_end?: string
+  /** 마지막 입장 시각 HH:MM (#261, 선택). 계획 시각이 이보다 늦으면 경고. */
+  last_entry_time?: string | null
+  /** 예약 마감일 YYYY-MM-DD (#261, 선택). 지났는데 미예약이면 경고. */
+  reservation_deadline?: string | null
   google_place_id?: string | null
   created_at: string
   updated_at: string

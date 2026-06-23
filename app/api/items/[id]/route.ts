@@ -50,6 +50,20 @@ function validatePartial(body: Record<string, unknown>, bounds: TripBounds | nul
     return '유효하지 않은 satisfaction입니다.'
   }
   if (
+    body.last_entry_time !== undefined &&
+    body.last_entry_time !== null &&
+    !/^\d{2}:\d{2}$/.test(body.last_entry_time as string)
+  ) {
+    return 'last_entry_time는 HH:MM 형식이어야 합니다.'
+  }
+  if (
+    body.reservation_deadline !== undefined &&
+    body.reservation_deadline !== null &&
+    !/^\d{4}-\d{2}-\d{2}$/.test(body.reservation_deadline as string)
+  ) {
+    return 'reservation_deadline는 YYYY-MM-DD 형식이어야 합니다.'
+  }
+  if (
     body.date !== undefined &&
     body.date !== null &&
     !/^\d{4}-\d{2}-\d{2}$/.test(body.date as string)

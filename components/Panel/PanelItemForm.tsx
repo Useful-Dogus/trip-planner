@@ -5,9 +5,11 @@ import type { Category, ReservationStatus, Satisfaction, TripItem, TripPriority,
 import { useItems } from '@/lib/hooks/useItems'
 import { useTrip } from '@/lib/hooks/useTripContext'
 import { currencyFieldLabel, normalizeCurrency } from '@/lib/currency'
+import { TriangleAlert } from 'lucide-react'
 import CollapsibleSection from '@/components/UI/CollapsibleSection'
 import MemoField from '@/components/UI/MemoField'
 import { cn } from '@/lib/cn'
+import { getScheduleWarnings } from '@/lib/scheduleWarnings'
 import {
   CATEGORY_OPTIONS,
   ITEM_FIELD_LABELS,
@@ -35,6 +37,8 @@ interface FormData {
   end_date: string
   time_start: string
   time_end: string
+  last_entry_time: string
+  reservation_deadline: string
   links: TripLink[]
 }
 
@@ -66,6 +70,8 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     end_date: item.end_date ?? '',
     time_start: item.time_start ?? '',
     time_end: item.time_end ?? '',
+    last_entry_time: item.last_entry_time ?? '',
+    reservation_deadline: item.reservation_deadline ?? '',
     links: item.links ?? [],
   })
   const [nameError, setNameError] = useState('')
@@ -99,6 +105,8 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
       form.end_date !== (item.end_date ?? '') ||
       form.time_start !== (item.time_start ?? '') ||
       form.time_end !== (item.time_end ?? '') ||
+      form.last_entry_time !== (item.last_entry_time ?? '') ||
+      form.reservation_deadline !== (item.reservation_deadline ?? '') ||
       JSON.stringify(cleanLinks) !== JSON.stringify(item.links ?? [])
     onDirtyChange(dirty)
   }, [form, item, onDirtyChange])
@@ -155,6 +163,8 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     changes.end_date = form.end_date.trim() || null
     changes.time_start = form.time_start.trim() || null
     changes.time_end = form.time_end.trim() || null
+    changes.last_entry_time = form.last_entry_time.trim() || null
+    changes.reservation_deadline = form.reservation_deadline.trim() || null
     await updateItem(item.id, changes)
     onSave()
   }
@@ -173,7 +183,20 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
 
   const inputClass = 'w-full border border-border-strong rounded-lg px-3 py-2 text-fg text-base focus:outline-none focus:ring-2 focus:ring-border-strong bg-bg-elevated'
 
-  const scheduleHasValue = !!(item.date || item.end_date || item.time_start || item.time_end || item.budget != null)
+  // 폼의 현재(미저장 포함) 값 기준으로 위반을 즉시 계산해 인라인 경고로 보여준다.
+  const todayKey = new Date().toISOString().slice(0, 10)
+  const scheduleWarnings = getScheduleWarnings(
+    {
+      ...item,
+      time_start: form.time_start || undefined,
+      last_entry_time: form.last_entry_time || null,
+      reservation_deadline: form.reservation_deadline || null,
+      reservation_status: form.reservation_status,
+    },
+    todayKey,
+  )
+
+  const scheduleHasValue = !!(item.date || item.end_date || item.time_start || item.time_end || item.budget != null || item.last_entry_time || item.reservation_deadline)
   const locationHasValue = !!(item.address || item.lat != null || item.lng != null)
   const linksHasValue = (item.links?.length ?? 0) > 0
 
@@ -303,6 +326,37 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
               </Field>
             </div>
           </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="마지막 입장 시각" hint="이 시각 이후 도착이면 경고">
+              <input
+                type="time"
+                value={form.last_entry_time}
+                onChange={e => setField('last_entry_time', e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="예약 마감일" hint="지났는데 미예약이면 경고">
+              <input
+                type="date"
+                value={form.reservation_deadline}
+                onChange={e => setField('reservation_deadline', e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+          </div>
+          {scheduleWarnings.length > 0 && (
+            <ul className="space-y-1" aria-live="polite">
+              {scheduleWarnings.map(w => (
+                <li
+                  key={w.kind}
+                  className="flex items-center gap-1.5 rounded-lg border border-warning-border bg-warning-bg px-2.5 py-1.5 text-xs font-medium text-warning-fg"
+                >
+                  <TriangleAlert className="size-3.5 flex-shrink-0" aria-hidden="true" />
+                  {w.message}
+                </li>
+              ))}
+            </ul>
+          )}
           <Field label={currencyFieldLabel('예산', normalizeCurrency(trip.currency))}>
             <input type="number" min="0" value={form.budget} onChange={e => setField('budget', e.target.value)} className={inputClass} placeholder="예: 50" />
           </Field>
