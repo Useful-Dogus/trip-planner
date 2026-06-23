@@ -35,6 +35,13 @@ function validatePartial(body: Record<string, unknown>, bounds: TripBounds | nul
     return 'budget은 0 이상의 숫자여야 합니다.'
   }
   if (
+    body.decision_reason !== undefined &&
+    body.decision_reason !== null &&
+    (typeof body.decision_reason !== 'string' || (body.decision_reason as string).length > 200)
+  ) {
+    return 'decision_reason은 200자 이하의 문자열이어야 합니다.'
+  }
+  if (
     body.date !== undefined &&
     body.date !== null &&
     !/^\d{4}-\d{2}-\d{2}$/.test(body.date as string)

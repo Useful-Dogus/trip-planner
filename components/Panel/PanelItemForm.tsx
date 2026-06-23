@@ -26,6 +26,7 @@ interface FormData {
   lng: string
   budget: string
   memo: string
+  decision_reason: string
   date: string
   end_date: string
   time_start: string
@@ -55,6 +56,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
     lng: item.lng?.toString() ?? '',
     budget: item.budget?.toString() ?? '',
     memo: item.memo ?? '',
+    decision_reason: item.decision_reason ?? '',
     date: item.date ?? '',
     end_date: item.end_date ?? '',
     time_start: item.time_start ?? '',
@@ -86,6 +88,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
       form.lng !== (item.lng?.toString() ?? '') ||
       form.budget !== (item.budget?.toString() ?? '') ||
       form.memo !== (item.memo ?? '') ||
+      form.decision_reason !== (item.decision_reason ?? '') ||
       form.date !== (item.date ?? '') ||
       form.end_date !== (item.end_date ?? '') ||
       form.time_start !== (item.time_start ?? '') ||
@@ -139,6 +142,7 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
       lng: trimmedAddress && form.lng.trim() ? parseFloat(form.lng) : null,
       budget: form.budget.trim() ? parseInt(form.budget) : null,
       memo: form.memo.trim() || null,
+      decision_reason: form.decision_reason.trim() || null,
     }
     changes.date = form.date.trim() || null
     changes.end_date = form.end_date.trim() || null
@@ -185,6 +189,22 @@ export default function PanelItemForm({ item, onSave, onCancel, onDirtyChange }:
           </div>
           <SelectField label={ITEM_FIELD_LABELS.category} value={form.category} onChange={value => setField('category', value as Category)} options={CATEGORY_OPTIONS.map(value => ({ value, label: value }))} />
           <SelectField label={ITEM_FIELD_LABELS.trip_priority} value={form.trip_priority} onChange={value => setField('trip_priority', value as TripPriority)} options={TRIP_PRIORITY_OPTIONS.map(value => ({ value, label: `${value} - ${TRIP_PRIORITY_META[value].description}` }))} />
+          {(form.trip_priority === '제외' || form.decision_reason.trim()) && (
+            <div>
+              <label className="block text-sm font-medium text-fg mb-1">
+                보류·탈락 사유 <span className="font-normal text-fg-subtle">(선택)</span>
+              </label>
+              <input
+                type="text"
+                value={form.decision_reason}
+                onChange={e => setField('decision_reason', e.target.value)}
+                maxLength={200}
+                className={inputClass}
+                placeholder="예: 거리가 멀어 동선에서 빠짐"
+              />
+              <p className="text-xs text-fg-subtle mt-1">왜 뺐는지 한 줄 남기면 나중에 결정을 되짚기 쉬워요.</p>
+            </div>
+          )}
           <SelectField label={ITEM_FIELD_LABELS.reservation_status} value={form.reservation_status} onChange={value => setField('reservation_status', value as ReservationStatus)} options={RESERVATION_STATUS_OPTIONS.map(value => ({ value, label: `${value} - ${RESERVATION_STATUS_META[value].description}` }))} />
         </section>
 

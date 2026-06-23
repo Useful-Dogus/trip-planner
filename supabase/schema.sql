@@ -48,6 +48,7 @@ create table if not exists public.items (
   links       jsonb       not null default '[]',
   budget      integer,
   memo        text,
+  decision_reason text,
   date        text,
   end_date    text,
   time_start  text,
