@@ -1,4 +1,4 @@
-import type { Category, ReservationStatus, TripItem, TripPriority } from '@/types'
+import type { Category, ReservationStatus, Satisfaction, TripItem, TripPriority } from '@/types'
 import {
   Bus,
   Hotel,
@@ -42,6 +42,33 @@ export const RESERVATION_STATUS_OPTIONS: ReservationStatus[] = [
   '필요(미예약)',
   '예약완료',
 ]
+
+export const SATISFACTION_OPTIONS: Satisfaction[] = ['좋았어요', '괜찮아요', '아쉬웠어요']
+
+interface SatisfactionMeta {
+  emoji: string
+  /** 추천 가중치(#262 소비). 좋음 +1 / 보통 0 / 아쉬움 -1. */
+  weight: number
+  className: string
+}
+
+export const SATISFACTION_META: Record<Satisfaction, SatisfactionMeta> = {
+  좋았어요: {
+    emoji: '😊',
+    weight: 1,
+    className: 'bg-success-bg text-success-fg border-success-border',
+  },
+  괜찮아요: {
+    emoji: '🙂',
+    weight: 0,
+    className: 'bg-bg-subtle text-fg-muted border-border',
+  },
+  아쉬웠어요: {
+    emoji: '😕',
+    weight: -1,
+    className: 'bg-warning-bg text-warning-fg border-warning-border',
+  },
+}
 
 export const ITEM_FIELD_LABELS = {
   category: '카테고리',

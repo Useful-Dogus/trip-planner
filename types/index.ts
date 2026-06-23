@@ -12,6 +12,8 @@ export type Category =
   | '기타'
 export type TripPriority = '검토 필요' | '시간 되면' | '가고 싶음' | '확정' | '제외'
 export type ReservationStatus = '확인 필요' | '불필요' | '필요(미예약)' | '예약완료'
+/** 여행 후 만족도(#264). 다음 추천 가중치 입력 — 좋았음/괜찮음/아쉬움. */
+export type Satisfaction = '좋았어요' | '괜찮아요' | '아쉬웠어요'
 
 export interface Link {
   label: string
@@ -32,6 +34,8 @@ export interface TripItem {
   memo?: string
   /** 보류/탈락 사유 한 줄 — "이거 왜 뺐더라" (#259, 선택 입력). */
   decision_reason?: string | null
+  /** 여행 후 만족도(#264, 선택 입력). 추천 루프 입력. */
+  satisfaction?: Satisfaction | null
   date?: string
   end_date?: string
   time_start?: string
