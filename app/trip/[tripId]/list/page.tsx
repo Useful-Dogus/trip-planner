@@ -6,7 +6,8 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Plus, Search, Share2 } from 'lucide-react'
 import ShareDialog from '@/components/Share/ShareDialog'
-import { useTripId } from '@/lib/hooks/useTripContext'
+import { useTripId, useOptionalTrip } from '@/lib/hooks/useTripContext'
+import { useItemVotes } from '@/lib/hooks/useItemVotes'
 import TripPageTitle from '@/components/UI/TripPageTitle'
 import Navigation from '@/components/Layout/Navigation'
 import ItemList from '@/components/Items/ItemList'
@@ -52,6 +53,9 @@ function ResearchPageContent() {
   const { items, isLoading, updateItem, createItem } = useItems()
   const { showToast } = useToast()
   const tripId = useTripId()
+  const trip = useOptionalTrip()
+  const canVote = trip?.role !== 'viewer'
+  const { tallies: voteTallies, toggle: toggleVote } = useItemVotes(tripId)
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [unnamedDialogOpen, setUnnamedDialogOpen] = useState(false)
 
@@ -359,6 +363,8 @@ function ResearchPageContent() {
               onSelectItem={handleSelectItem}
               onUpdateItem={updateItem}
               highlightedIds={highlightedIds}
+              votes={voteTallies}
+              onToggleVote={canVote ? toggleVote : undefined}
             />
             <StickyAddBar />
           </div>

@@ -80,6 +80,17 @@ create table if not exists public.place_hours_corrections (
 create index if not exists idx_phc_place
   on public.place_hours_corrections(google_place_id, created_at desc);
 
+-- 항목별 그룹 투표 (#265). 멤버별 1항목 1투표(presence = upvote).
+create table if not exists public.item_votes (
+  item_id    text        not null references public.items(id) on delete cascade,
+  trip_id    uuid        not null references public.trips(id) on delete cascade,
+  user_id    uuid        not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (item_id, user_id)
+);
+
+create index if not exists idx_item_votes_trip on public.item_votes(trip_id);
+
 -- ============================================================================
 -- RLS 재귀 회피용 헬퍼 함수 (SECURITY DEFINER)
 -- ============================================================================
@@ -130,6 +141,22 @@ create policy phc_select on public.place_hours_corrections
 drop policy if exists phc_insert on public.place_hours_corrections;
 create policy phc_insert on public.place_hours_corrections
   for insert with check (author_user_id = auth.uid());
+
+alter table public.item_votes enable row level security;
+-- item_votes: 멤버 읽기, owner/editor 본인 투표만 insert/delete (viewer 불가).
+drop policy if exists item_votes_select on public.item_votes;
+create policy item_votes_select on public.item_votes
+  for select using (public.is_trip_member(trip_id));
+drop policy if exists item_votes_insert on public.item_votes;
+create policy item_votes_insert on public.item_votes
+  for insert with check (
+    user_id = auth.uid() and public.user_role_in_trip(trip_id) in ('owner', 'editor')
+  );
+drop policy if exists item_votes_delete on public.item_votes;
+create policy item_votes_delete on public.item_votes
+  for delete using (
+    user_id = auth.uid() and public.user_role_in_trip(trip_id) in ('owner', 'editor')
+  );
 
 -- trips: 멤버만 SELECT, 본인이 owner 인 경우만 INSERT/UPDATE/DELETE
 drop policy if exists trips_select on public.trips;
