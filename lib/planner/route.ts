@@ -1,6 +1,12 @@
 import { haversineKm, estimateTravelMinutes } from '@/lib/distance'
 import type { ScoredItem } from './score'
-import type { DraftPlan, DraftStop, PlannerTrip, UnplacedItem } from './types'
+import type { DraftStop, PlannerTrip, UnplacedItem } from './types'
+
+/** planRoute 산출(예산·must-include 요약은 generateDraft 가 덧붙인다). */
+export interface RouteResult {
+  stops: DraftStop[]
+  unplaced: UnplacedItem[]
+}
 
 const DAY_START_MIN = 9 * 60 // 09:00
 const DAY_END_MIN = 21 * 60 // 21:00
@@ -57,7 +63,7 @@ export function planRoute(
   scored: ScoredItem[],
   trip: PlannerTrip,
   opts: { days?: string[] } = {},
-): DraftPlan {
+): RouteResult {
   const days = opts.days ?? listDays(trip.startDate, trip.endDate)
   const anchor: Coord | null =
     trip.centerLat != null && trip.centerLng != null
@@ -67,7 +73,11 @@ export function planRoute(
   if (days.length === 0) {
     return {
       stops: [],
-      unplaced: scored.map((s) => ({ itemId: s.item.id, reason: '여행 날짜 범위가 설정되지 않았어요' })),
+      unplaced: scored.map((s) => ({
+        itemId: s.item.id,
+        reason: '여행 날짜 범위가 설정되지 않았어요',
+        kind: 'fit' as const,
+      })),
     }
   }
 
@@ -133,15 +143,19 @@ export function planRoute(
 
   const unplaced: UnplacedItem[] = Array.from(remaining).map((id) => {
     const item = byId.get(id)!.item
-    const closedAll =
+    const closedAll = !!(
       item.closed_days && item.closed_days.length > 0 &&
       days.every((d) => item.closed_days!.includes(weekdayOf(d)))
-    return {
-      itemId: id,
-      reason: closedAll
-        ? '여행 기간 내내 휴무라 배치하지 못했어요'
-        : '남은 시간/동선에 맞는 자리가 없어 빠졌어요',
-    }
+    )
+    const mustInclude = item.trip_priority === '확정'
+    const reason = closedAll
+      ? '여행 기간 내내 휴무라 배치하지 못했어요'
+      : mustInclude
+        ? '확정인데 자리를 못 잡았어요 — 동선·시간을 확인해 주세요'
+        : '남은 시간/동선에 맞는 자리가 없어 빠졌어요'
+    // 확정("반드시")은 못 넣은 이유가 무엇이든 제약 불충족으로 가장 눈에 띄게 표시한다.
+    const kind: UnplacedItem['kind'] = mustInclude ? 'must-include' : closedAll ? 'closed' : 'fit'
+    return { itemId: id, reason, kind }
   })
 
   return { stops, unplaced }
