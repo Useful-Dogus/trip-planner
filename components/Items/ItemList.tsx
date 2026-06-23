@@ -16,7 +16,7 @@ import { Input } from '@/components/UI/Input'
 import { TRIP_PRIORITY_META } from '@/lib/itemOptions'
 import { useTripPath } from '@/lib/hooks/useTripContext'
 
-export type SortKey = 'name' | 'date' | 'budget' | 'trip_priority'
+export type SortKey = 'name' | 'date' | 'budget' | 'trip_priority' | 'created_at'
 export type SortDir = 'asc' | 'desc'
 
 export interface FilterState {
@@ -202,6 +202,10 @@ export default function ItemList({
             (i) => TRIP_PRIORITY_META[i.trip_priority].order,
           )
           sk = orders.length ? Math.max(...orders) : 0
+        } else if (sortKey === 'created_at') {
+          // 그룹은 가장 최근에 추가된 항목 기준으로 정렬한다.
+          const times = visibleItems.map((i) => i.created_at).filter(Boolean)
+          sk = times.length ? times.reduce((a, b) => (a > b ? a : b)) : ''
         }
 
         entries.push({
@@ -217,6 +221,7 @@ export default function ItemList({
         else if (sortKey === 'budget') sk = item.budget ?? 0
         else if (sortKey === 'trip_priority')
           sk = TRIP_PRIORITY_META[item.trip_priority].order
+        else if (sortKey === 'created_at') sk = item.created_at ?? ''
 
         entries.push({ type: 'single', item, sortKey: sk })
       }

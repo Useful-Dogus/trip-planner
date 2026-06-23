@@ -98,6 +98,9 @@ function getTripIdFromRequest(request: NextRequest): string | null {
 export async function GET(request: NextRequest, { params }: RouteContext) {
   const client = createRouteHandlerSupabase()
   const tripId = getTripIdFromRequest(request)
+  if (!tripId) {
+    return NextResponse.json({ error: '대상 여행이 지정되지 않았습니다.' }, { status: 400 })
+  }
   const items = await readItems(client, tripId)
   const item = items.find(i => i.id === params.id)
   if (!item) {
@@ -109,13 +112,16 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
   const client = createRouteHandlerSupabase()
   const tripId = getTripIdFromRequest(request)
+  if (!tripId) {
+    return NextResponse.json({ error: '대상 여행이 지정되지 않았습니다.' }, { status: 400 })
+  }
   const items = await readItems(client, tripId)
   const idx = items.findIndex(i => i.id === params.id)
   if (idx === -1) {
     return NextResponse.json({ error: '항목을 찾을 수 없습니다.' }, { status: 404 })
   }
 
-  const bounds = tripId ? await fetchTripBounds(client, tripId) : null
+  const bounds = await fetchTripBounds(client, tripId)
   const body = await request.json()
   const error = validatePartial(body, bounds)
   if (error) return NextResponse.json({ error }, { status: 400 })
@@ -147,6 +153,9 @@ export const PUT = PATCH
 export async function DELETE(request: NextRequest, { params }: RouteContext) {
   const client = createRouteHandlerSupabase()
   const tripId = getTripIdFromRequest(request)
+  if (!tripId) {
+    return NextResponse.json({ error: '대상 여행이 지정되지 않았습니다.' }, { status: 400 })
+  }
   const items = await readItems(client, tripId)
   const idx = items.findIndex(i => i.id === params.id)
   if (idx === -1) {

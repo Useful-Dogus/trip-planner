@@ -7,10 +7,17 @@ import { cn } from '@/lib/cn'
 
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: 'name', label: '이름' },
+  { key: 'created_at', label: '추가순' },
   { key: 'date', label: '날짜' },
   { key: 'budget', label: '예산' },
   { key: 'trip_priority', label: '우선순위' },
 ]
+
+// 정렬 키를 새로 고를 때의 기본 방향. '추가순' 은 최근 추가가 위로 오는 게
+// 자연스럽다(특히 gmaps 일괄 import 직후). 나머지는 오름차순.
+const DEFAULT_DIR: Partial<Record<SortKey, SortDir>> = {
+  created_at: 'desc',
+}
 
 interface SortButtonProps {
   sortKey: SortKey
@@ -48,7 +55,7 @@ export default function SortButton({ sortKey, sortDir, onChange }: SortButtonPro
     if (key === sortKey) {
       onChange(key, sortDir === 'asc' ? 'desc' : 'asc')
     } else {
-      onChange(key, 'asc')
+      onChange(key, DEFAULT_DIR[key] ?? 'asc')
     }
     setOpen(false)
   }

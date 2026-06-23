@@ -6,17 +6,18 @@ import {
   normalizeTripItem,
   normalizeCategory,
 } from '@/lib/itemOptions'
-import { ensureActiveTrip } from '@/lib/trip'
-
 type Client = SupabaseClient
 
-async function resolveTripId(client: Client, tripId?: string | null): Promise<string> {
-  if (tripId) return tripId
-  return ensureActiveTrip(client)
+// tripId 는 반드시 호출자가 명시한다. 예전엔 누락 시 ensureActiveTrip("첫 trip")으로
+// 폴백했는데, 그게 사용자가 보고 있는 trip 과 달라 다른 trip 으로 항목이 새는 버그의
+// 근원이었다(gmaps import/preview, items CRUD). 누락은 조용히 추측하지 않고 막는다.
+function resolveTripId(tripId?: string | null): string {
+  if (tripId && tripId.trim()) return tripId
+  throw new Error('readItems/writeItems 에는 tripId 가 반드시 필요합니다.')
 }
 
 export async function readItems(client: Client, tripId?: string | null): Promise<TripItem[]> {
-  const resolvedTripId = await resolveTripId(client, tripId)
+  const resolvedTripId = resolveTripId(tripId)
   const { data, error } = await client
     .from('items')
     .select('*')
@@ -37,7 +38,7 @@ export async function writeItems(
   tripId?: string | null,
 ): Promise<void> {
   items.forEach(validateItem)
-  const resolvedTripId = await resolveTripId(client, tripId)
+  const resolvedTripId = resolveTripId(tripId)
 
   const { data: existing, error: fetchError } = await client
     .from('items')
