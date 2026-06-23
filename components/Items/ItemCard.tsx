@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
+import { CalendarPlus } from 'lucide-react'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
 import ItemMetadataChips from '@/components/UI/ItemMetadataChips'
 import LinkButton from './LinkButton'
 import { cn } from '@/lib/cn'
-import { useOptionalTrip } from '@/lib/hooks/useTripContext'
+import { useOptionalTrip, useTripPath } from '@/lib/hooks/useTripContext'
 import { formatBudget, normalizeCurrency } from '@/lib/currency'
 
 interface ItemCardProps {
@@ -27,8 +29,11 @@ export default function ItemCard({
   const [editingName, setEditingName] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const trip = useOptionalTrip()
+  const tripPath = useTripPath()
   const tripCurrency = normalizeCurrency(trip?.currency)
   const scheduleLabel = formatScheduleLabel(item)
+  // 확정했는데 날짜가 없으면 일정 배치로 잇는 다리 — map 패널과 동일 패턴.
+  const needsDate = item.trip_priority === '확정' && !item.date
 
   useEffect(() => {
     if (editingName !== null) inputRef.current?.select()
@@ -138,6 +143,19 @@ export default function ItemCard({
           {item.budget !== undefined && (
             <span className="font-medium">{formatBudget(item.budget, tripCurrency)}</span>
           )}
+        </div>
+      )}
+
+      {needsDate && (
+        <div className="mt-2.5 pl-[22px]">
+          <Link
+            href={`${tripPath('schedule')}?item=${item.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium text-warning-fg hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            <CalendarPlus className="size-3" aria-hidden="true" />
+            확정됨 · 날짜 배정하기
+          </Link>
         </div>
       )}
     </div>
