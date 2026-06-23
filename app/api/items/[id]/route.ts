@@ -14,6 +14,7 @@ import {
   isDateWithinBounds,
   type TripBounds,
 } from '@/lib/trips'
+import { isValidOpeningHours, isValidClosedDays } from '@/lib/itemValidation'
 
 function validatePartial(body: Record<string, unknown>, bounds: TripBounds | null): string | null {
   if (body.name !== undefined && (typeof body.name !== 'string' || !body.name.trim())) {
@@ -62,6 +63,12 @@ function validatePartial(body: Record<string, unknown>, bounds: TripBounds | nul
     !/^\d{4}-\d{2}-\d{2}$/.test(body.reservation_deadline as string)
   ) {
     return 'reservation_deadline는 YYYY-MM-DD 형식이어야 합니다.'
+  }
+  if (body.opening_hours !== undefined && body.opening_hours !== null && !isValidOpeningHours(body.opening_hours)) {
+    return 'opening_hours는 {open:"HH:MM", close:"HH:MM"} 형식이어야 합니다.'
+  }
+  if (body.closed_days !== undefined && body.closed_days !== null && !isValidClosedDays(body.closed_days)) {
+    return 'closed_days는 0-6 정수 배열이어야 합니다.'
   }
   if (
     body.date !== undefined &&
