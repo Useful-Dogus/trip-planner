@@ -124,7 +124,12 @@ export default function ItemCard({
       </div>
 
       <div className="mt-3 pl-[22px]">
-        <ItemMetadataChips item={item} />
+        <ItemMetadataChips
+          item={item}
+          onChangePriority={
+            onUpdateItem ? (priority) => onUpdateItem(item.id, { trip_priority: priority }) : undefined
+          }
+        />
       </div>
 
       {(scheduleLabel || item.budget !== undefined) && (
