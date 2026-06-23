@@ -1,9 +1,10 @@
 'use client'
 
 import { Fragment } from 'react'
+import { TriangleAlert } from 'lucide-react'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
-import { formatDistance, haversineKm, estimateTravelMinutes, formatDuration } from '@/lib/distance'
+import { formatDistance, haversineKm, estimateTravelMinutes, formatDuration, isFarLeg } from '@/lib/distance'
 
 interface DayTimelineProps {
   items: TripItem[]
@@ -42,15 +43,24 @@ export default function DayTimeline({ items, selectedItemId, onSelectItem }: Day
         const active = item.id === selectedItemId
         return (
           <Fragment key={item.id}>
-            {km != null && (
-              <li
-                aria-hidden="true"
-                className="flex items-center gap-2 pl-7 pr-4 py-1 text-[10px] tabular-nums text-fg-subtle"
-              >
-                <span className="inline-block h-3 w-px bg-border" />
-                <span>약 {formatDuration(estimateTravelMinutes(km))} · 직선 {formatDistance(km)}</span>
-              </li>
-            )}
+            {km != null && (() => {
+              const far = isFarLeg(km)
+              return (
+                <li
+                  aria-hidden="true"
+                  className={`flex items-center gap-2 pl-7 pr-4 py-1 text-[10px] tabular-nums ${
+                    far ? 'text-warning-fg' : 'text-fg-subtle'
+                  }`}
+                >
+                  <span className={`inline-block h-3 w-px ${far ? 'bg-warning-fg/40' : 'bg-border'}`} />
+                  {far && <TriangleAlert className="size-3 flex-shrink-0" />}
+                  <span>
+                    약 {formatDuration(estimateTravelMinutes(km))} · 직선 {formatDistance(km)}
+                    {far ? ' · 동선이 멀어요' : ''}
+                  </span>
+                </li>
+              )
+            })()}
             <li>
               <button
                 type="button"
