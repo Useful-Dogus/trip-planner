@@ -30,6 +30,8 @@ export interface TripItem {
   links: Link[]
   budget?: number
   memo?: string
+  /** 보류/탈락 사유 한 줄 — "이거 왜 뺐더라" (#259, 선택 입력). */
+  decision_reason?: string | null
   date?: string
   end_date?: string
   time_start?: string
