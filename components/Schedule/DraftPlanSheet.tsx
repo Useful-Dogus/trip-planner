@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarRange, Sparkles } from 'lucide-react'
+import { CalendarRange, CheckCircle2, Sparkles, TriangleAlert } from 'lucide-react'
 import type { TripItem } from '@/types'
-import { generateDraft, type DraftStop, type PlannerTrip } from '@/lib/planner'
+import { generateDraft, type DraftStop, type PlannerTrip, type UnplacedItem } from '@/lib/planner'
 import { CATEGORY_META } from '@/lib/itemOptions'
+import { formatBudget, normalizeCurrency } from '@/lib/currency'
 import Sheet from '@/components/UI/Sheet'
 import Button from '@/components/UI/Button'
 
@@ -15,23 +16,36 @@ function formatDate(dateStr: string): string {
   return `${m}월 ${d}일 (${days[dt.getUTCDay()]})`
 }
 
+const UNPLACED_GROUPS: { kind: UnplacedItem['kind']; label: string; tone: 'warn' | 'muted' }[] = [
+  { kind: 'must-include', label: '반드시(확정)인데 못 넣음 — 확인 필요', tone: 'warn' },
+  { kind: 'budget', label: '예산 한도로 제외', tone: 'muted' },
+  { kind: 'closed', label: '기간 내내 휴무', tone: 'muted' },
+  { kind: 'fit', label: '자리가 없어 빠짐', tone: 'muted' },
+]
+
 interface DraftPlanSheetProps {
   open: boolean
   onClose: () => void
   items: TripItem[]
   trip: PlannerTrip
+  currency: string
   onApply: (stops: DraftStop[]) => Promise<void>
 }
 
-export default function DraftPlanSheet({ open, onClose, items, trip, onApply }: DraftPlanSheetProps) {
-  // 시트가 열릴 때의 항목 스냅샷으로 초안을 만든다.
-  const plan = useMemo(() => generateDraft({ items, trip }), [items, trip])
+export default function DraftPlanSheet({ open, onClose, items, trip, currency, onApply }: DraftPlanSheetProps) {
+  const cur = normalizeCurrency(currency)
+  const [budgetInput, setBudgetInput] = useState('')
+  const budgetCap = budgetInput.trim() ? Number(budgetInput.replace(/[^0-9]/g, '')) : null
+
+  const plan = useMemo(
+    () => generateDraft({ items, trip }, { budgetCap }),
+    [items, trip, budgetCap],
+  )
   const byId = useMemo(() => new Map(items.map((i) => [i.id, i])), [items])
 
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [applying, setApplying] = useState(false)
 
-  // 열릴 때마다 전체 선택으로 초기화.
   useEffect(() => {
     if (open) setSelected(new Set(plan.stops.map((s) => s.itemId)))
   }, [open, plan])
@@ -66,6 +80,9 @@ export default function DraftPlanSheet({ open, onClose, items, trip, onApply }: 
     }
   }
 
+  const mustOk = plan.mustInclude.total > 0 && plan.mustInclude.placed === plan.mustInclude.total
+  const mustFailed = plan.mustInclude.total - plan.mustInclude.placed
+
   const footer = (
     <div className="flex items-center justify-between gap-3">
       <span className="text-xs text-fg-subtle">초안일 뿐 — 수락해도 확정 상태는 그대로예요</span>
@@ -89,6 +106,55 @@ export default function DraftPlanSheet({ open, onClose, items, trip, onApply }: 
       footer={footer}
     >
       <div className="space-y-5 px-1 py-1">
+        {/* 예산 제약 입력 + 합계 (#263) */}
+        <div className="rounded-lg border border-border bg-bg-subtle p-3 space-y-2">
+          <label className="flex items-center justify-between gap-3 text-xs font-medium text-fg">
+            예산 한도 <span className="font-normal text-fg-subtle">(선택)</span>
+            <input
+              type="number"
+              min="0"
+              inputMode="numeric"
+              value={budgetInput}
+              onChange={(e) => setBudgetInput(e.target.value)}
+              placeholder="예: 300000"
+              className="w-32 rounded border border-border-strong bg-bg-elevated px-2 py-1 text-right text-sm text-fg outline-none focus:ring-2 focus:ring-border-strong"
+            />
+          </label>
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-fg-muted">초안 예산 합계</span>
+            <span className={`tabular-nums font-medium ${plan.budget.over > 0 ? 'text-warning-fg' : 'text-fg'}`}>
+              {formatBudget(plan.budget.total, cur)}
+              {plan.budget.cap != null && ` / ${formatBudget(plan.budget.cap, cur)}`}
+            </span>
+          </div>
+          {plan.budget.over > 0 && (
+            <p className="flex items-center gap-1 text-[11px] text-warning-fg">
+              <TriangleAlert className="size-3 flex-shrink-0" aria-hidden="true" />
+              확정(반드시) 항목만으로 한도를 {formatBudget(plan.budget.over, cur)} 초과해요.
+            </p>
+          )}
+        </div>
+
+        {/* 반드시(확정) 충족 상태 */}
+        {plan.mustInclude.total > 0 && (
+          <div
+            className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium ${
+              mustOk
+                ? 'border-success-border bg-success-bg text-success-fg'
+                : 'border-warning-border bg-warning-bg text-warning-fg'
+            }`}
+          >
+            {mustOk ? (
+              <CheckCircle2 className="size-4 flex-shrink-0" aria-hidden="true" />
+            ) : (
+              <TriangleAlert className="size-4 flex-shrink-0" aria-hidden="true" />
+            )}
+            {mustOk
+              ? `반드시 갈 곳 ${plan.mustInclude.total}곳 모두 넣었어요`
+              : `반드시 갈 곳 ${mustFailed}곳을 못 넣었어요 — 아래 사유 확인`}
+          </div>
+        )}
+
         {plan.stops.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-8 text-center text-sm text-fg-muted">
             <CalendarRange className="size-8 text-fg-subtle" aria-hidden="true" />
@@ -147,25 +213,37 @@ export default function DraftPlanSheet({ open, onClose, items, trip, onApply }: 
           ))
         )}
 
-        {plan.unplaced.length > 0 && (
-          <section>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-fg-subtle">
-              넣지 못한 후보 ({plan.unplaced.length})
-            </h3>
-            <ul className="space-y-1">
-              {plan.unplaced.map((u) => {
-                const item = byId.get(u.itemId)
-                if (!item) return null
-                return (
-                  <li key={u.itemId} className="flex items-center justify-between gap-2 px-1 text-xs text-fg-muted">
-                    <span className="truncate">{item.name}</span>
-                    <span className="flex-shrink-0 text-fg-subtle">{u.reason}</span>
-                  </li>
-                )
-              })}
-            </ul>
-          </section>
-        )}
+        {/* 못 넣은 후보 — kind 별 그룹, 조용히 누락하지 않고 설명 (#263) */}
+        {plan.unplaced.length > 0 &&
+          UNPLACED_GROUPS.map(({ kind, label, tone }) => {
+            const group = plan.unplaced.filter((u) => u.kind === kind)
+            if (group.length === 0) return null
+            return (
+              <section key={kind}>
+                <h3
+                  className={`mb-2 text-xs font-semibold uppercase tracking-wider ${
+                    tone === 'warn' ? 'text-warning-fg' : 'text-fg-subtle'
+                  }`}
+                >
+                  {label} ({group.length})
+                </h3>
+                <ul className="space-y-1">
+                  {group.map((u) => {
+                    const item = byId.get(u.itemId)
+                    if (!item) return null
+                    return (
+                      <li key={u.itemId} className="flex items-center justify-between gap-2 px-1 text-xs">
+                        <span className={`truncate ${tone === 'warn' ? 'text-fg' : 'text-fg-muted'}`}>
+                          {item.name}
+                        </span>
+                        <span className="flex-shrink-0 text-fg-subtle">{u.reason}</span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </section>
+            )
+          })}
       </div>
     </Sheet>
   )

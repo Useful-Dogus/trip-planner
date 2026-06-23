@@ -147,6 +147,7 @@ function SchedulePageContent() {
           centerLat: trip.centerLat,
           centerLng: trip.centerLng,
         }}
+        currency={trip.currency}
         onApply={async (stops) => {
           await Promise.all(
             stops.map((s) => updateItem(s.itemId, { date: s.date, time_start: s.time_start })),
