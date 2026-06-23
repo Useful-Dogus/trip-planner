@@ -3,7 +3,7 @@
 import { Fragment } from 'react'
 import type { TripItem } from '@/types'
 import { CATEGORY_META } from '@/lib/itemOptions'
-import { formatDistance, haversineKm } from '@/lib/distance'
+import { formatDistance, haversineKm, estimateTravelMinutes, formatDuration } from '@/lib/distance'
 
 interface DayTimelineProps {
   items: TripItem[]
@@ -48,7 +48,7 @@ export default function DayTimeline({ items, selectedItemId, onSelectItem }: Day
                 className="flex items-center gap-2 pl-7 pr-4 py-1 text-[10px] tabular-nums text-fg-subtle"
               >
                 <span className="inline-block h-3 w-px bg-border" />
-                <span>{formatDistance(km)}</span>
+                <span>약 {formatDuration(estimateTravelMinutes(km))} · 직선 {formatDistance(km)}</span>
               </li>
             )}
             <li>
