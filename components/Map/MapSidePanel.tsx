@@ -1,15 +1,18 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Search, MapPin, CalendarRange } from 'lucide-react'
-import type { Category, TripItem } from '@/types'
+import { Search, MapPin, CalendarRange, CalendarPlus } from 'lucide-react'
+import type { Category, TripItem, TripPriority } from '@/types'
 import { CATEGORY_META, CATEGORY_OPTIONS, TRIP_PRIORITY_META } from '@/lib/itemOptions'
 import CategoryStackBar from '@/components/Schedule/CategoryStackBar'
 import DayTimeline from '@/components/Schedule/DayTimeline'
+import PriorityCell from '@/components/Schedule/cells/PriorityCell'
 import EmptyState from '@/components/UI/EmptyState'
 import { Input } from '@/components/UI/Input'
 import { cn } from '@/lib/cn'
+import { useTripPath } from '@/lib/hooks/useTripContext'
 import { getLodgingForDate } from '@/lib/lodging'
 
 export interface DaySummary {
@@ -26,6 +29,7 @@ interface MapSidePanelProps {
   selectedItemId: string | null
   onSelectDate: (date: string | null) => void
   onSelectItem: (id: string) => void
+  onUpdatePriority: (id: string, priority: TripPriority) => void
 }
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
@@ -73,6 +77,7 @@ export default function MapSidePanel({
   selectedItemId,
   onSelectDate,
   onSelectItem,
+  onUpdatePriority,
 }: MapSidePanelProps) {
   const candidates = useMemo(
     () => items.filter((i) => i.trip_priority !== '제외'),
@@ -198,6 +203,7 @@ export default function MapSidePanel({
           items={candidates}
           selectedItemId={selectedItemId}
           onSelectItem={onSelectItem}
+          onUpdatePriority={onUpdatePriority}
         />
       ) : (
         <DayView
@@ -217,16 +223,20 @@ function CandidatesView({
   items,
   selectedItemId,
   onSelectItem,
+  onUpdatePriority,
 }: {
   items: TripItem[]
   selectedItemId: string | null
   onSelectItem: (id: string) => void
+  onUpdatePriority: (id: string, priority: TripPriority) => void
 }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const tripPath = useTripPath()
   const [query, setQuery] = useState(() => searchParams.get('q') ?? '')
   const [categoryFilter, setCategoryFilter] = useState<Category | null>(null)
+  const [editingPriorityId, setEditingPriorityId] = useState<string | null>(null)
 
   // 검색어를 URL ?q 로 동기화 — list 와 공유 (뷰 전환 시 검색 유지)
   useEffect(() => {
@@ -311,39 +321,61 @@ function CandidatesView({
             const isConfirmed = item.trip_priority === '확정'
             return (
               <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => onSelectItem(item.id)}
-                  aria-current={active ? 'true' : undefined}
-                  aria-label={`${item.name}${item.address ? ', ' + item.address : ''}${
-                    isConfirmed ? ', 일정 확정' : ''
-                  }`}
+                <div
                   className={cn(
-                    'flex w-full items-start gap-2 px-4 py-2.5 text-left',
+                    'flex items-start gap-2 px-4 py-2.5',
                     'transition-colors duration-150 ease-out-soft',
-                    'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent',
                     active ? 'bg-accent-subtle' : 'hover:bg-bg-subtle',
                   )}
                 >
-                  <span className="min-w-0 flex-1">
+                  <button
+                    type="button"
+                    onClick={() => onSelectItem(item.id)}
+                    aria-current={active ? 'true' : undefined}
+                    aria-label={`${item.name}${item.address ? ', ' + item.address : ''}`}
+                    className={cn(
+                      'min-w-0 flex-1 text-left rounded',
+                      'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent',
+                    )}
+                  >
                     <span className="flex items-center gap-1.5">
                       {Icon ? <Icon size={12} className="flex-shrink-0 text-fg-muted" aria-hidden="true" /> : null}
                       <span className="truncate text-xs font-semibold text-fg">
                         {item.name}
                       </span>
-                      {isConfirmed && (
-                        <span className="flex-shrink-0 rounded bg-success-bg px-1 py-px text-[9px] font-semibold tracking-wide text-success-fg">
-                          확정
-                        </span>
-                      )}
                     </span>
                     {item.address && (
                       <span className="mt-0.5 block truncate text-[10px] text-fg-muted">
                         {item.address}
                       </span>
                     )}
-                  </span>
-                </button>
+                  </button>
+                  {/* 후보 카드에서 우선순위를 1클릭으로 바꾼다 (list/schedule 과 대칭). */}
+                  <div className="flex flex-shrink-0 flex-col items-end gap-1">
+                    <PriorityCell
+                      value={item.trip_priority}
+                      isEditing={editingPriorityId === item.id}
+                      onClick={() =>
+                        setEditingPriorityId((prev) => (prev === item.id ? null : item.id))
+                      }
+                      onSelect={(priority) => {
+                        onUpdatePriority(item.id, priority)
+                        setEditingPriorityId(null)
+                      }}
+                      onClose={() => setEditingPriorityId(null)}
+                    />
+                    {/* 확정했지만 날짜가 없으면 다음 행동(일정에서 날짜 배정)으로 잇는다. */}
+                    {isConfirmed && !item.date && (
+                      <Link
+                        href={`${tripPath('schedule')}?item=${item.id}`}
+                        className="inline-flex items-center gap-1 rounded px-1 py-px text-[10px] font-medium text-warning-fg hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                      >
+                        <CalendarPlus className="size-3" aria-hidden="true" />
+                        날짜 미정
+                      </Link>
+                    )}
+                  </div>
+                </div>
               </li>
             )
           })}

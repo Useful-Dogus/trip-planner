@@ -86,7 +86,7 @@ export default function PlanScreen({ basePath }: PlanScreenProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const tripPath = useTripPath()
-  const { items, isLoading } = useItems()
+  const { items, isLoading, updateItem } = useItems()
   const { showToast } = useToast()
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
@@ -158,6 +158,7 @@ export default function PlanScreen({ basePath }: PlanScreenProps) {
       selectedItemId={selectedItemId}
       onSelectDate={handleSelectDate}
       onSelectItem={handleSelectItem}
+      onUpdatePriority={(id, priority) => updateItem(id, { trip_priority: priority })}
     />
   )
 
