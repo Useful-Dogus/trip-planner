@@ -82,7 +82,7 @@ TypeScript + Node.js 18+: Follow standard conventions
 
 ### 신규 기능 작업 전 필수 체크
 
-> 아래 체크는 *추함을 알아보는* 운영판이다. 그 **이유**(판단 레이어)는 [docs/taste-for-waypost.md](docs/taste-for-waypost.md) 에 있다 — 특히 #2·#4(CRUD/진입점 대칭)는 거기 1.5 Symmetry, #3(카피 정직성)은 1.7 Daring 과 한 몸이다.
+> 아래 체크는 *추함을 알아보는* 운영판이다. 그 **이유**(판단 레이어)는 [docs/taste-for-waypost.md](docs/taste-for-waypost.md) 에 있다 — 특히 #2·#4(CRUD/진입점 대칭)는 거기 1.5 Symmetry, #3(카피 정직성)은 1.9 Honest 와 한 몸이다.
 
 새 페이지/기능을 추가하거나 기존을 수정할 때 **반드시** 아래를 자기검열한다. 위반이 있으면 그 자리에서 닫거나, 닫을 수 없으면 후속 이슈를 같은 PR 에서 생성해 본 PR 본문에 명시한다.
 
