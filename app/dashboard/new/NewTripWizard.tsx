@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import Link from 'next/link'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { mutate as globalMutate } from 'swr'
@@ -10,10 +9,14 @@ import Button from '@/components/UI/Button'
 import { Input } from '@/components/UI/Input'
 import LocationAutocompleteInput from '@/components/UI/LocationAutocompleteInput'
 import { useToast } from '@/components/UI/Toast'
+import { useConfirm } from '@/components/UI/ConfirmDialog'
 import { SUPPORTED_CURRENCIES, type CurrencyCode } from '@/lib/currency'
 import { useIsTouchDevice } from '@/lib/hooks/useIsTouchDevice'
 import { resolveRegionCenter, resolutionToCenter } from '@/lib/resolveRegionCenter'
 import type { CenterValue } from '@/components/Map/CenterPicker'
+
+/** 마법사 입력을 임시 저장하는 sessionStorage 키. 생성 성공 시 비운다. */
+const DRAFT_KEY = 'wizard:new-trip:draft'
 
 const CenterPicker = dynamic(() => import('@/components/Map/CenterPicker'), {
   ssr: false,
@@ -35,6 +38,7 @@ const STEP_TITLES: Record<Step, string> = {
 export default function NewTripWizard() {
   const router = useRouter()
   const { showToast } = useToast()
+  const confirm = useConfirm()
   const [step, setStep] = useState<Step>(1)
   const [title, setTitle] = useState('')
   const [startDate, setStartDate] = useState('')
@@ -44,6 +48,119 @@ export default function NewTripWizard() {
   const [basecamp, setBasecamp] = useState('')
   const [currency, setCurrency] = useState<CurrencyCode>('KRW')
   const [submitting, setSubmitting] = useState(false)
+  const [restored, setRestored] = useState(false)
+  // 복원이 끝나기 전에는 저장 effect 가 기본값으로 드래프트를 덮어쓰지 않도록 가드.
+  const hydratedRef = useRef(false)
+
+  // 사용자가 의미 있는 입력을 했는지. 이탈 가드·드래프트 저장 판단 기준.
+  const isDirty =
+    title.trim() !== '' ||
+    startDate !== '' ||
+    endDate !== '' ||
+    region.trim() !== '' ||
+    basecamp.trim() !== '' ||
+    center !== null
+
+  // 마운트 시 1회: 임시 저장된 드래프트가 있으면 복원한다(클라이언트 전용 — SSR 불일치 방지).
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY)
+      if (raw) {
+        const d = JSON.parse(raw) as Partial<{
+          step: Step
+          title: string
+          startDate: string
+          endDate: string
+          region: string
+          center: CenterValue | null
+          basecamp: string
+          currency: CurrencyCode
+        }>
+        const hasInput =
+          d.title || d.startDate || d.endDate || d.region || d.basecamp || d.center
+        if (hasInput) {
+          if (typeof d.step === 'number') setStep(d.step)
+          if (typeof d.title === 'string') setTitle(d.title)
+          if (typeof d.startDate === 'string') setStartDate(d.startDate)
+          if (typeof d.endDate === 'string') setEndDate(d.endDate)
+          if (typeof d.region === 'string') setRegion(d.region)
+          if (d.center) setCenter(d.center)
+          if (typeof d.basecamp === 'string') setBasecamp(d.basecamp)
+          if (typeof d.currency === 'string') setCurrency(d.currency)
+          setRestored(true)
+        }
+      }
+    } catch {
+      /* 손상된 드래프트는 무시 */
+    }
+    hydratedRef.current = true
+  }, [])
+
+  // 입력 변경을 디바운스 저장. 입력이 비면 드래프트 제거.
+  useEffect(() => {
+    if (!hydratedRef.current) return
+    if (!isDirty) {
+      sessionStorage.removeItem(DRAFT_KEY)
+      return
+    }
+    const t = setTimeout(() => {
+      try {
+        sessionStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({ step, title, startDate, endDate, region, center, basecamp, currency }),
+        )
+      } catch {
+        /* 용량 초과 등은 무시 */
+      }
+    }, 400)
+    return () => clearTimeout(t)
+  }, [step, title, startDate, endDate, region, center, basecamp, currency, isDirty])
+
+  // 새로고침·탭 닫기 시 브라우저 기본 경고(입력이 있을 때만).
+  useEffect(() => {
+    if (!isDirty) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
+
+  function clearDraft() {
+    try {
+      sessionStorage.removeItem(DRAFT_KEY)
+    } catch {
+      /* noop */
+    }
+  }
+
+  function resetDraft() {
+    clearDraft()
+    setStep(1)
+    setTitle('')
+    setStartDate('')
+    setEndDate('')
+    setRegion('')
+    setCenter(null)
+    setBasecamp('')
+    setCurrency('KRW')
+    setRestored(false)
+  }
+
+  // 헤더 '대시보드' 이탈. 입력이 있으면 확인(드래프트로 이어쓰기 가능함을 안내).
+  async function handleExit() {
+    if (isDirty) {
+      const ok = await confirm({
+        title: '작성을 멈추고 나갈까요?',
+        description: '입력한 내용은 임시 저장되어, 다시 돌아오면 이어서 작성할 수 있어요.',
+        confirmLabel: '나가기',
+        cancelLabel: '계속 작성',
+      })
+      if (!ok) return
+    }
+    router.push('/dashboard')
+  }
 
   const canProceed = useMemo(() => {
     if (step === 1) return title.trim().length > 0
@@ -114,6 +231,7 @@ export default function NewTripWizard() {
       // 새 trip 이 0.3-0.5s 후 "팝업" 되는 대신 처음부터 보인다.
       // SWR 메모리 캐시(globalMutate)와 Next.js Router 캐시(router.refresh)를 함께 무효화해야
       // 대시보드 RSC(initialTrips)까지 재검증돼 새 trip 이 항상 보인다. (다른 mutation 사이트와 동일한 2줄 세트)
+      clearDraft()
       await globalMutate('/api/trips')
       router.refresh()
       router.push(`/trip/${data.tripId}/map`)
@@ -128,18 +246,31 @@ export default function NewTripWizard() {
     <div className="min-h-screen bg-bg text-fg">
       <header className="border-b border-border bg-bg-elevated">
         <div className="max-w-2xl mx-auto px-4 md:px-8 py-4 flex items-center gap-3">
-          <Link
-            href="/dashboard"
+          <button
+            type="button"
+            onClick={handleExit}
             className="inline-flex items-center gap-1.5 text-sm text-fg-subtle hover:text-fg transition-colors"
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
             대시보드
-          </Link>
+          </button>
           <h1 className="text-base font-bold text-fg ml-auto">새 여행 만들기</h1>
         </div>
       </header>
 
       <main className="max-w-2xl mx-auto px-4 md:px-8 py-6 pb-32">
+        {restored && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-subtle px-3 py-2">
+            <p className="text-xs text-fg-muted">작성하던 내용을 불러왔어요.</p>
+            <button
+              type="button"
+              onClick={resetDraft}
+              className="text-xs text-accent hover:underline underline-offset-2 shrink-0"
+            >
+              처음부터
+            </button>
+          </div>
+        )}
         <div className="mb-8">
           <div className="flex items-baseline justify-between gap-3 mb-2">
             <p className="text-sm font-semibold">
