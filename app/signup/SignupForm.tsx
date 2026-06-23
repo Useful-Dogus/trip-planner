@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { clearAppCache } from '@/lib/clearAppCache'
 import { ErrorBanner } from '@/components/UI'
-import { BrandMark, PRODUCT_NAME } from '@/components/Brand/Wordmark'
+import { BrandMark, PRODUCT_TAGLINE } from '@/components/Brand/Wordmark'
 
 export default function SignupForm() {
   const [email, setEmail] = useState('')
@@ -45,7 +45,7 @@ export default function SignupForm() {
         <div className="flex flex-col items-center text-center mb-8">
           <BrandMark size="lg" className="mb-3" />
           <h1 className="text-2xl font-bold text-fg">계정 만들기</h1>
-          <p className="text-sm text-fg-subtle mt-1">{PRODUCT_NAME}</p>
+          <p className="text-sm text-fg-subtle mt-1">{PRODUCT_TAGLINE}</p>
         </div>
 
         {submitted?.needsEmailConfirmation ? (

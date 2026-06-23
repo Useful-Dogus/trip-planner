@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { clearAppCache } from '@/lib/clearAppCache'
 import { ErrorBanner } from '@/components/UI'
 import { useToast } from '@/components/UI/Toast'
-import { BrandMark, PRODUCT_NAME } from '@/components/Brand/Wordmark'
+import { BrandMark, PRODUCT_NAME, PRODUCT_TAGLINE } from '@/components/Brand/Wordmark'
 import type { AuthErrorCode } from '@/lib/auth-errors'
 
 export default function LoginForm() {
@@ -90,7 +90,7 @@ export default function LoginForm() {
         <div className="flex flex-col items-center text-center mb-8">
           <BrandMark size="lg" className="mb-3" />
           <h1 className="text-2xl font-semibold tracking-tight text-fg">{PRODUCT_NAME}</h1>
-          <p className="text-sm text-fg-subtle mt-1">로그인하여 여행을 계획하세요</p>
+          <p className="text-sm text-fg-subtle mt-1">{PRODUCT_TAGLINE}</p>
         </div>
 
         <form

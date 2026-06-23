@@ -200,8 +200,8 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
           <div className="py-12">
             <EmptyState
               icon={<Compass className="size-10" aria-hidden="true" />}
-              title="아직 여행이 없어요"
-              description="첫 여행을 만들어 일정을 정리해 보세요."
+              title="첫 여행을 시작해요"
+              description="모아둔 후보를 추려, 현장에서 안 깨지는 하루 일정으로 만들어요."
               action={
                 <Link href="/dashboard/new">
                   <Button>
