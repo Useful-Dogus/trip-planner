@@ -102,6 +102,9 @@ export async function GET(request: NextRequest) {
   try {
     const client = createRouteHandlerSupabase()
     const tripId = getTripIdFromRequest(request)
+    if (!tripId) {
+      return NextResponse.json({ error: '대상 여행이 지정되지 않았습니다.' }, { status: 400 })
+    }
     const items = await readItems(client, tripId)
     return NextResponse.json({ items })
   } catch (e) {
@@ -124,7 +127,10 @@ export async function POST(request: NextRequest) {
 
   const client = createRouteHandlerSupabase()
   const tripId = getTripIdFromRequest(request)
-  const bounds = tripId ? await fetchTripBounds(client, tripId) : null
+  if (!tripId) {
+    return NextResponse.json({ error: '대상 여행이 지정되지 않았습니다.' }, { status: 400 })
+  }
+  const bounds = await fetchTripBounds(client, tripId)
 
   const error = validateItem(body, bounds)
   if (error) return NextResponse.json({ error }, { status: 400 })

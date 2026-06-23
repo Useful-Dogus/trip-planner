@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { mapGoogleCategory } from '@/services/gmaps/categoryMap'
 import type { GooglePlace, TripItem } from '@/types'
 import { createRouteHandlerSupabase } from '@/lib/supabase-server'
-import { ensureActiveTrip } from '@/lib/trip'
+import { getUserRole } from '@/lib/trip'
 import { reverseGeocode } from '@/lib/geocode'
 
 // "34°39'53.7\"N 135°29'58.3\"E" 또는 "34.123, 135.456" 같이 좌표 자체가 이름인 경우를 감지.
@@ -80,9 +80,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const {
+      tripId: bodyTripId,
       places,
       categoryOverrides = {},
     } = body as {
+      tripId?: string
       places?: GooglePlace[]
       categoryOverrides?: Record<string, string>
     }
@@ -94,11 +96,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createRouteHandlerSupabase()
+    // tripId 는 반드시 호출자(현재 보고 있는 trip)가 명시한다.
+    // 예전엔 누락 시 ensureActiveTrip 으로 "첫 trip" 을 골랐는데,
+    // 그게 사용자가 보고 있는 trip 과 달라 다른 trip 으로 항목이 새는 버그였다.
     const queryTripId = request.nextUrl.searchParams.get('tripId')
-    const tripId = queryTripId && queryTripId.trim()
-      ? queryTripId
-      : await ensureActiveTrip(supabase)
+    const tripId = (queryTripId && queryTripId.trim()) || (bodyTripId && bodyTripId.trim()) || ''
+    if (!tripId) {
+      return NextResponse.json(
+        { error: 'INVALID_REQUEST', message: '대상 여행이 지정되지 않았습니다.' },
+        { status: 400 }
+      )
+    }
+
+    const supabase = createRouteHandlerSupabase()
+
+    // 호출자가 이 trip 의 멤버이고 쓰기 권한(owner/editor)이 있는지 검증.
+    const role = await getUserRole(supabase, tripId)
+    if (!role) {
+      return NextResponse.json(
+        { error: 'FORBIDDEN', message: '이 여행에 접근할 수 없습니다.' },
+        { status: 403 }
+      )
+    }
+    if (role === 'viewer') {
+      return NextResponse.json(
+        { error: 'FORBIDDEN', message: '보기 전용 멤버는 장소를 추가할 수 없습니다.' },
+        { status: 403 }
+      )
+    }
 
     // trip region 을 한 번 fetch — 좌표만 있는 핀의 폴백 라벨에 사용.
     const { data: tripRow } = await supabase

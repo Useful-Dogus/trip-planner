@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Layout/Navigation'
 import UrlInput from '@/components/GmapsImport/UrlInput'
 import CandidateList from '@/components/GmapsImport/CandidateList'
-import { useTripPath } from '@/lib/hooks/useTripContext'
+import { useTripId, useTripPath } from '@/lib/hooks/useTripContext'
 import TripPageHeader from '@/components/Layout/TripPageHeader'
 import type { ImportCandidate } from '@/types'
 
@@ -13,6 +13,7 @@ type PageState = 'idle' | 'loading' | 'review' | 'importing' | 'done'
 
 export default function GmapsImportPage() {
   const router = useRouter()
+  const tripId = useTripId()
   const tripPath = useTripPath()
   const [state, setState] = useState<PageState>('idle')
   const [candidates, setCandidates] = useState<ImportCandidate[]>([])
@@ -37,7 +38,7 @@ export default function GmapsImportPage() {
       const res = await fetch('/api/gmaps/preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, tripId }),
       })
 
       const data = await res.json()
@@ -72,10 +73,11 @@ export default function GmapsImportPage() {
     setError(null)
 
     try {
-      const res = await fetch('/api/gmaps/import', {
+      const res = await fetch(`/api/gmaps/import?tripId=${encodeURIComponent(tripId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          tripId,
           places: selected.map(c => c.place),
         }),
       })
