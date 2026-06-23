@@ -4,6 +4,8 @@ import { useDroppable } from '@dnd-kit/core'
 
 interface UndatedGroupHeaderProps {
   count: number
+  /** 이 중 확정 상태라 날짜 배정이 필요한 항목 수. */
+  needsDateCount?: number
   isCollapsed: boolean
   onToggleCollapse: () => void
   onAddItem: () => void
@@ -12,6 +14,7 @@ interface UndatedGroupHeaderProps {
 
 export default function UndatedGroupHeader({
   count,
+  needsDateCount = 0,
   isCollapsed,
   onToggleCollapse,
   onAddItem,
@@ -39,6 +42,11 @@ export default function UndatedGroupHeader({
       >
         <span className="text-sm font-semibold text-fg">날짜 미정</span>
         <span className="text-xs text-fg-muted">{count}개</span>
+        {needsDateCount > 0 && (
+          <span className="inline-flex items-center rounded-full border border-warning-border bg-warning-bg px-2 py-0.5 text-[11px] font-medium text-warning-fg">
+            확정 {needsDateCount}개 날짜 필요
+          </span>
+        )}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className={`w-3.5 h-3.5 text-fg-subtle transition-transform flex-shrink-0 ${isCollapsed ? '-rotate-90' : ''}`}

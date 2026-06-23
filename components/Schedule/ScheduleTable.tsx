@@ -601,6 +601,10 @@ export default function ScheduleTable({
   }
 
   const undatedItems = dateGroups.get(UNDATED_KEY) ?? []
+  // 확정인데 날짜가 없는 항목 — 일정에 떨어뜨려야 할 "다음 행동" 대상.
+  const undatedNeedsDateCount = undatedItems.filter(
+    (i) => i.trip_priority === '확정',
+  ).length
   const datedEntries = Array.from(dateGroups.entries())
     .filter(([key]) => key !== UNDATED_KEY)
     .sort(([a], [b]) => a.localeCompare(b))
@@ -661,6 +665,7 @@ export default function ScheduleTable({
           <div className="overflow-hidden rounded-xl border border-border bg-bg-elevated shadow-sm">
             <UndatedGroupHeader
               count={undatedItems.length}
+              needsDateCount={undatedNeedsDateCount}
               isCollapsed={undatedCollapsed}
               dndVariant="mobile"
               onToggleCollapse={() => setUndatedCollapsed(prev => !prev)}
@@ -800,6 +805,7 @@ export default function ScheduleTable({
                 <div>
                   <UndatedGroupHeader
                     count={undatedItems.length}
+                    needsDateCount={undatedNeedsDateCount}
                     isCollapsed={undatedCollapsed}
                     dndVariant="desktop"
                     onToggleCollapse={() => setUndatedCollapsed(prev => !prev)}
