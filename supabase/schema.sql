@@ -67,6 +67,19 @@ create table if not exists public.items (
 
 create index if not exists idx_items_trip on public.items(trip_id);
 
+-- 영업시간·휴무 crowd-correction 공유 테이블 (#278). google_place_id 기준 전역 공유.
+create table if not exists public.place_hours_corrections (
+  id              uuid        primary key default gen_random_uuid(),
+  google_place_id text        not null,
+  opening_hours   jsonb,
+  closed_days     jsonb,
+  author_user_id  uuid        not null references auth.users(id) on delete cascade,
+  created_at      timestamptz not null default now()
+);
+
+create index if not exists idx_phc_place
+  on public.place_hours_corrections(google_place_id, created_at desc);
+
 -- ============================================================================
 -- RLS 재귀 회피용 헬퍼 함수 (SECURITY DEFINER)
 -- ============================================================================
@@ -108,6 +121,15 @@ grant execute on function public.user_role_in_trip(uuid) to authenticated;
 alter table public.trips         enable row level security;
 alter table public.trip_members  enable row level security;
 alter table public.items         enable row level security;
+alter table public.place_hours_corrections enable row level security;
+
+-- place_hours_corrections: 로그인 사용자 전역 읽기, 본인 작성만 insert (append-only).
+drop policy if exists phc_select on public.place_hours_corrections;
+create policy phc_select on public.place_hours_corrections
+  for select using (auth.uid() is not null);
+drop policy if exists phc_insert on public.place_hours_corrections;
+create policy phc_insert on public.place_hours_corrections
+  for insert with check (author_user_id = auth.uid());
 
 -- trips: 멤버만 SELECT, 본인이 owner 인 경우만 INSERT/UPDATE/DELETE
 drop policy if exists trips_select on public.trips;
