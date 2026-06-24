@@ -134,10 +134,12 @@ const CATEGORY_MAP: Record<string, Category> = {
 
 /**
  * 구글 place type 문자열을 앱 카테고리로 변환한다.
- * 매핑되지 않는 경우 "기타"를 반환한다.
+ * 유형을 정하지 못하면 "기타" 도배 대신 "미분류"를 반환한다 — 사용자가
+ * 미분류로 필터링해 일괄 지정하도록 유도한다(#322). "기타"는 사용자가
+ * 명시적으로 고른 분류로 남겨 두 의미를 섞지 않는다.
  */
 export function mapGoogleCategory(googleType: string | null | undefined): Category {
-  if (!googleType) return '기타'
+  if (!googleType) return '미분류'
 
   // 직접 매핑 시도
   const direct = CATEGORY_MAP[googleType.toLowerCase()]
@@ -149,5 +151,5 @@ export function mapGoogleCategory(googleType: string | null | undefined): Catego
     if (lower.includes(key) || key.includes(lower)) return cat
   }
 
-  return '기타'
+  return '미분류'
 }
