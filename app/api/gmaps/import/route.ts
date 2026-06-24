@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
 import { mapGoogleCategory } from '@/services/gmaps/categoryMap'
-import type { GooglePlace, TripItem } from '@/types'
+import { buildGoogleMapsLink } from '@/services/gmaps/placeLink'
+import type { GooglePlace, Link, TripItem } from '@/types'
 import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 import { getUserRole } from '@/lib/trip'
 import { reverseGeocode } from '@/lib/geocode'
@@ -52,6 +53,9 @@ function placeToItem(
   categoryOverride?: string
 ): Omit<TripItem, 'created_at' | 'updated_at'> & { created_at: string; updated_at: string } {
   const now = new Date().toISOString()
+  // 연동 시 구글맵 장소 링크를 자동으로 채운다(#322) — 나중에 현장에서 다시 열 수 있게.
+  const mapsLink = buildGoogleMapsLink(place)
+  const links: Link[] = mapsLink ? [{ label: '구글맵', url: mapsLink }] : []
   return {
     id: uuidv4(),
     name: place.name,
@@ -63,7 +67,7 @@ function placeToItem(
     address: place.address ?? undefined,
     lat: place.lat ?? undefined,
     lng: place.lng ?? undefined,
-    links: [],
+    links,
     budget: undefined,
     memo: undefined,
     date: undefined,
@@ -155,7 +159,7 @@ export async function POST(request: NextRequest) {
         address: item.address ?? null,
         lat: item.lat ?? null,
         lng: item.lng ?? null,
-        links: [],
+        links: item.links,
         budget: null,
         memo: null,
         date: null,

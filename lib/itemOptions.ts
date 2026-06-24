@@ -11,6 +11,7 @@ import {
   Target,
   Palmtree,
   Bookmark,
+  CircleDashed,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -26,6 +27,7 @@ export const CATEGORY_OPTIONS: Category[] = [
   '액티비티',
   '휴양',
   '기타',
+  '미분류',
 ]
 
 export const TRIP_PRIORITY_OPTIONS: TripPriority[] = [
@@ -97,6 +99,7 @@ export const CATEGORY_META: Record<Category, { Icon: LucideIcon }> = {
   액티비티: { Icon: Target },
   휴양: { Icon: Palmtree },
   기타: { Icon: Bookmark },
+  미분류: { Icon: CircleDashed },
 }
 
 // CategoryStackBar 전용 팔레트. 스택 바는 카테고리 분포 비교가 목적이라
@@ -114,6 +117,7 @@ export const CATEGORY_STACK_COLORS: Record<Category, string> = {
   액티비티: '#fbbf24',   // amber-400
   휴양: '#4ade80',       // green-400
   기타: '#cbd5e1',       // slate-300
+  미분류: '#e2e8f0',     // slate-200 — 미정(가장 옅게)
 }
 
 interface PriorityMeta {
@@ -239,6 +243,7 @@ const LEGACY_CATEGORY_MAP: Record<string, Category> = {
   액티비티: '액티비티',
   휴양: '휴양',
   기타: '기타',
+  미분류: '미분류',
 }
 
 export function normalizeCategory(value: unknown): Category {
