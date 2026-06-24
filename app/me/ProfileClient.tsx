@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, LogOut } from 'lucide-react'
+import { ArrowLeft, LogOut, Trash2 } from 'lucide-react'
 import Button from '@/components/UI/Button'
 import { Input } from '@/components/UI/Input'
 import { useToast } from '@/components/UI/Toast'
+import { useConfirm } from '@/components/UI/ConfirmDialog'
 import { logout } from '@/lib/auth-client'
+import { clearAppCache } from '@/lib/clearAppCache'
 
 const handleLogout = logout
 
@@ -42,8 +44,74 @@ export default function ProfileClient({ email, initialNickname }: Props) {
             로그아웃
           </Button>
         </section>
+        <DangerSection />
       </main>
     </div>
+  )
+}
+
+function DangerSection() {
+  const confirm = useConfirm()
+  const { showToast } = useToast()
+  const [submitting, setSubmitting] = useState(false)
+
+  async function handleDelete() {
+    if (submitting) return
+
+    // 사전 고지: 함께 삭제될 '내가 소유한 여행' 개수를 먼저 조회한다(#321).
+    let ownedTripCount = 0
+    try {
+      const res = await fetch('/api/auth/delete-account')
+      if (res.ok) {
+        const data = await res.json()
+        ownedTripCount = data.ownedTripCount ?? 0
+      }
+    } catch {
+      // 개수 조회 실패 시 일반 문구로 진행
+    }
+
+    const ok = await confirm({
+      title: '회원 탈퇴',
+      description: (
+        <>
+          계정과{' '}
+          {ownedTripCount > 0 ? `내가 소유한 여행 ${ownedTripCount}개를 포함한 ` : ''}
+          모든 데이터가 <strong>즉시·영구 삭제</strong>됩니다. 되돌릴 수 없습니다.
+        </>
+      ),
+      confirmLabel: '영구 삭제',
+      cancelLabel: '취소',
+      tone: 'destructive',
+      typeToConfirm: '탈퇴',
+    })
+    if (!ok) return
+
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/auth/delete-account', { method: 'DELETE' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data?.error ?? '탈퇴에 실패했습니다.')
+      // 계정이 사라졌으니 로컬 캐시를 비우고 로그인 화면으로 하드 리로드한다.
+      clearAppCache()
+      window.location.href = '/login'
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '탈퇴에 실패했습니다.'
+      showToast({ type: 'error', message: msg })
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <section className="bg-bg-elevated border border-critical-border rounded-xl p-5">
+      <h2 className="text-sm font-semibold text-critical-fg mb-1">위험 구역</h2>
+      <p className="text-xs text-fg-subtle mb-3">
+        탈퇴 시 계정과 내가 소유한 여행·항목이 즉시 영구 삭제됩니다. 복구할 수 없습니다.
+      </p>
+      <Button variant="destructive" onClick={handleDelete} loading={submitting}>
+        <Trash2 className="size-4 mr-1.5" aria-hidden="true" />
+        회원 탈퇴
+      </Button>
+    </section>
   )
 }
 
