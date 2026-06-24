@@ -6,25 +6,14 @@ import type { GooglePlace, Link, TripItem } from '@/types'
 import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 import { getUserRole } from '@/lib/trip'
 import { reverseGeocode } from '@/lib/geocode'
-
-// "34°39'53.7\"N 135°29'58.3\"E" 또는 "34.123, 135.456" 같이 좌표 자체가 이름인 경우를 감지.
-const DMS_RE = /\d+°\d+['′]/
-const DECIMAL_COORD_RE = /^-?\d{1,3}\.\d+\s*,\s*-?\d{1,3}\.\d+$/
-
-function isCoordinateName(name: string): boolean {
-  const trimmed = name.trim()
-  if (!trimmed) return true
-  if (DMS_RE.test(trimmed)) return true
-  if (DECIMAL_COORD_RE.test(trimmed)) return true
-  return false
-}
+import { isCoordinateLikeName } from '@/services/gmaps/placeName'
 
 async function resolvePinName(
   place: GooglePlace,
   regionLabel: string | null,
   fallbackIndex: number,
 ): Promise<string> {
-  if (!isCoordinateName(place.name)) return place.name
+  if (!isCoordinateLikeName(place.name)) return place.name
 
   // 1차: reverse geocode
   if (typeof place.lat === 'number' && typeof place.lng === 'number') {
