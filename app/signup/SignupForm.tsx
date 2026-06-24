@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { clearAppCache } from '@/lib/clearAppCache'
-import { ErrorBanner, PasswordInput } from '@/components/UI'
+import { ErrorBanner, PasswordInput, PasswordStrengthMeter } from '@/components/UI'
 import { BrandMark, PRODUCT_TAGLINE } from '@/components/Brand/Wordmark'
 
 export default function SignupForm() {
@@ -80,14 +80,17 @@ export default function SignupForm() {
               />
             </div>
 
-            <PasswordInput
-              label="비밀번호 (8자 이상)"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              autoComplete="new-password"
-              minLength={8}
-              required
-            />
+            <div>
+              <PasswordInput
+                label="비밀번호 (8자 이상)"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+              <PasswordStrengthMeter password={password} />
+            </div>
 
             {error && (
               <ErrorBanner tone="critical" onDismiss={() => setError('')}>
