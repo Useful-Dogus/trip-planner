@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PasswordInput } from '@/components/UI'
+import { PasswordInput, PasswordStrengthMeter } from '@/components/UI'
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState('')
@@ -45,14 +45,17 @@ export default function UpdatePasswordPage() {
           onSubmit={handleSubmit}
           className="bg-bg-elevated rounded-2xl shadow-sm border border-border p-6 space-y-4"
         >
-          <PasswordInput
-            label="새 비밀번호 (8자 이상)"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            autoComplete="new-password"
-            minLength={8}
-            required
-          />
+          <div>
+            <PasswordInput
+              label="새 비밀번호 (8자 이상)"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              autoComplete="new-password"
+              minLength={8}
+              required
+            />
+            <PasswordStrengthMeter password={password} />
+          </div>
 
           {error && (
             <div className="bg-critical-bg border border-critical-border rounded-lg px-3 py-2">

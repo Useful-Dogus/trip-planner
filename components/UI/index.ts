@@ -10,4 +10,5 @@ export { Card, CardHeader, CardBody, CardFooter, CardTitle, CardMeta } from './C
 export { Chip, ChipButton } from './Chip'
 export { Input, Textarea, Select } from './Input'
 export { PasswordInput } from './PasswordInput'
+export { default as PasswordStrengthMeter } from './PasswordStrengthMeter'
 export { Skeleton, SkeletonCard, SkeletonList } from './Skeleton'
