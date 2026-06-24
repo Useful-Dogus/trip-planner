@@ -4,9 +4,9 @@ import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Compass, LogOut, MapPin, MoreVertical, Plus, Search, SearchX, Trash2, User } from 'lucide-react'
+import { LogOut, MapPin, MoreVertical, Plus, Search, SearchX, Trash2, User } from 'lucide-react'
 import ThemeToggle from '@/components/Theme/ThemeToggle'
-import Wordmark from '@/components/Brand/Wordmark'
+import Wordmark, { BrandMark } from '@/components/Brand/Wordmark'
 import { Input } from '@/components/UI/Input'
 import Button from '@/components/UI/Button'
 import EmptyState from '@/components/UI/EmptyState'
@@ -199,7 +199,7 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
         {trips.length === 0 ? (
           <div className="py-12">
             <EmptyState
-              icon={<Compass className="size-10" aria-hidden="true" />}
+              icon={<BrandMark size="lg" />}
               title="첫 여행을 시작해요"
               description="모아둔 후보를 추려, 현장에서 안 깨지는 하루 일정으로 만들어요."
               action={
