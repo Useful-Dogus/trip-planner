@@ -316,7 +316,7 @@ export default function ItemList({
           <EmptyState
             icon={<MapPin className="size-10" aria-hidden="true" />}
             title="가고 싶은 곳부터 모아요"
-            description="후보를 모아두면, 나중에 추려서 안 깨지는 하루 일정으로 만들 수 있어요."
+            description="마음에 둔 장소를 먼저 담아 두세요. 일정은 나중에 정리하면 돼요."
             action={
               <Button onClick={() => router.push(tripPath('items/new'))}>
                 첫 장소 추가하기

@@ -201,7 +201,7 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
             <EmptyState
               icon={<BrandMark size="lg" />}
               title="첫 여행을 시작해요"
-              description="모아둔 후보를 추려, 현장에서 안 깨지는 하루 일정으로 만들어요."
+              description="가 보고 싶은 곳을 모으면, 여기서 하루 단위 일정으로 정리할 수 있어요."
               action={
                 <Link href="/dashboard/new">
                   <Button>
