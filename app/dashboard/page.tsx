@@ -3,6 +3,8 @@ import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 import { listUserTrips } from '@/lib/trips'
 import DashboardClient from './DashboardClient'
 
+export const metadata = { title: '내 여행' }
+
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {

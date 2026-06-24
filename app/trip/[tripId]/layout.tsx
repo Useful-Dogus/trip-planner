@@ -5,6 +5,24 @@ import TripAccessDenied from '@/components/UI/TripAccessDenied'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
+// 브라우저 탭·공유 미리보기에 "지금 보고 있는 여행" 을 표시(Basics-First #1 컨텍스트).
+// 루트 template("%s · Waypost") 가 적용돼 "도쿄 여행 · Waypost" 가 된다.
+export async function generateMetadata({ params }: { params: { tripId: string } }) {
+  if (!UUID_RE.test(params.tripId)) return {}
+  try {
+    const client = createRouteHandlerSupabase()
+    const { data } = await client
+      .from('trips')
+      .select('title')
+      .eq('id', params.tripId)
+      .maybeSingle<{ title: string }>()
+    if (data?.title) return { title: data.title }
+  } catch {
+    /* 메타데이터는 보조 정보 — 실패해도 페이지 렌더에 영향 없음 */
+  }
+  return {}
+}
+
 // PostgreSQL "undefined_column" — 운영 DB 에 마이그레이션이 적용되지 않은 경우 등.
 // 권한 문제가 아니므로 forbidden 으로 처리하지 않는다.
 const PG_UNDEFINED_COLUMN = '42703'

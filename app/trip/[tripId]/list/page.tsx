@@ -19,7 +19,6 @@ import FilterButton from '@/components/Research/FilterButton'
 import FilterPanel from '@/components/Research/FilterPanel'
 import ActiveFilterChips from '@/components/Research/ActiveFilterChips'
 import { Input } from '@/components/UI/Input'
-import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { useItems } from '@/lib/hooks/useItems'
 import { useToast } from '@/components/UI/Toast'
 import type { FilterState } from '@/components/Items/ItemList'
@@ -279,9 +278,6 @@ function ResearchPageContent() {
               <Share2 className="size-4" aria-hidden />
               공유
             </button>
-            <div className="md:hidden">
-              <ThemeToggle />
-            </div>
           </div>
         </div>
 

@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Navigation from '@/components/Layout/Navigation'
 import MapSidePanel, { type DaySummary } from '@/components/Map/MapSidePanel'
-import ThemeToggle from '@/components/Theme/ThemeToggle'
 import FAB from '@/components/UI/FAB'
 import { useTripPath } from '@/lib/hooks/useTripContext'
 import Link from 'next/link'
@@ -206,10 +205,7 @@ export default function PlanScreen({ basePath }: PlanScreenProps) {
           <div className="pointer-events-none absolute top-3 left-3 z-[600] max-w-[60%] rounded-md bg-bg-elevated/90 px-2.5 py-1.5 shadow-sm backdrop-blur">
             <TripContextLabel />
           </div>
-          {/* 모바일 우측 상단 떠있는 테마 토글 + FAB */}
-          <div className="absolute top-3 right-3 z-[600]">
-            <ThemeToggle />
-          </div>
+          {/* 테마 토글은 모바일 '더보기' 시트로 통합(#291) — 지도 우상단은 비워 둠 */}
           <FAB className="bottom-[calc(var(--mobile-panel-height,40vh)+1rem)] right-4" />
         </div>
         <div

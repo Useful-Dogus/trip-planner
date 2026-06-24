@@ -5,7 +5,10 @@ import Providers from './providers'
 import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 
 export const metadata: Metadata = {
-  title: 'Waypost',
+  title: {
+    default: 'Waypost',
+    template: '%s · Waypost',
+  },
   description: '가 보고 싶은 곳을 지도에 모아 하루 일정으로 정리하는 여행 계획 도구',
   applicationName: 'Waypost',
   appleWebApp: {
