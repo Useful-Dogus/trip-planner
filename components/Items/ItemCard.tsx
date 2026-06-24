@@ -10,6 +10,7 @@ import LinkButton from './LinkButton'
 import { cn } from '@/lib/cn'
 import { useOptionalTrip, useTripPath } from '@/lib/hooks/useTripContext'
 import { formatBudget, normalizeCurrency } from '@/lib/currency'
+import { formatRelativeTime, formatAbsoluteTime } from '@/lib/formatRelativeTime'
 
 interface ItemCardProps {
   item: TripItem
@@ -41,6 +42,10 @@ export default function ItemCard({
   const scheduleLabel = formatScheduleLabel(item)
   // 확정했는데 날짜가 없으면 일정 배치로 잇는 다리 — map 패널과 동일 패턴.
   const needsDate = item.trip_priority === '확정' && !item.date
+  // 추가/수정 시점(#326). 생성 직후 미편집이면 "추가", 한 번이라도 바뀌면 "수정"으로 표기.
+  const edited = item.updated_at !== item.created_at
+  const stampIso = edited ? item.updated_at : item.created_at
+  const stampLabel = formatRelativeTime(stampIso)
 
   useEffect(() => {
     if (editingName !== null) inputRef.current?.select()
@@ -166,6 +171,14 @@ export default function ItemCard({
             <CalendarPlus className="size-3" aria-hidden="true" />
             확정됨 · 날짜 배정하기
           </Link>
+        </div>
+      )}
+
+      {stampLabel && (
+        <div className="mt-2.5 pl-[22px] text-[11px] text-fg-subtle tabular">
+          <time dateTime={stampIso} title={formatAbsoluteTime(stampIso)}>
+            {stampLabel} {edited ? '수정' : '추가'}
+          </time>
         </div>
       )}
     </div>
