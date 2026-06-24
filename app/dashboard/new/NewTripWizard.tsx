@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { mutate as globalMutate } from 'swr'
+import { invalidateTrips } from '@/lib/swr/invalidateTrips'
 import { ArrowLeft } from 'lucide-react'
 import Button from '@/components/UI/Button'
 import { Input } from '@/components/UI/Input'
@@ -227,13 +227,9 @@ export default function NewTripWizard() {
           }),
         }).catch(() => {})
       }
-      // 대시보드 SWR 캐시를 즉시 갱신해 두면, 사용자가 뒤로가서 목록으로 돌아왔을 때
-      // 새 trip 이 0.3-0.5s 후 "팝업" 되는 대신 처음부터 보인다.
-      // SWR 메모리 캐시(globalMutate)와 Next.js Router 캐시(router.refresh)를 함께 무효화해야
-      // 대시보드 RSC(initialTrips)까지 재검증돼 새 trip 이 항상 보인다. (다른 mutation 사이트와 동일한 2줄 세트)
+      // 대시보드로 돌아왔을 때 새 trip 이 바로 보이도록 SWR + Router 캐시를 함께 무효화.
       clearDraft()
-      await globalMutate('/api/trips')
-      router.refresh()
+      await invalidateTrips(router)
       router.push(`/trip/${data.tripId}/map`)
     } catch (e) {
       const msg = e instanceof Error ? e.message : '여행 생성에 실패했습니다.'
