@@ -7,6 +7,7 @@ import UrlInput from '@/components/GmapsImport/UrlInput'
 import CandidateList from '@/components/GmapsImport/CandidateList'
 import StickyActionBar from '@/components/UI/StickyActionBar'
 import { useTripId, useTripPath } from '@/lib/hooks/useTripContext'
+import { useBeforeUnload } from '@/lib/hooks/useBeforeUnload'
 import TripPageHeader from '@/components/Layout/TripPageHeader'
 import type { ImportCandidate } from '@/types'
 
@@ -21,6 +22,9 @@ export default function GmapsImportPage() {
   const [error, setError] = useState<string | null>(null)
   const [insertedCount, setInsertedCount] = useState(0)
   const [insertedIds, setInsertedIds] = useState<string[]>([])
+
+  // 일괄 추가 진행 중 탭 닫기·새로고침·외부 이동을 막아 끊김을 방지(#324).
+  useBeforeUnload(state === 'importing')
 
   useEffect(() => {
     if (state !== 'done') return
@@ -152,6 +156,12 @@ export default function GmapsImportPage() {
 
         {state === 'importing' && (
           <div className="bg-bg-elevated rounded-xl border border-border p-6">
+            <p
+              role="status"
+              className="mb-4 rounded-lg bg-info-bg border border-info-border px-3 py-2 text-sm text-info-fg"
+            >
+              장소를 추가하는 중입니다. 완료될 때까지 이 페이지를 닫거나 새로고침하지 마세요.
+            </p>
             <CandidateList
               candidates={candidates}
               onChange={setCandidates}
