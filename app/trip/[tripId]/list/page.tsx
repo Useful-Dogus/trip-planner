@@ -49,7 +49,7 @@ function ResearchPageContent() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { items, isLoading, updateItem, createItem } = useItems()
+  const { items, isLoading, updateItem, updateItemsBulk, createItem } = useItems()
   const { showToast } = useToast()
   const tripId = useTripId()
   const trip = useOptionalTrip()
@@ -400,6 +400,7 @@ function ResearchPageContent() {
         onClose={() => setUnnamedDialogOpen(false)}
         items={filterUnnamed(items)}
         onUpdateItem={updateItem}
+        onUpdateItems={updateItemsBulk}
       />
 
       <ShareDialog

@@ -12,6 +12,10 @@ interface Props {
   onClose: () => void
   items: TripItem[]
   onUpdateItem: (id: string, changes: Record<string, unknown>) => Promise<unknown> | unknown
+  /** 일괄 저장 — 옵티미스틱 1회 + 병렬 PATCH + revalidate 1회로 stagger 없이 수렴(#298). */
+  onUpdateItems: (
+    updates: { id: string; changes: Record<string, unknown> }[],
+  ) => Promise<{ okIds: string[]; failedIds: string[] }>
 }
 
 interface RowState {
@@ -28,7 +32,7 @@ const UNNAMED_PREFIX = '📍'
  * Gmaps import 이후 `📍` prefix 가 붙은 좌표만 가진 항목을 모아 한 시트에서 명명.
  * 각 행: reverse geocode 후보 (선택 시 입력에 적용) + 직접 입력 + 개별 저장.
  */
-export default function UnnamedBulkEditDialog({ open, onClose, items, onUpdateItem }: Props) {
+export default function UnnamedBulkEditDialog({ open, onClose, items, onUpdateItem, onUpdateItems }: Props) {
   const { showToast } = useToast()
   const [rows, setRows] = useState<Record<string, RowState>>({})
   const [savingAll, setSavingAll] = useState(false)
@@ -102,32 +106,26 @@ export default function UnnamedBulkEditDialog({ open, onClose, items, onUpdateIt
 
   async function handleSaveAll() {
     setSavingAll(true)
-    const toSave = items.filter((it) => {
-      const row = rows[it.id]
-      if (!row) return false
-      if (row.saved) return false
-      return row.draft.trim().length > 0
+    const updates = items
+      .filter((it) => {
+        const row = rows[it.id]
+        return row && !row.saved && row.draft.trim().length > 0
+      })
+      .map((it) => ({ id: it.id, changes: { name: rows[it.id].draft.trim() } }))
+
+    // 개별 N회 저장 대신 일괄 처리 — 옵티미스틱 1회 + revalidate 1회로 항목이
+    // "하나씩" 사라지는 stagger 없이 한 번에 정리된다(#298).
+    const { okIds, failedIds } = await onUpdateItems(updates)
+
+    setRows((prev) => {
+      const next = { ...prev }
+      for (const id of okIds) next[id] = { ...next[id], saved: true, error: null }
+      for (const id of failedIds) next[id] = { ...next[id], error: '저장 실패' }
+      return next
     })
-    let ok = 0
-    for (const it of toSave) {
-      const name = rows[it.id]?.draft.trim()
-      if (!name) continue
-      try {
-        await onUpdateItem(it.id, { name })
-        setRows((prev) => ({
-          ...prev,
-          [it.id]: { ...prev[it.id], saved: true },
-        }))
-        ok++
-      } catch {
-        setRows((prev) => ({
-          ...prev,
-          [it.id]: { ...prev[it.id], error: '저장 실패' },
-        }))
-      }
-    }
     setSavingAll(false)
-    if (ok > 0) showToast({ type: 'success', message: `${ok}개 저장했어요` })
+    if (okIds.length > 0) showToast({ type: 'success', message: `${okIds.length}개 저장했어요` })
+    else if (failedIds.length > 0) showToast({ type: 'error', message: '저장에 실패했어요' })
   }
 
   const pending = items.filter((it) => !rows[it.id]?.saved)

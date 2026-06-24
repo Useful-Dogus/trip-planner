@@ -149,7 +149,62 @@ export function useItems() {
     syncStatus,
     error: error ?? null,
     updateItem,
+    updateItemsBulk,
     deleteItem,
     createItem,
+  }
+
+  /**
+   * 여러 항목을 한 번에 수정한다(일괄 명명 등).
+   * 개별 updateItem 을 N번 부르면 매 건마다 전체 revalidate 가 일어나 항목이
+   * "하나씩" 갱신/사라지는 stagger 가 생긴다(#298). 대신:
+   *  1) 옵티미스틱 업데이트 1회로 전체 변경을 한 번에 반영
+   *  2) PATCH 를 병렬 실행
+   *  3) 끝나고 revalidate 1회로 수렴(실패분은 서버 진실로 자동 복원)
+   */
+  async function updateItemsBulk(
+    updates: { id: string; changes: Record<string, unknown> }[],
+  ): Promise<{ okIds: string[]; failedIds: string[] }> {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      showToast({ type: 'info', message: '오프라인 상태입니다. 인터넷 연결 후 다시 시도해주세요.' })
+      return { okIds: [], failedIds: updates.map(u => u.id) }
+    }
+    if (updates.length === 0) return { okIds: [], failedIds: [] }
+
+    const changeMap = new Map(updates.map(u => [u.id, u.changes]))
+    mutate(
+      prev =>
+        prev
+          ? {
+              items: prev.items.map(i =>
+                changeMap.has(i.id) ? applyItemChanges(i, changeMap.get(i.id)!) : i,
+              ),
+            }
+          : prev,
+      { revalidate: false },
+    )
+
+    const results = await Promise.all(
+      updates.map(async u => {
+        try {
+          const res = await fetch(withTripId(`/api/items/${u.id}`, tripId), {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(u.changes),
+          })
+          return { id: u.id, ok: res.ok }
+        } catch {
+          return { id: u.id, ok: false }
+        }
+      }),
+    )
+
+    // revalidate 1회로 수렴 — 성공분은 서버 새 값, 실패분은 옛 값으로 자동 복원.
+    mutate()
+
+    return {
+      okIds: results.filter(r => r.ok).map(r => r.id),
+      failedIds: results.filter(r => !r.ok).map(r => r.id),
+    }
   }
 }
