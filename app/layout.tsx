@@ -6,7 +6,7 @@ import { createRouteHandlerSupabase } from '@/lib/supabase-server'
 
 export const metadata: Metadata = {
   title: 'Waypost',
-  description: '지도 위에서 후보를 모아 동선을 직접 깎는 여행 설계 도구',
+  description: '가 보고 싶은 곳을 지도에 모아 하루 일정으로 정리하는 여행 계획 도구',
   applicationName: 'Waypost',
   appleWebApp: {
     capable: true,
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Waypost',
-    description: '지도 위에서 후보를 모아 동선을 직접 깎는 여행 설계 도구',
+    description: '가 보고 싶은 곳을 지도에 모아 하루 일정으로 정리하는 여행 계획 도구',
     type: 'website',
   },
 }

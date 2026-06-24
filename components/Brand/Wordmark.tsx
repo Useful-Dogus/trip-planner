@@ -7,12 +7,12 @@ import { cn } from '@/lib/cn'
 export const PRODUCT_NAME = 'Waypost'
 
 /**
- * 제품 이익 한 문장 — "왜 쓰는가 = 무엇을 얻는가" (이슈 #258).
+ * 제품 이익 한 문장 — "왜 쓰는가 = 무엇을 얻는가" (이슈 #258·#289).
  * 기능 나열·협업 강조 대신, 사용자가 얻는 결과만 말한다.
- * 정본 기준 문장: "내가 모은 후보 더미를, 버리지 않고 추려서,
- * 현장에서 안 깨지는 하루 일정으로 만든다." 를 표면용으로 압축한 것.
+ * 보이스 규칙(design-guidelines §11): 사람처럼·짧게, 부정추상('안 깨지는')·
+ * PM 관점 동사('동선을 깎다') 대신 사용자 체감 결과로 적는다.
  */
-export const PRODUCT_TAGLINE = '모아둔 후보를 추려, 현장에서 안 깨지는 하루 일정으로'
+export const PRODUCT_TAGLINE = '가 보고 싶은 곳을 모아, 하루 일정으로 정리해요'
 
 type WordmarkSize = 'sm' | 'md' | 'lg'
 
