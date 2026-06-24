@@ -12,10 +12,8 @@ import { useToast } from '@/components/UI/Toast'
 import TripPageHeader from '@/components/Layout/TripPageHeader'
 import StickyAddBar from '@/components/UI/StickyAddBar'
 import IconButton from '@/components/UI/IconButton'
-import { Share, Sparkles } from 'lucide-react'
+import { Share } from 'lucide-react'
 import ExportScheduleDialog from '@/components/Schedule/ExportScheduleDialog'
-import DraftPlanSheet from '@/components/Schedule/DraftPlanSheet'
-import { useTrip } from '@/lib/hooks/useTripContext'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
@@ -33,13 +31,11 @@ function SchedulePageContent() {
   const searchParams = useSearchParams()
   const { items, isLoading, updateItem, createItem, deleteItem } = useItems()
   const { showToast } = useToast()
-  const trip = useTrip()
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
     searchParams.get('item'),
   )
   const [exportOpen, setExportOpen] = useState(false)
-  const [draftOpen, setDraftOpen] = useState(false)
 
   const selectedItem = items.find((i) => i.id === selectedItemId) ?? null
 
@@ -79,13 +75,6 @@ function SchedulePageContent() {
           section="일정"
           actions={
             <div className="flex items-center gap-1">
-              <IconButton
-                aria-label="자동 일정 초안 만들기"
-                onClick={() => setDraftOpen(true)}
-                title="자동 일정 초안 만들기"
-              >
-                <Sparkles className="size-5" />
-              </IconButton>
               <IconButton
                 aria-label="일정 내보내기"
                 onClick={() => setExportOpen(true)}
@@ -135,25 +124,6 @@ function SchedulePageContent() {
         open={exportOpen}
         onClose={() => setExportOpen(false)}
         items={items}
-      />
-
-      <DraftPlanSheet
-        open={draftOpen}
-        onClose={() => setDraftOpen(false)}
-        items={items}
-        trip={{
-          startDate: trip.startDate,
-          endDate: trip.endDate,
-          centerLat: trip.centerLat,
-          centerLng: trip.centerLng,
-        }}
-        currency={trip.currency}
-        onApply={async (stops) => {
-          await Promise.all(
-            stops.map((s) => updateItem(s.itemId, { date: s.date, time_start: s.time_start })),
-          )
-          showToast({ type: 'success', message: `${stops.length}개 일정에 넣었어요` })
-        }}
       />
     </div>
   )
