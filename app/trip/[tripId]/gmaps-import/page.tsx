@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Layout/Navigation'
 import UrlInput from '@/components/GmapsImport/UrlInput'
 import CandidateList from '@/components/GmapsImport/CandidateList'
+import StickyActionBar from '@/components/UI/StickyActionBar'
 import { useTripId, useTripPath } from '@/lib/hooks/useTripContext'
 import TripPageHeader from '@/components/Layout/TripPageHeader'
 import type { ImportCandidate } from '@/types'
@@ -138,12 +139,14 @@ export default function GmapsImportPage() {
             {error && (
               <p className="mt-3 text-sm text-critical-fg">{error}</p>
             )}
-            <button
-              onClick={handleReset}
-              className="mt-4 text-sm text-fg-subtle hover:text-fg-muted transition-colors"
-            >
-              다른 URL 입력
-            </button>
+            <StickyActionBar className="justify-start">
+              <button
+                onClick={handleReset}
+                className="text-sm text-fg-subtle hover:text-fg-muted transition-colors"
+              >
+                다른 URL 입력
+              </button>
+            </StickyActionBar>
           </div>
         )}
 

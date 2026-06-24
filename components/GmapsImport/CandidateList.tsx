@@ -81,8 +81,8 @@ export default function CandidateList({
         </label>
       )}
 
-      {/* 목록 */}
-      <div className="space-y-1 overflow-y-auto max-h-[calc(100vh-280px)]">
+      {/* 목록 — 내부 스크롤 캡 제거: 페이지가 자연 스크롤하고 액션은 sticky 푸터로 고정(#299) */}
+      <div className="space-y-1">
         {candidates.map((candidate, i) => (
           <div
             key={`${candidate.place.name}-${i}`}
@@ -105,7 +105,7 @@ export default function CandidateList({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span
-                  className={`text-sm font-medium ${
+                  className={`text-sm font-medium break-words ${
                     candidate.status === 'duplicate' ? 'text-fg-subtle' : 'text-fg'
                   }`}
                 >
@@ -122,7 +122,7 @@ export default function CandidateList({
               </div>
 
               {candidate.place.address && (
-                <p className="text-xs text-fg-subtle mt-0.5 truncate">
+                <p className="text-xs text-fg-subtle mt-0.5 break-words">
                   {candidate.place.address}
                 </p>
               )}
