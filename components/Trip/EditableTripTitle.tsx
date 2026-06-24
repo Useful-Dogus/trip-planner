@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { mutate as globalMutate } from 'swr'
+import { invalidateTrips } from '@/lib/swr/invalidateTrips'
 import { MoreHorizontal } from 'lucide-react'
 import { useTrip } from '@/lib/hooks/useTripContext'
 import { useToast } from '@/components/UI/Toast'
@@ -64,8 +64,7 @@ export default function EditableTripTitle({ section }: { section: string }) {
         setDraft(trip.title)
       } else {
         showToast({ message: '제목을 저장했습니다.', type: 'success' })
-        globalMutate('/api/trips')
-        router.refresh()
+        await invalidateTrips(router)
       }
     } catch {
       showToast({ message: '네트워크 오류', type: 'error' })

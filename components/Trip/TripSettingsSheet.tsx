@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { mutate as globalMutate } from 'swr'
+import { invalidateTrips } from '@/lib/swr/invalidateTrips'
 import Sheet, { SheetSection } from '@/components/UI/Sheet'
 import { Input } from '@/components/UI/Input'
 import Button from '@/components/UI/Button'
@@ -150,8 +150,7 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
         return
       }
       showToast({ message: '여행 정보를 저장했습니다.', type: 'success' })
-      globalMutate('/api/trips')
-      router.refresh()
+      await invalidateTrips(router)
       onClose()
     } catch {
       showToast({ message: '네트워크 오류가 발생했습니다.', type: 'error' })
@@ -181,7 +180,8 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
         return
       }
       showToast({ message: '여행을 삭제했어요.', type: 'success' })
-      globalMutate('/api/trips')
+      // 삭제도 Router 캐시까지 무효화해야 대시보드에서 삭제된 trip 이 사라진다(기존 누락 수정).
+      await invalidateTrips(router)
       router.push('/dashboard')
     } catch {
       showToast({ message: '네트워크 오류가 발생했습니다.', type: 'error' })

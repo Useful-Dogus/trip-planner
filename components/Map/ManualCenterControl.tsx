@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMap } from 'react-leaflet'
 import { useRouter } from 'next/navigation'
-import { mutate as globalMutate } from 'swr'
+import { invalidateTrips } from '@/lib/swr/invalidateTrips'
 import type L from 'leaflet'
 import { MapPin, RotateCcw } from 'lucide-react'
 import type { TripItem } from '@/types'
@@ -75,8 +75,7 @@ export default function ManualCenterBanner({ map, items, basecampCoord, region }
         showToast({ message: data?.error ?? '저장에 실패했습니다.', type: 'error' })
         return false
       }
-      globalMutate('/api/trips')
-      router.refresh()
+      await invalidateTrips(router)
       return true
     } catch {
       showToast({ message: '네트워크 오류가 발생했습니다.', type: 'error' })
