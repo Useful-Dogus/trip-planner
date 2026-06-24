@@ -101,18 +101,25 @@ export default function EditableTripTitle({ section }: { section: string }) {
             aria-label="여행 제목"
           />
         ) : (
-          <button
-            type="button"
-            onClick={() => editable && setEditing(true)}
-            className={`truncate text-xs font-medium text-fg-subtle ${
-              editable ? 'cursor-text hover:text-fg' : 'cursor-default'
-            }`}
-            title={editable ? '클릭하여 제목 편집' : trip.title}
-            disabled={!editable}
-          >
-            <span className="truncate">{trip.title}</span>
-            {range ? <span className="text-fg-subtle/70"> · {range}</span> : null}
-          </button>
+          <>
+            {/* 제목만 truncate, 기간(종료일)은 항상 보이도록 분리 (Basics-First #1 컨텍스트) */}
+            <button
+              type="button"
+              onClick={() => editable && setEditing(true)}
+              className={`min-w-0 truncate text-xs font-medium text-fg-subtle ${
+                editable ? 'cursor-text hover:text-fg' : 'cursor-default'
+              }`}
+              title={editable ? '클릭하여 제목 편집' : trip.title}
+              disabled={!editable}
+            >
+              {trip.title}
+            </button>
+            {range ? (
+              <span className="shrink-0 whitespace-nowrap text-xs font-medium text-fg-subtle/70">
+                · {range}
+              </span>
+            ) : null}
+          </>
         )}
         {editable && !editing && (
           <IconButton
