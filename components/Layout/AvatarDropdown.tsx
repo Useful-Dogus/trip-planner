@@ -16,7 +16,9 @@ import { cn } from '@/lib/cn'
  * 목적: user-scope (프로필·테마·로그아웃) 와 trip-scope (목록·지도·일정) 의 IA 완전 분리.
  * 사이드바는 trip-scope 만 남기고 user-scope 는 여기로.
  *
- * - 데스크탑(md+) 만 렌더. 모바일은 기존 더보기 시트 사용.
+ * - 데스크탑(md+) 은 항상 렌더.
+ * - 모바일은 trip 컨텍스트 밖(대시보드·/me 등)에서만 렌더 — trip 페이지는 하단 네비
+ *   ‟더보기" 시트가 user-scope 를 덮으므로 중복 방지로 숨긴다 (#310).
  * - 글로벌 위치 (fixed top-right) — 페이지 전환과 무관.
  * - 로그인 상태가 아니면 렌더 안 함.
  * - trip 컨텍스트 안에선 ‟내 여행 목록" 도 메뉴에 포함 — 사이드바에서 옮긴 진입점.
@@ -83,7 +85,12 @@ export default function AvatarDropdown() {
   return (
     <div
       ref={rootRef}
-      className="hidden md:block fixed top-3 right-4 z-40"
+      className={cn(
+        'fixed top-3 right-4 z-40',
+        // trip 컨텍스트 안에서는 모바일 하단 네비가 user-scope 를 덮으므로 데스크탑만,
+        // 밖(대시보드 등)에서는 모바일에서도 유저메뉴 진입점이 된다 (#310).
+        inTripContext ? 'hidden md:block' : 'block',
+      )}
     >
       <button
         type="button"
