@@ -7,6 +7,7 @@ import ItemMetadataChips from '@/components/UI/ItemMetadataChips'
 import { buildTripPath } from '@/lib/hooks/useTripContext'
 import TripContextLabel from '@/components/UI/TripContextLabel'
 import { formatBudget, normalizeCurrency } from '@/lib/currency'
+import { formatRelativeTime, formatAbsoluteTime } from '@/lib/formatRelativeTime'
 import type { TripItem } from '@/types'
 
 export default async function ItemDetailPage({
@@ -109,6 +110,8 @@ export default async function ItemDetailPage({
               <p className="text-sm text-fg whitespace-pre-wrap">{item.memo}</p>
             </section>
           )}
+
+          <Timestamps createdAt={item.created_at} updatedAt={item.updated_at} />
         </div>
       </div>
       <Navigation />
@@ -121,6 +124,31 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     <h2 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider mb-2">
       {children}
     </h2>
+  )
+}
+
+function Timestamps({ createdAt, updatedAt }: { createdAt: string; updatedAt: string }) {
+  const created = formatRelativeTime(createdAt)
+  const updated = formatRelativeTime(updatedAt)
+  if (!created && !updated) return null
+  // 추가·수정 시각이 사실상 같으면(생성 직후 미편집) "추가"만 보여 중복을 피한다.
+  const sameMoment = createdAt === updatedAt
+  return (
+    <p className="text-xs text-fg-subtle pt-1">
+      {created && (
+        <time dateTime={createdAt} title={formatAbsoluteTime(createdAt)}>
+          {created} 추가
+        </time>
+      )}
+      {!sameMoment && updated && (
+        <>
+          {created && <span aria-hidden="true"> · </span>}
+          <time dateTime={updatedAt} title={formatAbsoluteTime(updatedAt)}>
+            {updated} 수정
+          </time>
+        </>
+      )}
+    </p>
   )
 }
 
