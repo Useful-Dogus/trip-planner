@@ -15,5 +15,5 @@ export default async function DashboardPage() {
   }
 
   const trips = await listUserTrips(client)
-  return <DashboardClient initialTrips={trips} userEmail={userData.user.email ?? null} />
+  return <DashboardClient initialTrips={trips} />
 }

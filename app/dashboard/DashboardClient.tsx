@@ -4,15 +4,13 @@ import { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, MapPin, MoreVertical, Plus, Search, SearchX, Trash2, User } from 'lucide-react'
-import ThemeToggle from '@/components/Theme/ThemeToggle'
+import { MapPin, MoreVertical, Plus, Search, SearchX, Trash2 } from 'lucide-react'
 import Wordmark, { BrandMark } from '@/components/Brand/Wordmark'
 import { Input } from '@/components/UI/Input'
 import Button from '@/components/UI/Button'
 import EmptyState from '@/components/UI/EmptyState'
 import { useConfirm } from '@/components/UI/ConfirmDialog'
 import { useToast } from '@/components/UI/Toast'
-import { logout } from '@/lib/auth-client'
 import type { TripSummary } from '@/lib/trips'
 
 type SortKey = 'created_desc' | 'start_date' | 'name'
@@ -46,16 +44,13 @@ function formatRange(start: string | null, end: string | null): string | null {
   return `${formatDateShort(end!)} 까지`
 }
 
-const handleLogout = logout
-
 interface Props {
   initialTrips: TripSummary[]
-  userEmail: string | null
 }
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
-export default function DashboardClient({ initialTrips, userEmail }: Props) {
+export default function DashboardClient({ initialTrips }: Props) {
   const router = useRouter()
   const confirm = useConfirm()
   const { showToast } = useToast()
@@ -132,28 +127,8 @@ export default function DashboardClient({ initialTrips, userEmail }: Props) {
           <div className="min-w-0">
             <Wordmark size="sm" className="mb-1.5" />
             <h1 className="text-lg md:text-xl font-bold text-fg">내 여행</h1>
-            {userEmail && (
-              <p className="text-xs text-fg-subtle mt-0.5 truncate">{userEmail}</p>
-            )}
           </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Link
-              href="/me"
-              aria-label="프로필"
-              className="p-2 rounded-lg text-fg-subtle hover:text-fg hover:bg-bg-subtle transition-colors"
-            >
-              <User className="size-4" aria-hidden="true" />
-            </Link>
-            <button
-              type="button"
-              onClick={handleLogout}
-              aria-label="로그아웃"
-              className="p-2 rounded-lg text-fg-subtle hover:text-fg hover:bg-bg-subtle transition-colors"
-            >
-              <LogOut className="size-4" aria-hidden="true" />
-            </button>
-          </div>
+          {/* 프로필·테마·로그아웃은 글로벌 AvatarDropdown(우상단 fixed)으로 통합 (#310) */}
         </div>
       </header>
 
