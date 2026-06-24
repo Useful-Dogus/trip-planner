@@ -18,6 +18,10 @@
 .DS_Store
 *.pem
 
+# claude code (local-only)
+.claude/settings.local.json
+.claude/worktrees/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
