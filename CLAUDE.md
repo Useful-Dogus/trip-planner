@@ -41,6 +41,14 @@ npm run dev # 로컬 개발 서버 (http://localhost:3000)
 
 TypeScript + Node.js 18+: Follow standard conventions
 
+## Refactoring / Tidy-First
+
+- 개발 중간중간 수행하는 리팩토링·tidy-first·구조/아키텍처 변경은 [docs/refactoring-guidelines.md](docs/refactoring-guidelines.md) 를 단일 기준으로 따른다 (도구 중립, Codex·Gemini 공통).
+- 핵심: **구조 변경과 동작 변경을 한 커밋에 섞지 않는다.** 구조 변경은 `refactor:`/`style:`, 동작 변경은 `feat:`/`fix:` 로 분리. 작게·검증 유지·요청 범위 정직.
+- 도구 중립 진입점은 루트 [AGENTS.md](AGENTS.md) — 어떤 에이전트를 쓰든 같은 규칙을 읽는다.
+
+@docs/refactoring-guidelines.md
+
 ## Design Guidelines
 
 - 신규 화면·컴포넌트를 디자인하거나 기존 UI 를 수정할 때는 [docs/design-guidelines.md](docs/design-guidelines.md) 를 먼저 참고한다.
