@@ -38,6 +38,10 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  // NOTE(#306, 보류): 가입 이메일 인증(소유권 검증)·미인증 상태 UX 는 의도적으로 보류 중이다.
+  // 현재는 Supabase 의 needsEmailConfirmation 플래그만 클라이언트에 전달하고, 미인증 상태로도
+  // 로그인을 막지 않는다(soft). SSO(#318)에서 실유저 모집 전 "이메일 인증 없이 가입 불가"로
+  // 강화하기로 한 방향과 함께 다룬다 — 그때 hard/soft 게이팅을 결정·구현한다.
   const needsEmailConfirmation = !data.session
   return NextResponse.json({ ok: true, needsEmailConfirmation })
 }
