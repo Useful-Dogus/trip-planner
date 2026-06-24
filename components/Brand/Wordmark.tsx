@@ -1,4 +1,3 @@
-import { Route } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 /**
@@ -24,8 +23,29 @@ const SIZES: Record<WordmarkSize, { box: string; icon: string; text: string; gap
 }
 
 /**
- * 동선·이정표 모티프(lucide `route`)를 브라스 원형 테두리 안에 둔 브랜드 마크.
- * 아이콘 단독으로 쓸 때는 `aria-label` 을 부모가 제공한다.
+ * Waypost 전용 글리프 — 두 웨이포인트(점)를 잇는 곡선 경로(동선·이정표 모티프).
+ * favicon(app/icon.svg)·앱 아이콘과 동일한 형상을 단일 소스로 제공한다.
+ * `currentColor` 를 쓰므로 부모의 text 색(브라스 등)을 그대로 따른다.
+ */
+export function WaypostGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" fill="none" className={className} aria-hidden="true">
+      <circle cx="9.5" cy="22.5" r="2.6" fill="currentColor" />
+      <circle cx="22.5" cy="9.5" r="2.6" fill="currentColor" />
+      <path
+        d="M9.5 22.5 C 9.5 14 22.5 18 22.5 9.5"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        fill="none"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+/**
+ * 동선·이정표 모티프(Waypost 전용 글리프)를 브라스 원형 테두리 안에 둔 브랜드 마크.
+ * favicon 과 동일한 글리프를 쓴다. 아이콘 단독으로 쓸 때는 `aria-label` 을 부모가 제공한다.
  */
 export function BrandMark({ size = 'md', className }: { size?: WordmarkSize; className?: string }) {
   const s = SIZES[size]
@@ -37,7 +57,7 @@ export function BrandMark({ size = 'md', className }: { size?: WordmarkSize; cla
         className,
       )}
     >
-      <Route className={s.icon} aria-hidden="true" />
+      <WaypostGlyph className={s.icon} />
     </span>
   )
 }
