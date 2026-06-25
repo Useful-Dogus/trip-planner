@@ -1,7 +1,8 @@
 # AGENTS.md
 
 > 코딩 에이전트(Claude Code · Codex · Gemini CLI · Cursor 등) 공통 진입점이다.
-> 도구별 설정 파일은 이 문서를 가리키므로, **규칙은 여기와 링크된 문서 한 곳에서만** 관리한다.
+> 도구별 설정 파일은 이 문서를 가리키므로, **규칙은 여기와 링크된 `docs/` 문서 한 곳에서만** 관리한다.
+> `CLAUDE.md` 같은 도구별 파일은 호환용 어댑터이며, 새 규칙의 원천으로 만들지 않는다.
 
 ## 프로젝트 개요
 
@@ -13,7 +14,7 @@
 
 1. **리팩토링 / tidy-first / 구조 변경** → [docs/refactoring-guidelines.md](docs/refactoring-guidelines.md)
    개발 중간중간 정리할 때의 단일 기준. 핵심: **구조 변경과 동작 변경을 섞지 말고 따로 커밋**, 작게·검증 유지·범위 정직.
-2. **신규 기능 / 기존 UI 수정** → [CLAUDE.md](CLAUDE.md) 의 **Basics-First Rule** 게이트(컨텍스트 표시·CRUD 대칭·카피 정직성·진입점 일관성·사이징·접근성)를 자기검열.
+2. **신규 기능 / 기존 UI 수정** → [docs/basics-first-rule.md](docs/basics-first-rule.md) 의 게이트(컨텍스트 표시·CRUD 대칭·카피 정직성·진입점 일관성·사이징·접근성)를 자기검열.
 3. **디자인 / 컴포넌트** → [docs/design-guidelines.md](docs/design-guidelines.md) (메커닉) + [docs/taste-for-waypost.md](docs/taste-for-waypost.md) (판단). hex 직접 사용·임의 spacing/radius 금지, 토큰 체계 사용.
 
 ## 커밋 / PR 규약

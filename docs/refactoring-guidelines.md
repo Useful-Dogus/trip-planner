@@ -3,8 +3,8 @@
 > 이 문서는 **에이전트 기반 개발 중간중간** 수행하는 tidy-first·구조 개선·아키텍처 정리의 단일 기준이다.
 > Claude·Codex·Gemini 등 어떤 코딩 에이전트를 쓰든 **같은 규칙**을 따르도록 도구 중립으로 작성한다.
 >
-> - 진입점: 루트 [`AGENTS.md`](../AGENTS.md) (표준), [`CLAUDE.md`](../CLAUDE.md) (`@import`).
-> - 자매 문서: [design-guidelines.md](design-guidelines.md) = *메커닉*, [taste-for-waypost.md](taste-for-waypost.md) = *판단*, CLAUDE.md 의 **Basics-First Rule** = *실천 게이트*. 리팩토링은 그 셋을 **유지보수 가능한 상태로 떠받치는 기반 작업**이다.
+> - 진입점: 루트 [`AGENTS.md`](../AGENTS.md) (표준), [`CLAUDE.md`](../CLAUDE.md) (Claude 호환용 어댑터).
+> - 자매 문서: [design-guidelines.md](design-guidelines.md) = *메커닉*, [taste-for-waypost.md](taste-for-waypost.md) = *판단*, [basics-first-rule.md](basics-first-rule.md) = *실천 게이트*. 리팩토링은 그 셋을 **유지보수 가능한 상태로 떠받치는 기반 작업**이다.
 >
 > **담는 것은 거의 모든 현대 개발자가 동의하는 합의된 원칙뿐이다.** 유행하는 패턴·특정 프레임워크 취향·논쟁적 스타일은 넣지 않는다. 출처: Kent Beck *Tidy First?* (2023), Martin Fowler *Refactoring* 2e (2018), Robert C. Martin *Clean Architecture* (2017) 중 광범위 합의 항목.
 
