@@ -6,9 +6,10 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Plus, Search, Share2 } from 'lucide-react'
 import ShareDialog from '@/components/Share/ShareDialog'
-import { useTripId, useOptionalTrip } from '@/lib/hooks/useTripContext'
+import { buildTripPath, useTripId, useOptionalTrip } from '@/lib/hooks/useTripContext'
 import { useItemVotes } from '@/lib/hooks/useItemVotes'
 import TripPageTitle from '@/components/UI/TripPageTitle'
+import TripPulse from '@/components/Trip/TripPulse'
 import Navigation from '@/components/Layout/Navigation'
 import ItemList from '@/components/Items/ItemList'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
@@ -21,6 +22,7 @@ import ActiveFilterChips from '@/components/Research/ActiveFilterChips'
 import { Input } from '@/components/UI/Input'
 import { useItems } from '@/lib/hooks/useItems'
 import { useToast } from '@/components/UI/Toast'
+import { getTripPulseSummary } from '@/lib/tripPulse'
 import type { FilterState } from '@/components/Items/ItemList'
 import { getActiveFilterCount } from '@/components/Items/ItemList'
 import type { Category, ReservationStatus, TripPriority } from '@/types'
@@ -78,6 +80,15 @@ function ResearchPageContent() {
   }))
   const [filterPanelOpen, setFilterPanelOpen] = useState(false)
   const activeCount = useMemo(() => getActiveFilterCount(filterState), [filterState])
+  const tripPulse = useMemo(
+    () =>
+      getTripPulseSummary('list', items, {
+        list: buildTripPath(tripId, 'list'),
+        map: buildTripPath(tripId, 'map'),
+        schedule: buildTripPath(tripId, 'schedule'),
+      }),
+    [items, tripId],
+  )
 
   const buildUrl = (params: URLSearchParams): string =>
     params.toString() ? `${pathname}?${params.toString()}` : pathname
@@ -313,6 +324,7 @@ function ResearchPageContent() {
               <ActiveFilterChips chips={activeChips} />
             </div>
           )}
+          {!isLoading && <TripPulse summary={tripPulse} className="mt-3" />}
           <p className="text-xs text-fg-subtle mt-2 tabular" aria-live="polite">
             {filteredItems.length}개 항목
           </p>
@@ -353,6 +365,7 @@ function ResearchPageContent() {
       ) : (
         <>
           <div className="md:hidden px-4 pb-28">
+            <TripPulse summary={tripPulse} className="mb-3" />
             <ItemList
               items={items}
               selectedItemId={selectedItemId}

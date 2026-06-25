@@ -12,8 +12,10 @@ import PriorityCell from '@/components/Schedule/cells/PriorityCell'
 import EmptyState from '@/components/UI/EmptyState'
 import { Input } from '@/components/UI/Input'
 import { cn } from '@/lib/cn'
-import { useTripPath } from '@/lib/hooks/useTripContext'
+import { buildTripPath, useTripId, useTripPath } from '@/lib/hooks/useTripContext'
 import { getLodgingForDate } from '@/lib/lodging'
+import TripPulse from '@/components/Trip/TripPulse'
+import { getTripPulseSummary } from '@/lib/tripPulse'
 
 export interface DaySummary {
   date: string
@@ -104,6 +106,16 @@ export default function MapSidePanel({
   }, [items, selectedDate])
 
   const mode: 'candidates' | 'day' = selectedDate === null ? 'candidates' : 'day'
+  const tripId = useTripId()
+  const tripPulse = useMemo(
+    () =>
+      getTripPulseSummary('map', items, {
+        list: buildTripPath(tripId, 'list'),
+        map: buildTripPath(tripId, 'map'),
+        schedule: buildTripPath(tripId, 'schedule'),
+      }),
+    [items, tripId],
+  )
 
   function handleModeChange(next: 'candidates' | 'day') {
     if (next === 'candidates') {
@@ -159,6 +171,10 @@ export default function MapSidePanel({
             <span className="text-[10px] tabular opacity-70">{days.length}일</span>
           )}
         </button>
+      </div>
+
+      <div className="flex-shrink-0 border-b border-border px-3 py-2">
+        <TripPulse summary={tripPulse} />
       </div>
 
       {/* Day grid */}
