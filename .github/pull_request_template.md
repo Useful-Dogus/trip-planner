@@ -9,7 +9,7 @@
 ## 검증
 
 
-## 기본기 5문항 (Basics-First Rule — `CLAUDE.md` 참조)
+## 기본기 5문항 (Basics-First Rule — `docs/basics-first-rule.md` 참조)
 
 UI/제품 동선에 영향 있는 PR 이면 모두 체크. 해당 없으면 `N/A`.
 
@@ -29,4 +29,3 @@ UI/제품 동선에 영향 있는 PR 이면 모두 체크. 해당 없으면 `N/A
 - [ ] 약속한 동작이 실제로 구현되어 있는가? (카피 정직성)
 
 ## 남은 작업 / 리스크
-
