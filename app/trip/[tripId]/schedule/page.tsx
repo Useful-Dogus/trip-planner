@@ -6,7 +6,6 @@ import dynamic from 'next/dynamic'
 import Navigation from '@/components/Layout/Navigation'
 import ItemCardSkeleton from '@/components/UI/ItemCardSkeleton'
 import ScheduleTable from '@/components/Schedule/ScheduleTable'
-import ThemeToggle from '@/components/Theme/ThemeToggle'
 import { useItems } from '@/lib/hooks/useItems'
 import { useToast } from '@/components/UI/Toast'
 import TripPageHeader from '@/components/Layout/TripPageHeader'
@@ -14,6 +13,9 @@ import StickyAddBar from '@/components/UI/StickyAddBar'
 import IconButton from '@/components/UI/IconButton'
 import { Share } from 'lucide-react'
 import ExportScheduleDialog from '@/components/Schedule/ExportScheduleDialog'
+import TripPulse from '@/components/Trip/TripPulse'
+import { buildTripPath, useTripId } from '@/lib/hooks/useTripContext'
+import { getTripPulseSummary } from '@/lib/tripPulse'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
@@ -31,6 +33,7 @@ function SchedulePageContent() {
   const searchParams = useSearchParams()
   const { items, isLoading, updateItem, createItem, deleteItem } = useItems()
   const { showToast } = useToast()
+  const tripId = useTripId()
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(() =>
     searchParams.get('item'),
@@ -38,6 +41,11 @@ function SchedulePageContent() {
   const [exportOpen, setExportOpen] = useState(false)
 
   const selectedItem = items.find((i) => i.id === selectedItemId) ?? null
+  const tripPulse = getTripPulseSummary('schedule', items, {
+    list: buildTripPath(tripId, 'list'),
+    map: buildTripPath(tripId, 'map'),
+    schedule: buildTripPath(tripId, 'schedule'),
+  })
 
   const buildUrl = (params: URLSearchParams): string =>
     params.toString() ? `${pathname}?${params.toString()}` : pathname
@@ -85,6 +93,11 @@ function SchedulePageContent() {
             </div>
           }
         />
+        {!isLoading && (
+          <div className="px-4 md:px-8 mb-4">
+            <TripPulse summary={tripPulse} />
+          </div>
+        )}
       </div>
 
       {isLoading ? (
