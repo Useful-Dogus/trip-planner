@@ -121,8 +121,8 @@ export default function TableRow({
           }}
           onKeyDown={(e, currentValue) =>
             handleTextKeyDown(e, 'time_start', () => {
-              if (currentValue !== (item.time_start ?? '') && currentValue !== '') {
-                onCellSave('time_start', currentValue)
+              if (currentValue !== (item.time_start ?? '')) {
+                onCellSave('time_start', currentValue ? currentValue : null)
               }
             })
           }
