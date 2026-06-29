@@ -44,25 +44,29 @@ export default function PasswordStrengthMeter({ password }: Props) {
     }
   }, [password])
 
-  if (!password || !result) return null
+  const score = password && result ? result.score : null
+  const hasResult = score !== null
 
-  const tip = result.score < 3 ? '더 길게 쓰거나 추측하기 어려운 단어 조합을 써보세요.' : ''
+  const tip = score !== null && score < 3 ? '더 길게 쓰거나 추측하기 어려운 단어 조합을 써보세요.' : ''
 
   return (
-    <div className="mt-1.5" aria-live="polite">
+    <div className="mt-1.5 min-h-12" aria-live="polite">
       <div className="flex gap-1" role="presentation">
         {[0, 1, 2, 3].map((i) => (
           <span
             key={i}
             className={cn(
               'h-1 flex-1 rounded-full transition-colors',
-              i <= result.score - 1 ? BAR_COLOR[result.score] : 'bg-border',
+              score !== null && i <= score - 1 ? BAR_COLOR[score] : 'bg-border',
             )}
           />
         ))}
       </div>
-      <p className="mt-1 text-xs text-fg-subtle">
-        비밀번호 강도: <span className="font-medium text-fg-muted">{STRENGTH_LABEL[result.score]}</span>
+      <p className={cn('mt-1 text-xs text-fg-subtle', !hasResult && 'invisible')}>
+        비밀번호 강도:{' '}
+        <span className="font-medium text-fg-muted">
+          {score !== null ? STRENGTH_LABEL[score] : STRENGTH_LABEL[0]}
+        </span>
         {tip ? ` · ${tip}` : ''}
       </p>
     </div>

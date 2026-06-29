@@ -3,20 +3,36 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { clearAppCache } from '@/lib/clearAppCache'
+import { validatePasswordPolicy } from '@/lib/passwordPolicy'
 import { ErrorBanner, PasswordInput, PasswordStrengthMeter } from '@/components/UI'
 import { BrandMark, PRODUCT_TAGLINE } from '@/components/Brand/Wordmark'
 
 export default function SignupForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState<null | { needsEmailConfirmation: boolean }>(null)
+  const passwordMismatch = passwordConfirm.length > 0 && password !== passwordConfirm
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    if (password !== passwordConfirm) {
+      setError('비밀번호가 일치하지 않습니다.')
+      setLoading(false)
+      return
+    }
+
+    const passwordPolicy = await validatePasswordPolicy(password)
+    if (!passwordPolicy.ok) {
+      setError(passwordPolicy.message ?? '비밀번호를 다시 확인해주세요.')
+      setLoading(false)
+      return
+    }
 
     const res = await fetch('/api/auth/signup', {
       method: 'POST',
@@ -90,6 +106,24 @@ export default function SignupForm() {
                 required
               />
               <PasswordStrengthMeter password={password} />
+            </div>
+
+            <div>
+              <PasswordInput
+                label="비밀번호 확인"
+                value={passwordConfirm}
+                onChange={e => setPasswordConfirm(e.target.value)}
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+              <div className="min-h-5 pt-1">
+                {passwordMismatch && (
+                  <p className="text-xs text-critical-fg" role="alert">
+                    비밀번호가 일치하지 않습니다.
+                  </p>
+                )}
+              </div>
             </div>
 
             {error && (

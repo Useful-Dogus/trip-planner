@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { signUpWithEmail } from '@/lib/auth'
 import { mapAuthError } from '@/lib/auth-errors'
-import { isCommonPassword } from '@/lib/commonPasswords'
+import { validatePasswordPolicy } from '@/lib/passwordPolicy'
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
@@ -11,15 +11,8 @@ export async function POST(request: NextRequest) {
   if (!email || !password) {
     return NextResponse.json({ error: '이메일과 비밀번호를 입력해주세요.' }, { status: 400 })
   }
-  if (password.length < 8) {
-    return NextResponse.json({ error: '비밀번호는 8자 이상이어야 합니다.' }, { status: 400 })
-  }
-  if (isCommonPassword(password)) {
-    return NextResponse.json(
-      { error: '너무 흔한 비밀번호예요. 추측하기 어려운 비밀번호로 바꿔주세요.' },
-      { status: 400 },
-    )
-  }
+  const passwordPolicy = await validatePasswordPolicy(password)
+  if (!passwordPolicy.ok) return NextResponse.json({ error: passwordPolicy.message }, { status: 400 })
 
   const origin = new URL(request.url).origin
   const emailRedirectTo = `${origin}/api/auth/callback?next=/login`
