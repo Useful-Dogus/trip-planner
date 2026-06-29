@@ -70,6 +70,7 @@ export default function DashboardClient({ initialTrips }: Props) {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('created_desc')
   const [menuOpen, setMenuOpen] = useState<string | null>(null)
+  const showDiscoveryControls = trips.length > 3
 
   async function handleDeleteTrip(trip: TripSummary) {
     setMenuOpen(null)
@@ -134,34 +135,44 @@ export default function DashboardClient({ initialTrips }: Props) {
 
       <main className="max-w-5xl mx-auto px-4 md:px-8 py-6">
         {trips.length > 0 && (
-          <div className="flex flex-col md:flex-row gap-3 mb-6">
-            <div className="flex-1 min-w-0">
-              <Input
-                type="search"
-                hideLabel
-                label="여행 검색"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="이름·지역으로 검색"
-                leading={<Search className="size-4" aria-hidden="true" />}
-                data-shortcut="search"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="sr-only" htmlFor="sort-select">정렬</label>
-              <select
-                id="sort-select"
-                value={sort}
-                onChange={e => setSort(e.target.value as SortKey)}
-                className="bg-bg-elevated border border-border-strong rounded-lg px-3 py-2 text-sm text-fg focus:outline-none focus:ring-2 focus:ring-border-strong"
-              >
-                {(Object.keys(SORT_LABELS) as SortKey[]).map(k => (
-                  <option key={k} value={k}>
-                    {SORT_LABELS[k]}
-                  </option>
-                ))}
-              </select>
-              <Link href="/dashboard/new">
+          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            {showDiscoveryControls ? (
+              <div className="flex-1 min-w-0">
+                <Input
+                  type="search"
+                  hideLabel
+                  label="여행 검색"
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  placeholder="이름·지역으로 검색"
+                  leading={<Search className="size-4" aria-hidden="true" />}
+                  data-shortcut="search"
+                />
+              </div>
+            ) : (
+              <p className="text-sm text-fg-muted">
+                여행 {trips.length}개
+              </p>
+            )}
+            <div className="flex items-center justify-end gap-2">
+              {showDiscoveryControls && (
+                <>
+                  <label className="sr-only" htmlFor="sort-select">정렬</label>
+                  <select
+                    id="sort-select"
+                    value={sort}
+                    onChange={e => setSort(e.target.value as SortKey)}
+                    className="h-10 bg-bg-elevated border border-border-strong rounded-lg px-3 text-sm text-fg focus:outline-none focus:ring-2 focus:ring-border-strong"
+                  >
+                    {(Object.keys(SORT_LABELS) as SortKey[]).map(k => (
+                      <option key={k} value={k}>
+                        {SORT_LABELS[k]}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
+              <Link href="/dashboard/new" className="shrink-0">
                 <Button>
                   <Plus className="size-4 mr-1" aria-hidden="true" />
                   새 여행
