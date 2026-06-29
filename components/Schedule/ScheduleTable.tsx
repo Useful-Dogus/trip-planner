@@ -29,7 +29,6 @@ import DateGroupHeader from './DateGroupHeader'
 import UndatedGroupHeader from './UndatedGroupHeader'
 import DistanceSeparator from './DistanceSeparator'
 import ItemWarnings from './ItemWarnings'
-import { useDraggable } from '@dnd-kit/core'
 
 interface EditingCell {
   itemId: string
@@ -125,10 +124,12 @@ function formatDate(dateStr: string): string {
 function MobileScheduleItemCard({
   item,
   onOpenPanel,
+  onChangeDate,
   todayKey,
 }: {
   item: TripItem
   onOpenPanel: (id: string) => void
+  onChangeDate: (id: string, date: string | null) => void
   todayKey: string
 }) {
   const trip = useOptionalTrip()
@@ -136,17 +137,13 @@ function MobileScheduleItemCard({
   const budget = formatBudget(item.budget, trip?.currency ?? 'KRW')
   const time = formatTimeRange(item)
   const Icon = CATEGORY_META[item.category]?.Icon
-  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
-    id: `drag:item:${item.id}`,
-    data: { itemId: item.id, sourceDate: item.date ?? null },
-  })
 
   return (
-    <div ref={setNodeRef} className={`relative ${isDragging ? 'opacity-40' : ''}`}>
+    <div className="rounded-2xl border border-border bg-bg-elevated p-4 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md">
       <button
         type="button"
         onClick={() => onOpenPanel(item.id)}
-        className="w-full rounded-2xl border border-border bg-bg-elevated p-4 pl-10 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md active:scale-[0.99]"
+        className="w-full text-left"
       >
         <div className="flex items-start gap-3">
           <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-bg-subtle text-fg-muted">
@@ -163,27 +160,71 @@ function MobileScheduleItemCard({
                 {status.label}
               </span>
             </div>
-
-            <div className="mt-3 flex items-center justify-between gap-3 text-xs text-fg-muted">
-              <span className="tabular-nums">{time}</span>
-              {budget ? <span className="tabular-nums font-medium text-fg">{budget}</span> : <span />}
-            </div>
-            <ItemWarnings item={item} todayKey={todayKey} className="mt-2" />
           </div>
         </div>
       </button>
-      <span
-        {...listeners}
-        {...attributes}
-        role="button"
-        aria-label="길게 눌러 다른 날짜로 이동"
-        className="absolute top-0 left-0 bottom-0 w-8 flex items-center justify-center text-fg-subtle touch-none cursor-grab active:cursor-grabbing rounded-l-2xl"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M7 4a1 1 0 11-2 0 1 1 0 012 0zM7 10a1 1 0 11-2 0 1 1 0 012 0zM7 16a1 1 0 11-2 0 1 1 0 012 0zM15 4a1 1 0 11-2 0 1 1 0 012 0zM15 10a1 1 0 11-2 0 1 1 0 012 0zM15 16a1 1 0 11-2 0 1 1 0 012 0z" />
-        </svg>
-      </span>
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-fg-muted">
+        <div className="flex flex-wrap items-center gap-2">
+          <MobileDateChangeControl
+            currentDate={item.date ?? null}
+            onChange={(date) => onChangeDate(item.id, date)}
+          />
+          <span className="tabular-nums">{time}</span>
+        </div>
+        {budget ? <span className="tabular-nums font-medium text-fg">{budget}</span> : <span />}
+      </div>
+      <ItemWarnings item={item} todayKey={todayKey} className="mt-2" />
     </div>
+  )
+}
+
+function MobileDateChangeControl({
+  currentDate,
+  onChange,
+}: {
+  currentDate: string | null
+  onChange: (date: string | null) => void
+}) {
+  const trip = useOptionalTrip()
+  const inputRef = useRef<HTMLInputElement>(null)
+  return (
+    <span className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => {
+          const el = inputRef.current
+          if (!el) return
+          if (typeof (el as HTMLInputElement & { showPicker?: () => void }).showPicker === 'function') {
+            ;(el as HTMLInputElement & { showPicker: () => void }).showPicker()
+          } else {
+            el.focus()
+            el.click()
+          }
+        }}
+        className="inline-flex min-h-9 items-center gap-1 rounded-lg border border-border bg-bg-subtle px-2.5 text-xs font-medium text-fg-muted"
+        aria-label="날짜 변경"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="size-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fillRule="evenodd" d="M6 2a1 1 0 011 1v1h6V3a1 1 0 112 0v1h1a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 011-1zM4 8v8h12V8H4z" clipRule="evenodd" />
+        </svg>
+        날짜
+      </button>
+      <input
+        ref={inputRef}
+        type="date"
+        value={currentDate ?? ''}
+        min={trip?.startDate ?? undefined}
+        max={trip?.endDate ?? undefined}
+        onChange={(e) => {
+          const next = e.target.value || null
+          if (next !== currentDate) onChange(next)
+        }}
+        className="absolute inset-0 opacity-0 pointer-events-none"
+        tabIndex={-1}
+        aria-hidden
+      />
+    </span>
   )
 }
 
@@ -553,7 +594,12 @@ export default function ScheduleTable({
           return (
             <Fragment key={item.id}>
               {km != null && <DistanceSeparator km={km} variant="mobile" />}
-              <MobileScheduleItemCard item={item} onOpenPanel={onOpenPanel} todayKey={todayKey} />
+              <MobileScheduleItemCard
+                item={item}
+                onOpenPanel={onOpenPanel}
+                onChangeDate={(id, nextDate) => onUpdateItem(id, { date: nextDate })}
+                todayKey={todayKey}
+              />
             </Fragment>
           )
         })}
