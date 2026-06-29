@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom'
 import type { Category } from '@/types'
 import { CATEGORY_META, CATEGORY_OPTIONS } from '@/lib/itemOptions'
 
+const PORTAL_MARGIN = 8
+
 interface CategoryCellProps {
   value: Category
   isEditing: boolean
@@ -23,14 +25,24 @@ export default function CategoryCell({
   const buttonRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
+  const rawValue = String(value)
+  const safeCategory = CATEGORY_OPTIONS.includes(value) ? value : '기타'
+  const CurrentIcon = CATEGORY_META[safeCategory].Icon
+  const label = safeCategory === value ? value : `${rawValue} (분류 확인 필요)`
 
   useEffect(() => {
-    if (!isEditing) return
+    if (!isEditing || typeof window === 'undefined') {
+      setPosition(null)
+      return
+    }
 
     function updatePosition() {
       const rect = buttonRef.current?.getBoundingClientRect()
       if (!rect) return
-      setPosition({ top: rect.bottom + 4, left: rect.left })
+      setPosition({
+        top: rect.bottom + 4,
+        left: Math.max(PORTAL_MARGIN, rect.left),
+      })
     }
 
     function handleClickOutside(e: MouseEvent) {
@@ -51,16 +63,12 @@ export default function CategoryCell({
   }, [isEditing, onClose])
 
   useLayoutEffect(() => {
-    if (!position || !dropdownRef.current) return
+    if (!position || !dropdownRef.current || typeof window === 'undefined') return
     const dropRect = dropdownRef.current.getBoundingClientRect()
-    if (dropRect.right > window.innerWidth) {
-      setPosition(prev =>
-        prev ? { ...prev, left: Math.max(0, prev.left - (dropRect.right - window.innerWidth)) } : prev
-      )
-    }
+    const maxLeft = Math.max(PORTAL_MARGIN, window.innerWidth - dropRect.width - PORTAL_MARGIN)
+    const nextLeft = Math.min(Math.max(PORTAL_MARGIN, position.left), maxLeft)
+    if (nextLeft !== position.left) setPosition({ ...position, left: nextLeft })
   }, [position])
-
-  const CurrentIcon = CATEGORY_META[value]?.Icon
 
   return (
     <>
@@ -69,14 +77,15 @@ export default function CategoryCell({
         type="button"
         onClick={onClick}
         className="inline-flex items-center justify-center leading-none select-none cursor-pointer text-fg-muted hover:text-fg transition-colors"
-        title={value}
-        aria-label={value}
+        title={label}
+        aria-label={label}
       >
-        {CurrentIcon ? <CurrentIcon size={16} /> : null}
+        <CurrentIcon size={16} />
       </button>
 
       {isEditing &&
         position &&
+        typeof document !== 'undefined' &&
         createPortal(
           <div
             ref={dropdownRef}
