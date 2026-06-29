@@ -25,6 +25,15 @@ function withTripId(url: string, tripId: string | null): string {
   return `${url}${sep}tripId=${encodeURIComponent(tripId)}`
 }
 
+async function readErrorMessage(res: Response, fallback: string): Promise<string> {
+  try {
+    const payload = (await res.json()) as { error?: unknown }
+    return typeof payload.error === 'string' && payload.error.trim() ? payload.error : fallback
+  } catch {
+    return fallback
+  }
+}
+
 export function useItems() {
   const [hasMounted, setHasMounted] = useState(false)
   const tripId = useOptionalTripId()
@@ -70,13 +79,14 @@ export function useItems() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(changes),
       })
-      if (!res.ok) throw new Error('Save failed')
+      if (!res.ok) throw new Error(await readErrorMessage(res, '저장에 실패했습니다.'))
       mutate()
-    } catch {
+    } catch (e) {
       mutate(snapshot, { revalidate: false })
+      const message = e instanceof Error ? e.message : '저장에 실패했습니다.'
       showToast({
         type: 'error',
-        message: '저장에 실패했습니다.',
+        message,
         action: { label: '재시도', onClick: () => updateItem(id, changes) },
       })
     }
