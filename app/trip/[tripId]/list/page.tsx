@@ -23,6 +23,7 @@ import { Input } from '@/components/UI/Input'
 import { useItems } from '@/lib/hooks/useItems'
 import { useToast } from '@/components/UI/Toast'
 import { getTripPulseSummary } from '@/lib/tripPulse'
+import { TRIP_WORKSPACE_CLASS } from '@/lib/tripLayout'
 import type { FilterState } from '@/components/Items/ItemList'
 import { getActiveFilterCount } from '@/components/Items/ItemList'
 import type { Category, ReservationStatus, TripPriority } from '@/types'
@@ -270,64 +271,66 @@ function ResearchPageContent() {
   return (
     <div className="md:pl-44 bg-bg text-fg min-h-screen">
       <header className="px-4 md:px-8 pt-4">
-        <div className="flex items-center justify-between mb-4">
-          <TripPageTitle section="목록" />
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/trip/${tripId}/items/new`}
-              className="hidden md:inline-flex items-center gap-1.5 rounded-md bg-accent text-accent-fg px-3 py-1.5 text-sm font-medium hover:bg-accent-hover"
-            >
-              <Plus className="size-4" aria-hidden />
-              새 항목
-            </Link>
-            <button
-              type="button"
-              onClick={() => setShareDialogOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-bg px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-bg-subtle"
-              aria-label="공유 링크 관리"
-            >
-              <Share2 className="size-4" aria-hidden />
-              공유
-            </button>
+        <div className={TRIP_WORKSPACE_CLASS}>
+          <div className="flex items-center justify-between mb-4">
+            <TripPageTitle section="목록" />
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/trip/${tripId}/items/new`}
+                className="hidden md:inline-flex items-center gap-1.5 rounded-md bg-accent text-accent-fg px-3 py-1.5 text-sm font-medium hover:bg-accent-hover"
+              >
+                <Plus className="size-4" aria-hidden />
+                새 항목
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShareDialogOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-bg px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-bg-subtle"
+                aria-label="공유 링크 관리"
+              >
+                <Share2 className="size-4" aria-hidden />
+                공유
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div className="hidden md:block mb-4">
-          <div className="flex items-center gap-2">
-            <div className="flex-1 min-w-0">
-              <Input
-                type="search"
-                hideLabel
-                label="검색"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="이름·주소·메모로 검색"
-                leading={<Search className="size-4" aria-hidden="true" />}
-                data-shortcut="search"
-              />
+          <div className="hidden md:block mb-4">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 min-w-0">
+                <Input
+                  type="search"
+                  hideLabel
+                  label="검색"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="이름·주소·메모로 검색"
+                  leading={<Search className="size-4" aria-hidden="true" />}
+                  data-shortcut="search"
+                />
+              </div>
+              <div className="relative flex items-center gap-1.5 flex-shrink-0">
+                <FilterButton
+                  activeCount={activeCount}
+                  onClick={() => setFilterPanelOpen((v) => !v)}
+                />
+                <FilterPanel
+                  isOpen={filterPanelOpen}
+                  filterState={filterState}
+                  onChange={setFilterState}
+                  onClose={() => setFilterPanelOpen(false)}
+                />
+              </div>
             </div>
-            <div className="relative flex items-center gap-1.5 flex-shrink-0">
-              <FilterButton
-                activeCount={activeCount}
-                onClick={() => setFilterPanelOpen((v) => !v)}
-              />
-              <FilterPanel
-                isOpen={filterPanelOpen}
-                filterState={filterState}
-                onChange={setFilterState}
-                onClose={() => setFilterPanelOpen(false)}
-              />
-            </div>
+            {activeChips.length > 0 && (
+              <div className="mt-2">
+                <ActiveFilterChips chips={activeChips} />
+              </div>
+            )}
+            {!isLoading && <TripPulse summary={tripPulse} className="mt-3" />}
+            <p className="text-xs text-fg-subtle mt-2 tabular" aria-live="polite">
+              {filteredItems.length}개 항목
+            </p>
           </div>
-          {activeChips.length > 0 && (
-            <div className="mt-2">
-              <ActiveFilterChips chips={activeChips} />
-            </div>
-          )}
-          {!isLoading && <TripPulse summary={tripPulse} className="mt-3" />}
-          <p className="text-xs text-fg-subtle mt-2 tabular" aria-live="polite">
-            {filteredItems.length}개 항목
-          </p>
         </div>
       </header>
 
@@ -336,17 +339,19 @@ function ResearchPageContent() {
         if (unnamedCount === 0) return null
         return (
           <div className="px-4 md:px-8 mb-3">
-            <button
-              type="button"
-              onClick={() => setUnnamedDialogOpen(true)}
-              className="w-full flex items-center gap-2 rounded-lg border border-border bg-warning-bg text-warning-fg px-3 py-2 text-sm hover:opacity-90"
-            >
-              <MapPin className="size-4 shrink-0" aria-hidden />
-              <span className="flex-1 text-left">
-                이름 미정 {unnamedCount}개 — 일괄 편집
-              </span>
-              <span className="text-xs opacity-80">열기 →</span>
-            </button>
+            <div className={TRIP_WORKSPACE_CLASS}>
+              <button
+                type="button"
+                onClick={() => setUnnamedDialogOpen(true)}
+                className="w-full flex items-center gap-2 rounded-lg border border-border bg-warning-bg text-warning-fg px-3 py-2 text-sm hover:opacity-90"
+              >
+                <MapPin className="size-4 shrink-0" aria-hidden />
+                <span className="flex-1 text-left">
+                  이름 미정 {unnamedCount}개 — 일괄 편집
+                </span>
+                <span className="text-xs opacity-80">열기 →</span>
+              </button>
+            </div>
           </div>
         )
       })()}
@@ -358,7 +363,7 @@ function ResearchPageContent() {
               <ItemCardSkeleton key={i} />
             ))}
           </div>
-          <div className="hidden md:block px-8">
+          <div className={`hidden md:block px-8 ${TRIP_WORKSPACE_CLASS}`}>
             <ResearchTableSkeleton />
           </div>
         </>
@@ -377,7 +382,7 @@ function ResearchPageContent() {
             />
             <StickyAddBar />
           </div>
-          <div className="hidden md:block px-8 pb-6">
+          <div className={`hidden md:block px-8 pb-6 ${TRIP_WORKSPACE_CLASS}`}>
             <ResearchTable
               items={filteredItems}
               onUpdateItem={updateItem}
