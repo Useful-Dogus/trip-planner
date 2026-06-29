@@ -16,6 +16,7 @@ import {
   type TripBounds,
 } from '@/lib/trips'
 import { isValidOpeningHours, isValidClosedDays } from '@/lib/itemValidation'
+import { normalizeTimeField } from '@/lib/timeInput'
 
 function validateItem(body: Record<string, unknown>, bounds: TripBounds | null): string | null {
   if (!body.name || typeof body.name !== 'string' || !body.name.trim()) {
@@ -104,16 +105,10 @@ function validateItem(body: Record<string, unknown>, bounds: TripBounds | null):
   ) {
     return 'end_date는 시작 날짜보다 빠를 수 없습니다.'
   }
-  if (body.time_start !== undefined && !/^\d{2}:\d{2}$/.test(body.time_start as string)) {
-    return 'time_start는 HH:MM 형식이어야 합니다.'
-  }
-  if (
-    body.time_end !== undefined &&
-    body.time_end !== null &&
-    !/^\d{2}:\d{2}$/.test(body.time_end as string)
-  ) {
-    return 'time_end는 HH:MM 형식이어야 합니다.'
-  }
+  const timeStartError = normalizeTimeField(body, 'time_start')
+  if (timeStartError) return timeStartError
+  const timeEndError = normalizeTimeField(body, 'time_end')
+  if (timeEndError) return timeEndError
   if (body.time_start !== undefined && body.time_start !== null && !body.date) {
     return 'time_start를 입력하려면 시작 날짜가 필요합니다.'
   }

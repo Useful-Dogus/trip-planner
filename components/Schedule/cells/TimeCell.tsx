@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
+import { normalizeTimeInput } from '@/lib/timeInput'
 
 interface TimeCellProps {
   value: string | undefined
@@ -10,17 +11,16 @@ interface TimeCellProps {
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>, currentValue: string) => void
 }
 
-function isValidTime(value: string): boolean {
-  return /^\d{2}:\d{2}$/.test(value)
-}
-
 export default function TimeCell({ value, isEditing, onClick, onBlur, onKeyDown }: TimeCellProps) {
+  const errorId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
   const [draft, setDraft] = useState(value ?? '')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (isEditing) {
       setDraft(value ?? '')
+      setError(null)
       setTimeout(() => {
         inputRef.current?.focus()
         inputRef.current?.select()
@@ -35,29 +35,58 @@ export default function TimeCell({ value, isEditing, onClick, onBlur, onKeyDown 
   }, [value, isEditing])
 
   function handleBlur() {
-    if (draft === '') {
+    const result = normalizeTimeInput(draft)
+    if (result.status === 'empty') {
       onBlur(undefined)
-    } else if (isValidTime(draft)) {
-      onBlur(draft)
+    } else if (result.status === 'complete') {
+      onBlur(result.value)
     } else {
-      // 잘못된 포맷이면 원래 값으로 복원
-      setDraft(value ?? '')
-      onBlur(value)
+      setError(result.message)
+      setTimeout(() => inputRef.current?.focus(), 0)
     }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      const result = normalizeTimeInput(draft)
+      if (result.status === 'partial' || result.status === 'invalid') {
+        e.preventDefault()
+        setError(result.message)
+        return
+      }
+      onKeyDown(e, result.value ?? '')
+      return
+    }
+    setError(null)
+    onKeyDown(e, draft)
   }
 
   if (isEditing) {
     return (
+      <>
       <input
         ref={inputRef}
         value={draft}
-        onChange={e => setDraft(e.target.value)}
+        onChange={e => {
+          setDraft(e.target.value)
+          setError(null)
+        }}
         onBlur={handleBlur}
-        onKeyDown={e => onKeyDown(e, draft)}
-        placeholder="HH:MM"
-        className="w-16 bg-transparent border-b border-border-strong focus:border-accent outline-none text-sm text-fg py-0.5"
+        onKeyDown={handleKeyDown}
+        placeholder="08:00"
+        className={`w-16 bg-transparent border-b outline-none text-sm py-0.5 ${
+          error ? 'border-critical-fg text-critical-fg' : 'border-border-strong focus:border-accent text-fg'
+        }`}
         style={{ fontSize: 16 }}
+        aria-invalid={!!error}
+        aria-describedby={error ? errorId : undefined}
       />
+      {error && (
+        <p id={errorId} className="mt-1 w-32 text-xs text-critical-fg">
+          {error}
+        </p>
+      )}
+      </>
     )
   }
 
