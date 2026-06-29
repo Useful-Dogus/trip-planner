@@ -16,6 +16,7 @@ import ExportScheduleDialog from '@/components/Schedule/ExportScheduleDialog'
 import TripPulse from '@/components/Trip/TripPulse'
 import { buildTripPath, useTripId } from '@/lib/hooks/useTripContext'
 import { getTripPulseSummary } from '@/lib/tripPulse'
+import { TRIP_WORKSPACE_CLASS } from '@/lib/tripLayout'
 
 const ItemPanel = dynamic(() => import('@/components/Panel/ItemPanel'), { ssr: false })
 
@@ -78,7 +79,7 @@ function SchedulePageContent() {
 
   return (
     <div className="md:pl-44 bg-bg text-fg min-h-screen">
-      <div className="max-w-3xl mx-auto">
+      <div className={TRIP_WORKSPACE_CLASS}>
         <TripPageHeader
           section="일정"
           actions={
@@ -101,13 +102,13 @@ function SchedulePageContent() {
       </div>
 
       {isLoading ? (
-        <div className="max-w-3xl mx-auto px-4 space-y-2">
+        <div className={`${TRIP_WORKSPACE_CLASS} px-4 space-y-2`}>
           {Array.from({ length: 5 }).map((_, i) => (
             <ItemCardSkeleton key={i} />
           ))}
         </div>
       ) : (
-        <div className="max-w-3xl mx-auto px-4 pb-32 md:pb-6">
+        <div className={`${TRIP_WORKSPACE_CLASS} px-4 pb-32 md:pb-6`}>
           <ScheduleTable
             items={items}
             onUpdateItem={updateItem}
