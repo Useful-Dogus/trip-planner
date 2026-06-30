@@ -41,14 +41,16 @@ export default function EmptyState({
       )}
       <p
         className={cn(
-          'font-semibold text-fg',
+          'text-keep-korean font-semibold text-fg',
           size === 'page' ? 'text-base' : 'text-sm',
         )}
       >
         {title}
       </p>
       {description && (
-        <p className="text-sm text-fg-muted max-w-sm leading-relaxed">{description}</p>
+        <p className="text-keep-korean max-w-md text-sm leading-relaxed text-fg-muted">
+          {description}
+        </p>
       )}
       {action && <div className="mt-2">{action}</div>}
     </div>
