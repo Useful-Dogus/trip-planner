@@ -83,7 +83,7 @@ export default function TripPlannerMap({
           setBasecampCoord([data.lat, data.lng])
         }
       } catch {
-        // 베이스캠프 좌표 실패는 silent — lodging item 만으로 동작
+        // 지도 기준점 좌표 실패는 silent — lodging item 만으로 동작
       }
     })()
     return () => {
@@ -211,7 +211,7 @@ export default function TripPlannerMap({
           interactive={false}
         >
           <Tooltip direction="top" offset={[0, -16]} opacity={0.9}>
-            <span className="text-xs font-medium">베이스캠프</span>
+            <span className="text-xs font-medium">지도 기준점</span>
           </Tooltip>
         </Marker>
       )}

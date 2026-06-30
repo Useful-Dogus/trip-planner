@@ -193,7 +193,7 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
       open={open}
       onClose={onClose}
       title="여행 설정"
-      description="제목·기간·지역·베이스캠프를 수정합니다."
+      description="제목·기간·지역·지도 기준점을 수정합니다."
       footer={
         <>
           <Button type="button" variant="ghost" onClick={onClose} disabled={saving}>
@@ -249,12 +249,18 @@ export default function TripSettingsSheet({ open, onClose }: Props) {
               onPickOther={() => void resolveAndStore(region, { skipPreset: true })}
             />
           </div>
-          <Input
-            label="베이스캠프 주소"
-            placeholder="숙소 등 동선의 기준점"
-            value={basecamp}
-            onChange={(e) => setBasecamp(e.target.value)}
-          />
+          <div>
+            <Input
+              label="지도 기준점 주소 (선택)"
+              placeholder="예: 첫날 자주 출발할 위치"
+              value={basecamp}
+              onChange={(e) => setBasecamp(e.target.value)}
+            />
+            <p className="mt-1 text-xs text-fg-subtle">
+              지도 중심을 잡기 위한 한 곳만 저장합니다. 숙소가 여러 곳이면 일정에 숙박 항목으로
+              추가하세요.
+            </p>
+          </div>
           <div>
             <label className="block text-sm font-medium text-fg mb-1.5">통화</label>
             <select
