@@ -132,7 +132,7 @@ export default async function SharePage({ params }: Props) {
         </dl>
         {trip.basecamp_address && (
           <p className="mt-2 text-sm text-fg-subtle">
-            <span className="font-medium text-fg-muted">베이스캠프</span>{' '}
+            <span className="font-medium text-fg-muted">지도 기준점</span>{' '}
             <span className="break-words">{trip.basecamp_address}</span>
           </p>
         )}

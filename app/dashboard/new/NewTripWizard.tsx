@@ -31,7 +31,7 @@ const STEP_TITLES: Record<Step, string> = {
   1: '여행 이름',
   2: '기간',
   3: '지역',
-  4: '베이스캠프',
+  4: '통화',
   5: '확인',
 }
 
@@ -45,7 +45,6 @@ export default function NewTripWizard() {
   const [endDate, setEndDate] = useState('')
   const [region, setRegion] = useState('')
   const [center, setCenter] = useState<CenterValue | null>(null)
-  const [basecamp, setBasecamp] = useState('')
   const [currency, setCurrency] = useState<CurrencyCode>('KRW')
   const [submitting, setSubmitting] = useState(false)
   const [restored, setRestored] = useState(false)
@@ -58,7 +57,6 @@ export default function NewTripWizard() {
     startDate !== '' ||
     endDate !== '' ||
     region.trim() !== '' ||
-    basecamp.trim() !== '' ||
     center !== null
 
   // 마운트 시 1회: 임시 저장된 드래프트가 있으면 복원한다(클라이언트 전용 — SSR 불일치 방지).
@@ -73,11 +71,10 @@ export default function NewTripWizard() {
           endDate: string
           region: string
           center: CenterValue | null
-          basecamp: string
           currency: CurrencyCode
         }>
         const hasInput =
-          d.title || d.startDate || d.endDate || d.region || d.basecamp || d.center
+          d.title || d.startDate || d.endDate || d.region || d.center
         if (hasInput) {
           if (typeof d.step === 'number') setStep(d.step)
           if (typeof d.title === 'string') setTitle(d.title)
@@ -85,7 +82,6 @@ export default function NewTripWizard() {
           if (typeof d.endDate === 'string') setEndDate(d.endDate)
           if (typeof d.region === 'string') setRegion(d.region)
           if (d.center) setCenter(d.center)
-          if (typeof d.basecamp === 'string') setBasecamp(d.basecamp)
           if (typeof d.currency === 'string') setCurrency(d.currency)
           setRestored(true)
         }
@@ -107,14 +103,14 @@ export default function NewTripWizard() {
       try {
         sessionStorage.setItem(
           DRAFT_KEY,
-          JSON.stringify({ step, title, startDate, endDate, region, center, basecamp, currency }),
+          JSON.stringify({ step, title, startDate, endDate, region, center, currency }),
         )
       } catch {
         /* 용량 초과 등은 무시 */
       }
     }, 400)
     return () => clearTimeout(t)
-  }, [step, title, startDate, endDate, region, center, basecamp, currency, isDirty])
+  }, [step, title, startDate, endDate, region, center, currency, isDirty])
 
   // 새로고침·탭 닫기 시 브라우저 기본 경고(입력이 있을 때만).
   useEffect(() => {
@@ -143,7 +139,6 @@ export default function NewTripWizard() {
     setEndDate('')
     setRegion('')
     setCenter(null)
-    setBasecamp('')
     setCurrency('KRW')
     setRestored(false)
   }
@@ -196,7 +191,6 @@ export default function NewTripWizard() {
           start_date: startDate || null,
           end_date: endDate || null,
           region: region.trim() || null,
-          basecamp_address: basecamp.trim() || null,
           currency,
         }),
       })
@@ -317,15 +311,13 @@ export default function NewTripWizard() {
           )}
           {step === 4 && (
             <Step4
-              basecamp={basecamp}
-              setBasecamp={setBasecamp}
               currency={currency}
               setCurrency={setCurrency}
             />
           )}
           {step === 5 && (
             <Step5
-              summary={{ title, startDate, endDate, region, basecamp, currency }}
+              summary={{ title, startDate, endDate, region, currency }}
               centerManual={center?.source === 'manual'}
               onEdit={jumpToStep}
             />
@@ -448,48 +440,29 @@ function Step3({
 }
 
 function Step4({
-  basecamp,
-  setBasecamp,
   currency,
   setCurrency,
 }: {
-  basecamp: string
-  setBasecamp: (v: string) => void
   currency: CurrencyCode
   setCurrency: (c: CurrencyCode) => void
 }) {
-  const isTouch = useIsTouchDevice()
   return (
-    <div className="space-y-4">
-      <div>
-        <LocationAutocompleteInput
-          label="베이스캠프 (선택 · 숙소)"
-          value={basecamp}
-          onChange={setBasecamp}
-          placeholder="예: 난바 인근 호텔"
-          autoFocus={!isTouch}
-        />
-        <p className="text-xs text-fg-subtle mt-1">
-          비워두면 여행을 만든 뒤 설정에서 추가할 수 있어요.
-        </p>
-      </div>
-      <div className="border-t border-border pt-4">
-        <label className="block text-sm font-medium text-fg mb-1.5">통화</label>
-        <select
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
-          className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-fg focus-visible:outline-2 focus-visible:outline-accent"
-        >
-          {SUPPORTED_CURRENCIES.map((c) => (
-            <option key={c.code} value={c.code}>
-              {c.symbol} {c.code} — {c.label}
-            </option>
-          ))}
-        </select>
-        <p className="text-xs text-fg-subtle mt-1">
-          예산을 입력·표시할 통화를 정해요. 여행 설정에서 나중에 바꿀 수 있어요.
-        </p>
-      </div>
+    <div>
+      <label className="block text-sm font-medium text-fg mb-1.5">통화</label>
+      <select
+        value={currency}
+        onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
+        className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-fg focus-visible:outline-2 focus-visible:outline-accent"
+      >
+        {SUPPORTED_CURRENCIES.map((c) => (
+          <option key={c.code} value={c.code}>
+            {c.symbol} {c.code} — {c.label}
+          </option>
+        ))}
+      </select>
+      <p className="text-xs text-fg-subtle mt-1">
+        예산을 입력·표시할 통화를 정해요. 여행 설정에서 나중에 바꿀 수 있어요.
+      </p>
     </div>
   )
 }
@@ -515,7 +488,7 @@ function Step5({
   centerManual,
   onEdit,
 }: {
-  summary: { title: string; startDate: string; endDate: string; region: string; basecamp: string; currency: CurrencyCode }
+  summary: { title: string; startDate: string; endDate: string; region: string; currency: CurrencyCode }
   centerManual: boolean
   onEdit: (step: Step) => void
 }) {
@@ -542,11 +515,6 @@ function Step5({
             (summary.region || '미설정') + (centerManual ? ' · 중심 직접 지정' : '')
           }
           onEdit={() => onEdit(3)}
-        />
-        <SummaryEditRow
-          label="베이스캠프"
-          value={summary.basecamp.trim() || '미설정 (나중에 추가 가능)'}
-          onEdit={() => onEdit(4)}
         />
         <SummaryEditRow
           label="통화"
