@@ -54,89 +54,91 @@ export default function DateGroupHeader({
   return (
     <div
       ref={setNodeRef}
-      className={`bg-bg-elevated border-b border-border sticky top-0 z-10 transition-colors ${
+      className={`sticky top-0 z-10 border-y border-border-strong bg-bg-elevated/95 shadow-sm backdrop-blur transition-colors ${
         isDropTarget ? 'bg-accent-subtle ring-2 ring-accent ring-inset' : ''
       }`}
     >
-      <div className="flex items-center gap-2 px-3 py-3">
-      <button
-        type="button"
-        onClick={onToggleCollapse}
-        className="flex items-center gap-2 flex-1 min-w-0 text-left group"
-      >
-        <span className="text-sm font-semibold text-fg whitespace-nowrap">
-          {formatDate(date)}
-        </span>
-        {isToday && (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-info-bg text-info-fg">
-            오늘
-          </span>
-        )}
-        {!isUndated && dayOffset !== null && (
-          <span className="text-xs text-fg-muted font-normal whitespace-nowrap">D+{dayOffset}</span>
-        )}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className={`w-3.5 h-3.5 text-fg-subtle transition-transform flex-shrink-0 ${isCollapsed ? '-rotate-90' : ''}`}
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
-
-      <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
-        {lodgingName && (
-          <span
-            className="inline-flex items-center gap-1 text-xs text-fg-muted min-w-0 max-w-[10rem] sm:max-w-[14rem]"
-            title={lodgingName}
-          >
-            <span className="flex-shrink-0">🏨</span>
-            <span className="truncate">{lodgingName}</span>
-          </span>
-        )}
-        {totalBudget > 0 && (() => {
-          const tripCurrency = normalizeCurrency(trip?.currency)
-          const homeCurrency = isCurrencyCode(trip?.homeCurrency) ? trip.homeCurrency : null
-          const converted = formatHomeConversion(
-            totalBudget,
-            tripCurrency,
-            homeCurrency,
-            trip?.homeCurrencyRate ?? null,
-          )
-          return (
-            <span className="text-xs text-fg-muted tabular-nums">
-              {formatBudget(totalBudget, tripCurrency)}
-              {converted && (
-                <span className="ml-1 text-fg-subtle">≈ {converted}</span>
-              )}
-            </span>
-          )
-        })()}
+      <div className="flex min-h-14 flex-wrap items-center gap-x-4 gap-y-2 px-4 py-4 sm:flex-nowrap sm:px-5">
         <button
           type="button"
-          onClick={onAddItem}
-          className="flex items-center gap-1 text-xs text-fg-subtle hover:text-fg transition-colors"
+          onClick={onToggleCollapse}
+          className="group flex min-w-0 flex-1 items-center gap-2 text-left"
         >
+          <span className="text-base font-semibold leading-snug text-fg whitespace-nowrap">
+            {formatDate(date)}
+          </span>
+          {isToday && (
+            <span className="inline-flex items-center rounded bg-info-bg px-1.5 py-0.5 text-xs font-medium text-info-fg">
+              오늘
+            </span>
+          )}
+          {!isUndated && dayOffset !== null && (
+            <span className="rounded bg-bg-subtle px-1.5 py-0.5 text-xs font-medium text-fg-muted whitespace-nowrap">
+              D+{dayOffset}
+            </span>
+          )}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="w-3.5 h-3.5"
+            className={`h-4 w-4 flex-shrink-0 text-fg-subtle transition-transform ${isCollapsed ? '-rotate-90' : ''}`}
             viewBox="0 0 20 20"
             fill="currentColor"
           >
             <path
               fillRule="evenodd"
-              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
               clipRule="evenodd"
             />
           </svg>
-          추가
         </button>
-      </div>
+
+        <div className="flex min-w-0 flex-shrink-0 items-center gap-3">
+          {lodgingName && (
+            <span
+              className="inline-flex min-w-0 max-w-[10rem] items-center gap-1 text-xs text-fg-muted sm:max-w-[14rem]"
+              title={lodgingName}
+            >
+              <span className="flex-shrink-0">🏨</span>
+              <span className="truncate">{lodgingName}</span>
+            </span>
+          )}
+          {totalBudget > 0 && (() => {
+            const tripCurrency = normalizeCurrency(trip?.currency)
+            const homeCurrency = isCurrencyCode(trip?.homeCurrency) ? trip.homeCurrency : null
+            const converted = formatHomeConversion(
+              totalBudget,
+              tripCurrency,
+              homeCurrency,
+              trip?.homeCurrencyRate ?? null,
+            )
+            return (
+              <span className="text-xs text-fg-muted tabular-nums">
+                {formatBudget(totalBudget, tripCurrency)}
+                {converted && (
+                  <span className="ml-1 text-fg-subtle">≈ {converted}</span>
+                )}
+              </span>
+            )
+          })()}
+          <button
+            type="button"
+            onClick={onAddItem}
+            className="flex min-h-8 items-center gap-1 text-xs font-medium text-fg-subtle transition-colors hover:text-fg"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-3.5 h-3.5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+            추가
+          </button>
+        </div>
       </div>
     </div>
   )
