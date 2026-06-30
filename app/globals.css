@@ -4,6 +4,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .text-keep-korean {
+    line-break: strict;
+    overflow-wrap: break-word;
+    word-break: keep-all;
+  }
+}
+
 /* ============================================================
  * 시맨틱 디자인 토큰
  * - 색은 RGB triple 로 정의해 Tailwind 의 rgb(var(--x) / <alpha-value>) 와 호환

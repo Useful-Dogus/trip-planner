@@ -521,6 +521,7 @@ Key + Ambient 2종 합성, 14% opacity 기본. trip-planner 매핑:
 - `title`: 한 줄. "아직 …이 없어요" 처럼 사용자 시점 (§ 11.2).
 - `description`: 선택. **다음 행동을 안내** (Polaris empty-state 원칙).
 - `action`: 선택. 1차 액션은 `<Button>` 으로 — 추가 / 검색 초기화 등.
+- 한국어 제목·설명은 `text-keep-korean`으로 조사·어미가 한 글자 단독 줄로 떨어지지 않게 한다.
 
 **lucide 매핑 가이드**
 
