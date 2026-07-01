@@ -140,7 +140,10 @@ async function main(): Promise<void> {
   await runSql(
     ref,
     token,
-    `create table if not exists ${TRACKING_TABLE} (name text primary key, applied_at timestamptz not null default now());`,
+    [
+      `create table if not exists ${TRACKING_TABLE} (name text primary key, applied_at timestamptz not null default now());`,
+      `alter table ${TRACKING_TABLE} enable row level security;`,
+    ].join('\n'),
   )
 
   const applied = await fetchAppliedNames(ref, token)
